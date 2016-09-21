@@ -1,0 +1,212 @@
+\documentclass[12pt]{article}
+\usepackage[top=1in, bottom=1in, left=1in, right=1in]{geometry}
+
+\usepackage{setspace}
+\onehalfspacing
+
+\usepackage{amssymb}
+%% The amsthm package provides extended theorem environments
+\usepackage{amsthm}
+\usepackage{epsfig}
+\usepackage{times}
+\renewcommand{\ttdefault}{cmtt}
+\usepackage{amsmath}
+\usepackage{graphicx} % for graphics files
+\usepackage{tabu}
+
+% Draw figures yourself
+\usepackage{tikz} 
+
+% writing elements
+\usepackage{mhchem}
+
+\usepackage{paralist}
+
+% The float package HAS to load before hyperref
+\usepackage{float} % for psuedocode formatting
+\usepackage{xspace}
+
+% from Denovo Methods Manual
+\usepackage{mathrsfs}
+\usepackage[mathcal]{euscript}
+\usepackage{color}
+\usepackage{array}
+
+\usepackage[pdftex]{hyperref}
+\usepackage[parfill]{parskip}
+
+% math syntax
+\newcommand{\nth}{n\ensuremath{^{\text{th}}} }
+\newcommand{\ve}[1]{\ensuremath{\mathbf{#1}}}
+\newcommand{\Macro}{\ensuremath{\Sigma}}
+\newcommand{\rvec}{\ensuremath{\vec{r}}}
+\newcommand{\omvec}{\ensuremath{\hat{\Omega}}}
+\newcommand{\vOmega}{\ensuremath{\hat{\Omega}}}
+%---------------------------------------------------------------------------
+%---------------------------------------------------------------------------
+\begin{document}
+\begin{center}
+{\bf NE 255, Fa16 \\
+Solution Context and Tools\\
+September 20, 2016}
+\end{center}
+
+\setlength{\unitlength}{1in}
+\begin{picture}(6,.1) 
+\put(0,0) {\line(1,0){6.25}}         
+\end{picture}
+
+We've started looking a little bit at how to play around with the transport equation. To venture much farther in thinking about solving the transport equation, it helps to remember what we're applying it to, how we might attack actually solving it, and some other bits of information that we use. 
+
+As mentioned, we'll mostly focus on reactors in this class. A nuclear reactor is a three-dimensional structure consisting of complicated geometrical shapes made of variety of materials.	
+
+\begin{compactitem} 
+\item A unit cell usually consists of a fuel rod, gap, cladding and
+corresponding moderator. It is usually surrounded by similar
+cells. A fuel rod consists of fuel pellets.	
+
+\item A fuel assembly usually consists of several hundred fuel rods
+(fuel cells).	
+
+\item A reactor core consists of several hundred fuel assemblies.	
+
+\item Fuel assemblies and fuel rods are usually arranged in square or
+hexagonal lattice.	
+
+\item Instead of fuel pellets, the fuel could be in the form of coated fuel
+particles (TRISO particles).	
+
+\item Coated fuel particles could be arranged into fuel compacts or
+pebbles (Pebble Bed Reactor).	
+\end{compactitem}
+%
+(switch to ppt for image examples)
+
+%-------------------------------------------------------------
+%-------------------------------------------------------------
+\vspace{-1 em}
+\subsection*{Solution Context and Data}%
+\begin{figure}[h!]
+    \begin{center}
+    \includegraphics[keepaspectratio, width = 4.5 in]{solver-map}
+    \end{center}
+    %\caption{Legendre polynomials}
+    \label{fig:context}
+\end{figure}
+%
+We have many different types of geometries and physics going on with the systems we're interested in. However, we take the same fundamental approach no matter what. Each component is incredibly important, but let's take a moment to talk about \textbf{Nuclear Data}.
+
+We need a description of all of the physical interactions happening inside a nuclear reactor that we can use in our equation. An \textit{evaluated nuclear data file} is a collection of various data enabling to reconstruct, for each isotope, its cross-section's 
+\begin{compactitem}
+\item general information
+\item resonance parameters 
+\item angular distribution for emitted particles 
+\item energy distribution for emitted particles 
+\item energy-angle distribution for emitted particles 
+\item thermal neutron scattering law data 
+\item radioactivity and fission-product yield data 
+\item multiplicities for radioactive nuclide production 
+\item cross-sections for radioactive nuclide production
+\end{compactitem}
+
+There are many evaluations coming from various countries such as: USA, Europe, Japan, Russia, China, \dots Getting from experimental data (what we have of it) + theory (however accurate that is) to data that can actually be used in a code is no small feat. And, that process is sort of a mess...
+\begin{figure}[h!]
+    \begin{center}
+    \includegraphics[keepaspectratio, width = 6 in]{data-notes}
+    \end{center}
+    \caption{Notes from a meeting where someone tried to explain this to me}
+    \label{fig:datanotes}
+\end{figure}
+\begin{figure}[h!]
+    \begin{center}
+    \includegraphics[keepaspectratio, width = 4.5 in]{hurst-code-map}
+    \end{center}
+    \caption{A more coherent (but less comprehensive) set}
+    \label{fig:hurstfig}
+\end{figure}
+
+We won't go through all of this, but I think it's important to have context about what this is and how confusing it can be. There is a lot of data and many formats. In computation you will pretty much only need to interface with ENDF and its equivalents. 
+
+The data that we use is complicated, and can be quite different depending on the application we're interested in. Let's look at some (back to ppt).
+
+%-------------------------------------------------------------
+%-------------------------------------------------------------
+\subsection*{Physics Impacts}
+We are often able to use knowledge about the physics to inform method development or, at the very least, choose which methods are more appropriate given our physics. 
+
+For example, you may notice is how, in particular, Fast and Thermal reactor physics differ. We often need different codes to deal with LWRs and FRs (note: CASL and NEAMS are different initiatives...). 
+%
+Many of the assumptions employed in traditional LWR methods do not apply:
+\begin{compactitem}
+\item Lack of a 1/E energy spectrum as a basis for the calculation of resonance absorption.
+\item Upscattering resulting from the thermal motion of the scattering nuclei may be neglected.
+\item Inelastic, (n, 2n), and anisotropic scattering are quite important.
+\item Long mean free paths imply global coupling. That is, local reactivity effects impact the entire core.  
+\item The energy range where neutrons induce fission and the energy range where the fission neutrons appear strongly overlap.
+\end{compactitem}
+%
+Other physics considerations have high priority in FR methods
+\begin{compactitem}
+\item Detailed energy modeling for resonance structure (core/reflector).
+\item Transport and anisotropy effects are more important at high energy.
+\end{compactitem}
+%
+In general, a distinct set of physics analysis and core design tools with tailer assumptions have been and are being developed for FR analysis.
+
+
+%-------------------------------------------------------------
+%-------------------------------------------------------------
+\subsection*{Computational Methods}
+Inside the box of computational methods, we have two main categories: 
+\begin{compactitem}
+\item \textbf{Deterministic}: discretize all independent variables, obtain a set of coupled, linear, algebraic equations and develop a numerical method to solve them.
+\item \textbf{Probabilistic}: follow the history of each relevant particle based on the underlying probabilities for various types of interactions.
+\end{compactitem}
+%
+Everything we've done so far applies to both methods (we haven't discretized, only simplified). Each method has its own benefits and challenges. We'll talk a bit about \textbf{deterministic first}. Here, the discretization methods are a big part of the strategy, followed by parallelization.
+
+The size of the problems (which impacts memory and parallelization performance) is government by discretization. To get more accurate fluxes, typical transport problems today are three-dimensional, have up to thousands $\times$ thousands $\times$ thousands of mesh points, use up to $\sim$150 energy groups, include accurate expansions of scattering terms, and are solved over many directions. 
+%
+\begin{table}[!h]
+\caption{Meaning and Range of Indices Used in Transport Discretization}
+\begin{center}
+\begin{tabular}{l c c c c c c}
+\hline
+Variable & Symbol & First & Last & Low & High \\[0.5ex]
+\hline
+Energy & g & 1 & G & 2 & 100s \\
+Solid Angle & a & 1 & n & $S_2$ & $S_{16}$ \\
+Space & suppressed & n/a & n/a & 1? & 1e9 \\
+Legendre moment ($P_{N}$) & $l$ & 0 & N & 0 & 9 \\
+%Spherical harmonic moment ($Y$) & m & 0 & $l$ \\
+\hline
+\end{tabular}
+\end{center}
+\label{table:index}
+\end{table}
+%
+E.g.\ In 2012, a Pressurized Water Reactor (PWR)-900 with 44 groups, a 578 $\times$ 578 $\times$ 700 mesh, using $S_{16}$ level-symmetric quadrature, and with $P_{0}$ scattering was solved: 1.7 trillion unknowns.
+
+With \textbf{Monte Carlo} we sample the physics of every single interaction of every single particle until we have enough samples to assert that something is statistically valid. Thie requires lots and lots of samples, but is typically fairly easy to parallelize.
+
+\begin{center}
+\begin{tabu}{| l | X | X |}
+  \hline
+  & Monte Carlo         & Deterministic \\\hline
+              % -----------------------
+    Strengths & * General geometry    & * Fast \\
+              & * Continuous Energy   & * Global Solution\\
+              & * Continuous in Angle & * Solution is of same quality everywhere\\
+              & * Inherently 3-D      & \\
+              & * Easy to parallelize on CPUs & \\\hline
+% -----------------------
+    Weaknesses & * Slow & * Variable discretization governs solution quality \\
+               & * Might be memory intensive & * Might be memory intensive \\
+               & * Solutions have statistical error & * Solution contains truncation error\\
+               & * Local solutions only & * Constrained by what you can mesh \\
+               & * Must adequately sample phase space & * Ray Effects \\
+               & * Need efficient VR & * Can be complicated to parallelize on CPUs \\\hline
+  \end{tabu}
+\end{center}
+
+\end{document}
