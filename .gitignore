@@ -10,3 +10,5 @@
 *.nav
 *.out
 *.DS_Store
+*.fls
+*.fdb_latexmk
