@@ -1,0 +1,73 @@
+\documentclass[10pt]{article}
+\usepackage[left=0.9in,top=0.9in,bottom=0.9in,right=0.9in]{geometry}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{mathtools}
+\usepackage{amsmath}
+\usepackage[font=small,labelfont=bf,labelsep=period]{caption}
+\usepackage[english]{babel}
+\usepackage{indentfirst}
+\usepackage{array}
+\usepackage{makecell}
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{arydshln}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{xfrac}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{enumitem}
+\usepackage{lipsum}
+\setlength{\bibsep}{0pt}
+
+%\pagestyle{fancy} 
+%\fancyhead[LE,RO]{\today}
+%\fancyhead[C]{NE 255}
+%\fancyhead[LO,RE]{D. Hellfeld}
+%\fancyfoot[C]{\thepage\ of \pageref{LastPage}}
+%\renewcommand{\headrulewidth}{0.4pt}
+%\renewcommand{\footrulewidth}{0.4pt}
+
+\pagestyle{empty}
+
+% Set up figure/table captions
+\addto\captionsenglish{\renewcommand{\figurename}{Fig.}}
+\addto\captionsenglish{\renewcommand{\tablename}{\small Table}}
+\renewcommand{\thetable}{\Roman{table}}
+\captionsetup[table]{labelfont = normal, labelsep=period, singlelinecheck=false}
+\captionsetup[figure]{labelfont=normal, labelsep=period, singlelinecheck=false}
+
+\setlength\parindent{0pt}
+
+% Set up section\subsection title formats
+\renewcommand{\thesection}{\Roman{section}}
+\renewcommand{\thesubsection}{\thesection.\Roman{subsection}}
+\titleformat*{\section}{\normalsize\bfseries}
+\titleformat*{\subsection}{\normalsize\bfseries}
+
+\begin{document}
+
+\begin{centering}
+\textbf{Project Title}\\
+\vspace{11pt}
+NE 255 - Numerical Simulation in Radiation Transport\\
+University of California, Berkeley\\
+Department of Nuclear Engineering\\
+\vspace{11pt}
+Daniel Hellfeld\\
+\vspace{11pt}
+October 25, 2016 \\
+\end{centering}
+
+
+\section*{Abstract}
+
+\lipsum[1]
+
+
+
+\end{document}
+
