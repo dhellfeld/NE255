@@ -178,15 +178,18 @@ Now if we were integrating over the whole range, we would be able to use the ort
 \newpage
 \noindent \textbf{Problem 2}\\
 Consider the integral
-%\begin{equation*}
+%
+\begin{equation*}
 \int_{4\pi} d\hat{\Omega}\,\hat{\Omega}
 \end{equation*}
-The LQ$_N$ quadrature set is given in Table 4-1 in Lewis and Miller (\emph{E.E.~Lewis and W.F.~Miller, Computational Methods of Neutron Transport, John Wiley \& Sons, Inc., 1984.}). Recall that $\mu_i = \eta_i= \xi_i$ for a given level, $i$.
+
+The LQ$_N$ quadrature set is given in Table 4-1 in Lewis and Miller (\emph{E.E.~Lewis and W.F.~Miller, Computational Methods of Neutron Transport, John Wiley \& Sons, Inc., 1984.}). Recall that $\mu_i = \eta_i= \xi_i$ for a given level, $i$.
 %
 \begin{enumerate}[(a)]
-\item Use the S$_4$ LQ$_N$ quadrature set to execute this integral.\\[-5pt]\end{enumerate}
+\item Use the S$_4$ LQ$_N$ quadrature set to execute this integral.\\[-5pt]
+\end{enumerate}
 
-$\Rightarrow$ A quadrature set allows us to evaluate the integral of a function over some domain using a discrete set of points and cooresponding weights:
+$\Rightarrow$ A quadrature set allows us to evaluate the integral of a function over some domain using a discrete set of points and corresponding weights:
 %
 \begin{equation*}
     \int dx f(x) = \sum_{n \in \textrm{set}} w_n f(n)
@@ -198,7 +201,7 @@ Now, we can decompose $\hat{\Omega}$ into its directional cosines ($\mu$, $\eta$
     \int_{4\pi} d\hat{\Omega}\,\hat{\Omega} \approx \sum_{\textrm{8 octants}} w\sqrt{\mu_1^2 + \eta_1^2 + \xi_2^2} + w\sqrt{\mu_1^2 + \eta_2^2 + \xi_1^2} + w\sqrt{\mu_2^2 + \eta_1^2 + \xi_1^2}
 \end{equation*}
 
-Since all the directional cosines are squared in the equation for $\hat{\Omega}$, we do not need to care much about the fact that they can be negative in certain octants (\ul{however in general we would have to be careful about signs}). Therefore the sum over the 8 octants can be reduced to just mutplying by 8.
+Since all the directional cosines are squared in the equation for $\hat{\Omega}$, we do not need to care much about the fact that they can be negative in certain octants (\ul{however in general we would have to be careful about signs}). Therefore the sum over the 8 octants can be reduced to just multiplying by 8.
 %
 \begin{align*}
         \int_{4\pi} d\hat{\Omega}\,\hat{\Omega} &\approx 8 \Big( w\sqrt{\mu_1^2 + \eta_2^2 + \xi_2^2} + w\sqrt{\mu_2^2 + \eta_2^2 + \xi_1^2} + w\sqrt{\mu_2^2 + \eta_1^2 + \xi_2^2} \Big) \\
@@ -219,7 +222,7 @@ Now, the weights are normalized to 1 in each quadrant and thus 8 over the entire
         \includegraphics[height=120pt]{Figures/S6.jpg} \\
         \scriptsize{(a)} & \scriptsize{(b)} \\ [-1.2ex]
     \end{tabular}
-    \caption{S4 (a) and S6 (b) quaderature point sketches. Please excuse my terrible drawing abilities.}
+    \caption{S4 (a) and S6 (b) quadrature point sketches. Please excuse my terrible drawing abilities.}
     \label{fig1}
 \end{figure}
 
@@ -289,14 +292,14 @@ All the quadrature sets seem to approximate the integrals fairly well, up to wha
 \newpage
 \noindent \textbf{Problem 3}\\ [-4ex]
 \begin{enumerate}[(a)]
-    \item Briefly compare the diffusion equation, deterministic methods, and monte carlo methods in terms of complexity, accuracy, run time, and range of applicability. \\[-5pt]
+    \item Briefly compare the diffusion equation, deterministic methods, and Monte Carlo methods in terms of complexity, accuracy, run time, and range of applicability. \\[-5pt]
 \end{enumerate}
 
-$\Rightarrow$ The diffusion equation is an appriximation to the transport equation - specifically under the assumptions of azimuthally symmetric scattering, scattering is at most linear anisotropic, and that the angular flux is also at most linearly anisotropic. Solutions are not valid when solved for near voids, boundarys, sources, or in strongly absorbing media. This severly limits the applicability of the diffusion equation, but for most macroscopic quantities we are concerned about in nuclear reactor physics (such as nuclear interaction rates, i.e.\,\,fission) this can be acceptable. The diffusion equation is quite simple and can in some cases be solved analytically by hand or using simple diffusion solvers.\\
+$\Rightarrow$ The diffusion equation is an approximation to the transport equation - specifically under the assumptions of azimuthally symmetric scattering, scattering is at most linear anisotropic, and that the angular flux is also at most linearly anisotropic. Solutions are not valid when solved for near voids, boundaries, sources, or in strongly absorbing media. This severely limits the applicability of the diffusion equation, but for most macroscopic quantities we are concerned about in nuclear reactor physics (such as nuclear interaction rates, i.e.\,\,fission) this can be acceptable. The diffusion equation is quite simple and can in some cases be solved analytically by hand or using simple diffusion solvers.\\
 
 Deterministic methods are methods by which we try to solve the transport or diffusion equation. This is done by discretizing all the variables in the equation (including time, space, energy, and direction), solving equations in each discretized space, and correctly communicating information between the discretized spaces. The complexity, accuracy, and run time are all dependent on the extent of discretization. If finer discretization is used, the solutions are more accurate, but the equations become more complex and the computational expenses significantly increase. While the equations in the solvers can be complex, the inputs given to the solvers tend to be quite simple (I want this solution in this system using these discretizations, etc.). Deterministic solutions are also global in the sense that the solutions we produce are valid in the entire space (constrained by the meshing, of course). \\
 
-Monte Carlo methods are akin to deterministic methods as they are both methods to solve the diffusion or transport equation. In contrast to deterministic methods, however, in Monte Carlo we use continuous variables and sample every single interaction every particle has until we have sampled enough times that the solution we generate is statistically significant. We therefore do not necessary solve any equations (apart from the interaction probability sampling equations), but instead follow multiple particles through multiple stochastic histories to find an average behavior of some unknown (such as the neutron flux). Monte Carlo is regarded, in most cases, as much less complex than deterministic methods (though correctly sampling interactions can be difficult as well as building the geometry and including all the necessary physics), but it comes at a price of run time. Because so many particle histories need to be run in order to gain sufficient statistics, Monte Carlo methods are typically slower than deterministic. However, Monte Carlo is also much easier to parallelize (becuase each particle history is independent of the others and thus they can be simulated at the same time) which can lead to significant speed ups. With increased run time, we will get a more precise answer (a smaller uncertainty), however it does not always promise a more accurate answer (that relies on the correct modeling of both the system and the physics). The solutions we generate with Monte Carlo are also considered local solutions (as opposed to deterministic methods) becuase of the use of local tallies, such as the neutron flux at a specific point in space (as opposed to the flux everywhere). We do this becuase to generate enough statistics to the get the global solution would take a enormous amout of time!\\
+Monte Carlo methods are akin to deterministic methods as they are both methods to solve the diffusion or transport equation. In contrast to deterministic methods, however, in Monte Carlo we use continuous variables and sample every single interaction every particle has until we have sampled enough times that the solution we generate is statistically significant. We therefore do not necessary solve any equations (apart from the interaction probability sampling equations), but instead follow multiple particles through multiple stochastic histories to find an average behavior of some unknown (such as the neutron flux). Monte Carlo is regarded, in most cases, as much less complex than deterministic methods (though correctly sampling interactions can be difficult as well as building the geometry and including all the necessary physics), but it comes at a price of run time. Because so many particle histories need to be run in order to gain sufficient statistics, Monte Carlo methods are typically slower than deterministic. However, Monte Carlo is also much easier to parallelize (because each particle history is independent of the others and thus they can be simulated at the same time) which can lead to significant speed ups. With increased run time, we will get a more precise answer (a smaller uncertainty), however it does not always promise a more accurate answer (that relies on the correct modeling of both the system and the physics). The solutions we generate with Monte Carlo are also considered local solutions (as opposed to deterministic methods) because of the use of local tallies, such as the neutron flux at a specific point in space (as opposed to the flux everywhere). We do this because to generate enough statistics to the get the global solution would take a enormous amount of time!\\
 
 
 
@@ -330,7 +333,7 @@ Use this function in a function that generates spherical harmonics
     \item Generate and plot the following $l = 0, 1, 2$ for $−l \leq m \leq l$ (recall we can relate the negative $m$ to positive $m$ values). You will need to discretize $\theta$ and $\mu$ fairly finely (I suggest 30 increments in each to start so you get a real sense of the shape of the harmonics). \\[-5pt]
 \end{enumerate}
 
-$\Rightarrow$ See the attached Python script below for the generation of the associated Legenedre Polynomials and Spherical Harmonics. The script produces 3D plots using the mayavi package, and 2D screeshots are shown in Fig.~1 for both the real and imaginary parts. In the plots, I use two methods to visualize the spherical harmonics - a heat map on a unit sphere where the color corresponds to the value of the spherical harmonic at a particular $\theta$ and $\phi$, and a distorted sphere where the distance from the origin represents the absolute value of the spherical harmoinc at a particular $\theta$ and $\phi$ (the color represents the true value of the spherical harmonic). \\
+$\Rightarrow$ See the attached Python script below for the generation of the associated Legendre Polynomials and Spherical Harmonics. The script produces 3D plots using the mayavi package, and 2D screenshots are shown in Fig.~1 for both the real and imaginary parts. In the plots, I use two methods to visualize the spherical harmonics - a heat map on a unit sphere where the color corresponds to the value of the spherical harmonic at a particular $\theta$ and $\phi$, and a distorted sphere where the distance from the origin represents the absolute value of the spherical harmonic at a particular $\theta$ and $\phi$ (the color represents the true value of the spherical harmonic). \\
 
 \lstinputlisting[language=Python]{../p4/a/p4a.py}
 
@@ -412,7 +415,7 @@ Next, we can use the quadrature code and the spherical harmonic code to evaluate
   &q_{22}^g =\int_{4\pi}Y_{22}^e(\hat{\Omega})\:d\hat{\Omega} = \frac{4\pi}{24}\sum_{\textrm{8 octants}}Y_{22}^e(\mu_1,\eta_1,\xi_2) + Y_{22}^e(\mu_1,\eta_2,\xi_1) + Y_{22}^e(\mu_2,\eta_1,\xi_1) \approx 0 \\
 \end{align*}
 
-Notice the factor of (1/24), this is becuase of the (4$\pi$/8) out in front being multiplied by the (1/3) weight for each quaderature point. I used the $\approx$ symbol, becuase the calculation gave very small answers in most cases ($\sim 10^{-16}$). Also note that there is no spatial dependence in the final results. For the odd components ($s_{lm}^g$), we get
+Notice the factor of (1/24), this is because of the (4$\pi$/8) out in front being multiplied by the (1/3) weight for each quadrature point. I used the $\approx$ symbol, because the calculation gave very small answers in most cases ($\sim 10^{-16}$). Also note that there is no spatial dependence in the final results. For the odd components ($s_{lm}^g$), we get
 %
 \begin{align*}
   &s_{00}^g = \int_{4\pi}Y_{00}^o(\hat{\Omega})\:d\hat{\Omega} = \frac{4\pi}{24}\sum_{\textrm{8 octants}}Y_{00}^o(\mu_1,\eta_1,\xi_2) + Y_{00}^o(\mu_1,\eta_2,\xi_1) + Y_{00}^o(\mu_2,\eta_1,\xi_1) \approx 0 \\
@@ -431,7 +434,7 @@ Again, all the calculations results in either zero or very small numbers. These 
     &N = 2 \quad \Rightarrow \quad q_e^g(\vec{r},\hat{\Omega}) = Y_{00}^e(\hat{\Omega}) q_{00}^g = \frac{3.5449}{2} \sqrt{\frac{1}{\pi}}
 \end{align*}
 
-We see that this is just a constant value over all space and angle. This makes sense becuase we used $q_e = 1$, which is to say the source strength is constant and uniform over all space and angle, so it is reasonable that the spherical harmonic expansion of the source will also be constant in space and angle.\\
+We see that this is just a constant value over all space and angle. This makes sense because we used $q_e = 1$, which is to say the source strength is constant and uniform over all space and angle, so it is reasonable that the spherical harmonic expansion of the source will also be constant in space and angle.\\
 
 \lstinputlisting[language=Python]{../p4/b/p4b.py}
 
@@ -463,7 +466,9 @@ l =  2, m = 2, slm = 0.0
 \noindent \textbf{Problem 5}\\
 What are the major nuclear data libraries and which countries manage them?\\[5pt]
 
-$\Rightarrow$ The three major nuclear data libraries are the Evalucated Nuclear Data File (ENDF), Joint Evaluated Fission and Fusion File (JEFF), and Japanese Evaluated Nuclear Data Library (JENDL). ENDF is managed by a Canadian and USA cross section working group consisting of national laboratories, universities, and industry. JEFF is managed by the Nuclear Energy Agency under the Organization for Economic Cooperation and Development (OECD) - which previoulsy consisted of only European member states until 1961. JENDL is managed by the Nuclear Data Center within the Japan Atomic Energy Agency (JAEA) in Japan.
+$\Rightarrow$ The three major nuclear data libraries are the Evaluated Nuclear Data File (ENDF), Joint Evaluated Fission and Fusion File (JEFF), and Japanese Evaluated Nuclear Data Library (JENDL). ENDF is managed by a Canadian and USA cross section working group consisting of national laboratories, universities, and industry. JEFF is managed by the Nuclear Energy Agency under the Organization for Economic Cooperation and Development (OECD) - which previoulsy consisted of only European member states until 1961. JENDL is managed by the Nuclear Data Center within the Japan Atomic Energy Agency (JAEA) in Japan.\\
+
+There are also other data libraries such as the Experimental Nuclear Reaction Data (EXFOR) managed by the IAEA (comprised of multiple countries including the US, Russia, Japan, Austria, France, etc.), as well as modeling codes used to produce data for the libraries (such as EMPIRE and TALYS) and codes to convert the libraries into other useable formats (such as RIPL), all primarily managed by the nuclear data group at the IAEA. 
 
 
 
