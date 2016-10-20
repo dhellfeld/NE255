@@ -1,0 +1,468 @@
+\documentclass[12pt]{article}
+\usepackage[top=1in, bottom=1in, left=1in, right=1in]{geometry}
+
+\usepackage{setspace}
+\onehalfspacing
+
+\usepackage{amssymb}
+%% The amsthm package provides extended theorem environments
+\usepackage{amsthm}
+\usepackage{epsfig}
+\usepackage{times}
+\renewcommand{\ttdefault}{cmtt}
+\usepackage{amsmath}
+\usepackage{graphicx} % for graphics files
+\usepackage{tabu}
+
+% Draw figures yourself
+\usepackage{tikz} 
+
+% writing elements
+%\usepackage{mhchem}
+
+\usepackage{paralist}
+
+% The float package HAS to load before hyperref
+\usepackage{float} % for psuedocode formatting
+\usepackage{xspace}
+
+% from Denovo Methods Manual
+\usepackage{mathrsfs}
+\usepackage[mathcal]{euscript}
+\usepackage{color}
+\usepackage{array}
+
+\usepackage[pdftex]{hyperref}
+\usepackage[parfill]{parskip}
+
+% math syntax
+\newcommand{\nth}{n\ensuremath{^{\text{th}}} }
+\newcommand{\ve}[1]{\ensuremath{\mathbf{#1}}}
+\newcommand{\Macro}{\ensuremath{\Sigma}}
+\newcommand{\rvec}{\ensuremath{\vec{r}}}
+\newcommand{\vecr}{\ensuremath{\vec{r}}}
+\newcommand{\omvec}{\ensuremath{\hat{\Omega}}}
+\newcommand{\vOmega}{\ensuremath{\hat{\Omega}}}
+\newcommand{\even}{\ensuremath{\phi^g}}
+\newcommand{\odd}{\ensuremath{\vartheta^g}}
+\newcommand{\evenp}{\ensuremath{\phi^{g'}}}
+\newcommand{\oddp}{\ensuremath{\vartheta^{g'}}}
+\newcommand{\Sn}{\ensuremath{S_N} }
+\newcommand{\Ye}[2]{\ensuremath{Y^e_{#1}(\vOmega_#2)}}
+\newcommand{\Yo}[2]{\ensuremath{Y^o_{#1}(\vOmega_#2)}}
+\newcommand{\sigg}[1]{\ensuremath{\Macro^{gg'}_{s\,#1}}}
+\newcommand{\psig}{\ensuremath{\psi^g}}
+\newcommand{\Di}{\ensuremath{\Delta_i}}
+\newcommand{\Dj}{\ensuremath{\Delta_j}}
+\newcommand{\Dk}{\ensuremath{\Delta_k}}
+%---------------------------------------------------------------------------
+%---------------------------------------------------------------------------
+\begin{document}
+\begin{center}
+{\bf NE 255, Fa16 \\
+Operator Form and Iteration Methods\\
+October 20, 2016}
+\end{center}
+
+\setlength{\unitlength}{1in}
+\begin{picture}(6,.1) 
+\put(0,0) {\line(1,0){6.25}}         
+\end{picture}
+
+We have now fully discretized the transport equation: 
+\begin{align}
+\vOmega_a \cdot \nabla \psi^g_a(\vecr) &+ \Sigma^g_t(\vecr)\psi^g_a(\vecr) =   \label{eq:mg-sn-transport}\\
+&\sum_{g'=0}^G
+  \sum_{l=0}^N
+  \sigg{l}(\vec{r})
+  \Bigl[
+  Y^e_{l0}(\vOmega_a)\evenp_{l0}(\vec{r}) +
+  \sum_{m=1}^l
+  \bigl(
+  Y^e_{lm}(\vOmega_a)\evenp_{lm}(\vec{r}) +
+  Y^o_{lm}(\vOmega_a)\oddp_{lm}(\vec{r})
+  \bigr)\Bigr] + q_{a,e}^g(\vec{r})\:, \nonumber
+\end{align}
+\begin{alignat}{3}
+  \even_{lm} &= \int_{4\pi}Y^e_{lm}(\vOmega)\psi^g(\vOmega)\:d\vOmega\:,
+  \quad& m\ge 0\:,\label{eq:even-flux}\\
+  %%
+  \odd_{lm} &= \int_{4\pi}Y^o_{lm}(\vOmega)\psi^g(\vOmega)\:d\vOmega\:,
+  \quad& m>0\:.\label{eq:odd-flux}
+\end{alignat}
+%
+Now that we have these equations (+ spatial discretization) we're going to look at how we actually solve this with a computer. 
+
+The  next set of material comes from\\
+\hspace*{2em}R. N. Slaybaugh. \textit{Acceleration Methods for Massively Parallel Deterministic Transport}, a PhD Dissertation. University of Wisconsin, Madison, WI (2011).\\
+\hspace*{2em}T. M. Evans, A. S. Stafford, R. N. Slaybaugh, and K. T. Clarno. ``Denovo -- New
+Three-Dimensional Parallel Discrete Ordinates Code in SCALE." \textit{Nuclear Technology},
+\textbf{volume 171}(2), pp. 171–200 (2010).
+
+\section*{Operator Form}
+We start by expressing the TE in operator notation; which makes it easier to talk about solution techniques. In general, uppercase bolded letters will indicate matrices and lowercase italicized letters will indicate vectors and scalars. The following operators are used to express the transport equation:\\
+%
+\hspace*{2em} $\mathbf{L} = \vOmega \cdot \nabla + \Macro_t$ is the transport operator, \\
+\hspace*{2em} $\mathbf{M}$ is the operator that converts harmonic moments into discrete angles, \\
+\hspace*{2em} $\mathbf{S}$ is the scattering matrix, \\
+\hspace*{2em} $q_e$ contains the external source,\\
+\hspace*{2em} $f$ contains the fission source, $\nu \Macro_{f}$; $\mathbf{F} =\mathbf{\chi} f^{T}$, \\ 
+\hspace*{2em} $\mathbf{D} = \ve{M^{T}}\ve{W} = \sum_{a=1}^{n}Y^{e/o}_{lm}w_{a}$ is the discrete-to-moment operator. 
+
+With this notation, \autoref{eq:mg-sn-transport} can be written as \autoref{eq:operator-form}; it can be formulated as an eigenvalue problem by replacing the fixed soruce term with the fission term, $\frac{1}{k}\mathbf{MF}\phi$. This has two unknowns, the angular flux and the moments, which are related by the discrete-to-moment operator as seen in Equation \eqref{eq:moments} [NOTE: $\phi$ are the flux moments, \textbf{not} the scalar flux].
+%
+\begin{align}
+  \mathbf{L} \psi &= \mathbf{MS}\phi + \ve{M}q_{e} \label{eq:operator-form}\\
+  \phi &= \mathbf{D}\psi 
+  \label{eq:moments}
+\end{align}
+%The typical strategy for solving Equation \eqref{eq:operator-form} is to combine it with \eqref{eq:moments} and form one equation involving only the moments, where $Q$ is comprised of the fixed or fission source: 
+%\begin{equation}
+%   (\ve{I} - \ve{DL}^{-1}\ve{MS})\phi = Q \:.
+%\end{equation}  
+%This is solved for $\phi$ from which $\psi$ can be determined at the end of the calculation.
+%
+The size of the operators can be defined in terms of the granularity of discretization: \\
+%
+\hspace*{2em} $G$ = number of energy groups, \\
+\hspace*{2em} $t$ = number of moments, \\
+\hspace*{2em} $n$ = number of angular unknowns, \\
+\hspace*{2em} $c$ = number of cells, \\
+\hspace*{2em} $u$ = number of unknowns per cell, which is determined by spatial discretization. \\
+%
+These can be combined to define \\
+\hspace*{2em} $a = G \times n \times c \times u$ and \\
+\hspace*{2em} $f = G \times t \times c \times u$. \\
+Using $a$ and $f$, Equation \eqref{eq:operator-form} can be presented in terms of operator size:\\
+\[
+(a \times a)(a \times 1) = (a \times f) (f \times f) (f \times 1) + (a \times f) (f \times 1)\:.
+%(a \times f) (f \times f) (f \times 1)\:.
+\]
+The index variables, their meaning, and their ranges are shown in Table \ref{table:index}. 
+%
+\begin{table}[!h]
+\caption{Meaning and Range of Indices Used in Transport Discretization}
+\begin{center}
+\begin{tabular}{l c c c c}
+\hline
+Variable & Symbol & First & Last \\[0.5ex]
+\hline
+Energy & g & 1 & G \\
+Solid Angle & a & 1 & n \\
+Space & suppressed & n/a & n/a \\
+Legendre moment ($P_{N}$) & $l$ & 0 & N \\
+Spherical harmonic moment ($Y$) & m & 0 & $l$ \\
+\hline
+\end{tabular}
+\end{center}
+\label{table:index}
+\end{table}
+%
+
+The structures of the vectors and matrices are shown in the next few equations as this can make the whole thing easier to understand and visualize. The angular flux vector is explicitly written first, where for each discrete angle, $a$, and energy group, $g$, the set of angular fluxes, $ \psi^g_a$, includes all spatial unknowns.
+%
+ \begin{align}
+    \psi &=     \begin{pmatrix}
+    [\psi]_{1} & [\psi]_2 & \cdots & [\psi]_g & \cdots [\psi]_{G} 
+  \end{pmatrix}^T  \:, \quad \text{and}  \\
+  %
+    [\psi]_g &= \begin{pmatrix}
+    \psi^g_1 & \psi^g_2& \cdots & \psi^g_a & \cdots \psi^g_n 
+  \end{pmatrix}^T \:.  
+\end{align}
+%
+\begin{alignat}{2}
+  \mathbf{M} &=    \begin{pmatrix}
+      [\ve{M}]_{11} & 0 & 0 & \cdots & 0 \\
+      0 & [\ve{M}]_{22} & 0 & \cdots & 0 \\
+      0 & 0 & [\ve{M}]_{33} & \cdots & 0 \\
+      \vdots & \vdots & \vdots & \ddots   & \vdots \\
+      0 & 0 & 0 & \cdots & [\ve{M}]_{GG} \\
+    \end{pmatrix} \nonumber  \:,& \qquad
+    %
+  \mathbf{S}  =     \begin{pmatrix}
+      [\ve{S}]_{11} & [\ve{S}]_{12} & [\ve{S}]_{13} & \cdots &
+      [\ve{S}]_{1G} \\
+      [\ve{S}]_{21} & [\ve{S}]_{22} & [\ve{S}]_{23} & \cdots &
+      [\ve{S}]_{2G} \\
+      [\ve{S}]_{31} & [\ve{S}]_{32} & [\ve{S}]_{33} & \cdots &
+      [\ve{S}]_{3G} \\
+      \vdots & \vdots & \vdots & \ddots & \vdots \\
+      [\ve{S}]_{G1} & [\ve{S}]_{G2} & [\ve{S}]_{G3} & \cdots &
+      [\ve{S}]_{GG}
+    \end{pmatrix} \nonumber  \:,
+ \end{alignat}
+ %
+ \begin{alignat}{2}
+      \mathbf{F}  &=     \begin{pmatrix}
+     \chi^{1}[\nu\Macro_{f}]^{1} &\chi^{1}[\nu\Macro_{f}]^{2} & \cdots &
+      \chi^{1}[\nu\Macro_{f}]^{G} \\
+      \chi^{2}[\nu\Macro_{f}]^{1} &\chi^{2}[\nu\Macro_{f}]^{2} & \cdots &
+      \chi^{2}[\nu\Macro_{f}]^{G}\\
+      \vdots & \vdots & \ddots & \vdots \\
+      \chi^{G}[\nu\Macro_{f}]^{1} &\chi^{G}[\nu\Macro_{f}]^{2} & \cdots &
+      \chi^{G}[\nu\Macro_{f}]^{G}\\
+    \end{pmatrix} \:, \nonumber & \qquad
+    %
+  [\ve{S}]_{gg'} = \begin{pmatrix}
+    \sigg{0} & 0 & \cdots & 0  \\
+    0 & \sigg{1} & \cdots & 0 \\
+    \vdots & 0 & \ddots  & \vdots \\
+     0 & 0 & \cdots & \sigg{N}
+  \end{pmatrix}\:, \nonumber
+ \end{alignat}
+    %
+\begin{equation}    
+   [\ve{M}]_{gg} = \begin{pmatrix}
+    \Ye{00}{1} & \Ye{10}{1} & \Yo{11}{1} & \Ye{11}{1} & 
+    \Ye{20}{1} & \cdots & \Yo{NN}{1} & \Ye{NN}{1} \\
+    \Ye{00}{2} & \Ye{10}{2} & \Yo{11}{2} & \Ye{11}{2} & 
+    \Ye{20}{2} & \cdots & \Yo{NN}{2} & \Ye{NN}{2} \\
+    \Ye{00}{3} & \Ye{10}{3} & \Yo{11}{3} & \Ye{11}{3} & 
+    \Ye{20}{3} & \cdots & \Yo{NN}{3} & \Ye{NN}{3} \\
+    \vdots     & \vdots     & \vdots     & \vdots     & 
+    \vdots     &  \ddots    & \vdots     & \vdots     \\
+    \Ye{00}{n} & \Ye{10}{n} & \Yo{11}{n} & \Ye{11}{n} & 
+    \Ye{20}{n} & \cdots & \Yo{NN}{n} & \Ye{NN}{n}
+  \end{pmatrix}\:. \nonumber \\
+\end{equation}
+
+\noindent Note that $[\ve{M}]_{11} = [\ve{M}]_{22} =  \hdots = [\ve{M}]_{GG} = [\ve{M}]$. These are written with subscripts to simplify the visualization of which blocks correspond to which equations and multiply which other blocks.
+
+The lower
+triangular part of $\ve{S}$ represents downscattering, the diagonal represents
+in-group scattering, and the upper diagonal is upscattering. 
+
+Finally, the
+vector of flux moments for group $g$ has $t$ entries per spatial unknown, and
+%
+\begin{equation} 
+[\phi]_g = \begin{pmatrix} \even_{00} & \even_{10} & \odd_{11}
+& \even_{11} & \even_{20} & \cdots & \odd_{NN} & \even_{NN}
+  \end{pmatrix}^T\:,
+\end{equation} for each group.
+
+Note also that the total size of $\ve{D}$ over all
+groups and spatial unknowns is $(f\times a)$ (where $\ve{W}$ is an $(n\times n)$ diagonal matrix of quadrature
+weights).  Also, even though $\ve{M}$ maps
+angular flux moments onto discrete angular fluxes, in general
+$\psi\ne\ve{M}\phi$.  This constraint can be removed by using Galerkin
+quadrature in which $\ve{D} = \ve{M}^{-1}$.
+
+
+%--------------------------------------------------------------------------------
+\section*{Solution Procedure}
+Once the matrices are multiplied together, a series of single-group equations that are each only a function of space and angle result:
+%
+\begin{equation}
+  \begin{aligned}
+    \ve{L}[\psi]_1 &= [\ve{M}]\bigl([\ve{S}]_{11}[\phi]_1 + 
+    [\ve{S}]_{12}[\phi]_2 + \ldots + [\ve{S}]_{1G}[\phi]_G\bigr) + 
+    [\ve{M}][q_{e}]_1\:, \\
+   % \frac{1}{k}[\ve{M}]\sum_{i=1}^{G}[\ve{F}]_{1i}[\phi]_{i} \:, \\
+    %%
+    \ve{L}[\psi]_2 &= [\ve{M}]\bigl([\ve{S}]_{21}[\phi]_1 + 
+    [\ve{S}]_{22}[\phi]_2 + \ldots + [\ve{S}]_{2G}[\phi]_G\bigr) + 
+    [\ve{M}][q_{e}]_2\:, \\
+    %\frac{1}{k}[\ve{M}]\sum_{i=1}^{G}[\ve{F}]_{2i}[\phi]_{i} \:, \\
+    %%
+    &\vdots\\
+    %%
+    \ve{L}[\psi]_G &= [\ve{M}]\bigl([\ve{S}]_{G1}[\phi]_1 + 
+    [\ve{S}]_{G2}[\phi]_2 + \ldots + [\ve{S}]_{GG}[\phi]_G\bigr) + 
+       [\ve{M}][q_{e}]_G\:, \\
+    % \frac{1}{k}[\ve{M}]\sum_{i=1}^{G}[\ve{F}]_{Gi}[\phi]_{i} \:.
+  \end{aligned}
+  \label{eq:group-equations}
+\end{equation}
+%
+Each \textbf{within-group} equation is solved for that group's flux. 
+
+If the groups are coupled together through upscattering, as they often are, then multiple \textbf{multigroup} solves over the coupled portion of the energy range may be required. 
+
+If there is fission and the eigenvalue is desired, an additional \textbf{eigenvalue} solve is needed as well. 
+
+Each of these levels of iteration typically uses a completely different solver. 
+
+Note that the typical strategy for solving Equation \eqref{eq:operator-form} is to combine it with \eqref{eq:moments} and form one equation involving only the moments, where $Q = \ve{DL}^{-1}\ve{M}q_e$ is comprised of the fixed (or fission) source: 
+\begin{equation}
+   (\ve{I} - \ve{DL}^{-1}\ve{MS})\phi = Q \:.
+\end{equation}  
+This is solved for $\phi$ from which $\psi$ can be determined at the end of the calculation. This format looks like what we're used to seeing in numerical linear algebra: $\ve{A}x = b$.
+
+\subsection*{Solver Basics}
+There are two categories of methods for solving $\ve{A}x = b$, \textbf{direct} and \textbf{iterative}. 
+
+\underline{Direct methods} solve the problem by inverting $\ve{A}$ and setting $x = \ve{A}^{-1}b$. If $\ve{A}$ is invertible this can be done explicitly. $\ve{A}$ is often not invertible, so most direct methods are based on factoring the coefficient matrix $\ve{A}$ into matrices that are easy to invert. The problem is then solved in pieces where each factored matrix is inverted to get the final solution. An example where this is done is LU factorization. These methods are often robust and require a predictable amount of time and storage resources. However, direct methods scale poorly with problem size, becoming increasingly expensive as problems grow large.% \cite{Benzi2002}.
+
+\underline{Iterative methods} compute a sequence of increasingly accurate approximations to the solution. They generally require less storage and take fewer operations than direct methods, though they may not be as reliable. Iterative methods are highly advantageous for large problems because direct methods become intractable for systems of the size of those of interest here. For this reason the nuclear energy industry tends to use iterative methods for transport calculations.% \cite{Birkhoff1984}, \cite{Benzi2002}. 
+
+Within the category of iterative methods, two further subdivisions can be made that will be useful in this work. Some methods only place data from previous iterations on the right hand side of the equation. The order in which those equations are solved is then irrelevant because only the previous iterate is needed. The other class of methods place data from both the previous and current iteration on the right hand side. These methods are fundamentally sequential and must be solved in order. These two categories will be referred to as \textit{order independent} and \textit{order dependent}, respectively. 
+
+%---------------------------------------------------
+%---------------------------------------------------
+\subsection*{Within Group Iterative Methods}
+The methods that functionally perform a mesh sweep
+\[
+[\psi]_g = \ve{L}^{-1}\bigl([\ve{M}]\bigl([\ve{S}]_{11}[\phi]_1 + 
+    [\ve{S}]_{12}[\phi]_2 + \ldots + [\ve{S}]_{1G}[\phi]_G\bigr) + 
+    [\ve{M}][q_{e}]_1\bigr)\:.
+\]
+%---------------------------------------------------
+\subsubsection*{Richardson iteration}
+The simplest iteration scheme used by the nuclear community is source iteration (SI), also known as \textbf{Richardson iteration}. SI is applied to the within-group space-angle iterations. Richardson iteration can be thought of as a two-part process for the neutron transport equation, where $\bar{Q}$ includes all sources and $k$ is the inner iteration index:
+%
+\begin{align}
+  \ve{L}[\psi]_g^{k+1} &= \ve{MS} [\phi]_g^k + [\bar{Q}]_{g} \:,   \label{eq:SIpsi} \\
+  [\phi]_g^{k+1} &= \ve{D}[\psi]_g^{k+1} \:.
+  \label{eq:SIphi}
+\end{align}
+%
+The spectral radius, $c = \Macro_s / \Macro$, determines the speed of convergence. For problems dominated by scattering, SI will converge very slowly (good explanation of how to think of this physically on p.\ 2, 3 of  \href{https://github.com/rachelslaybaugh/NE250/blob/master/23-iterations/Nov-30Class.tex}{https://github.com/rachelslaybaugh/NE250/blob/master/23-iterations/Nov-30Class.tex}, which you can build using pdflatex). 
+
+%---------------------------------------------------
+\subsubsection*{Krylov methods}
+\textbf{Krylov methods} are a powerful class of subspace methods that can be ideal for solving various types of linear and eigenvalue problems. A Krylov method solves $\ve{A}x = b$ by building a solution from a Krylov subspace generated by an iteration vector $v_{1}$. At iteration $k$, the subspace is:
+%
+\begin{equation}
+  \mathcal{K}_{k}(\ve{A},v_{1}) \equiv span\{v_{1}, \ve{A}v_{1}, \ve{A}^{2}v_{1}, ..., \ve{A}^{k-1}v_{1}\} \:.
+  \label{eq:Krylov-subspace}
+\end{equation}
+%
+The choice of $v_{1}$ varies, but $v_{1} = b$ is common. %When the problem is presented as $\ve{A}z = r_{0}$ where $r_{0} \equiv b - \ve{A}x_{0}$ and the solution is $x_{k} = x_{0} + z$, then $v_{1} $ is often chosen to be $r_{0}$. Note that $x_{0}$ is the initial guess and $x_{k}$ is the solution approximation at step $k$.%  \cite{Ipsen1998}.
+
+The dimension of a Krylov space is bounded by $n$ because Krylov methods will give the exact solution after $n$ iterations in the absence of roundoff error. Interestingly, this technically makes Krylov methods a hybrid of direct and iterative methods because an exact answer can be obtained in a predetermined number of steps. Krylov subspace methods are nevertheless generally classified as iterative methods.% \cite{Birkhoff1984}.
+
+Krylov methods are particularly useful in a few pertinent cases. One is when $\ve{A}$ is very large because fewer operations are required than traditional inversion methods like Gaussian elimination. Another is when $\ve{A}$ is not explicitly formed because Krylov methods only need the action of $\ve{A}$. Finally, Krylov methods are ideal when $\ve{A}$ is sparse because the number of operations are low for each matrix-vector multiplication. For deterministic transport codes, $\ve{A}$ is typically quite large, fairly sparse, and only its action is needed. The action of $\ve{A}$ is implemented through the transport sweeps.% \cite{Lewis1993}, \cite{Ipsen1998}.  
+
+In the last few decades Krylov methods have been used widely to solve problems with appropriate properties for several reasons. Krylov methods are robust; the existence and uniqueness of the solution can be established; typically far fewer than $n$ iterations are needed when they are used as iterative solvers; they can be preconditioned to significantly reduce time to solution; only matrix-vector products are required; explicit construction of intermediate residuals is not needed; and they have been found to be highly efficient in practice.% \cite{Ipsen1998}, \cite{Knoll2004}. 
+
+There are, however, a few drawbacks. In some cases Krylov methods can be very slow to converge, causing large subspaces to be generated and thus becoming prohibitively expensive in terms of storage size and cost of computation. Some methods can be restarted after $m$ steps %\footnote{For information about restarted Krylov methods see Appendix \ref{sec:AppendixB}.} 
+to alleviate this problem, keeping the maximum subspace size below $\mathcal{K}_{m+1}$.  The relatively inexpensive restart techniques can reduce the storage requirements and computational costs associated with a slow-converging problem such that they are tractable. Preconditioners can also help by reducing the number of iterations needed. %Development of appropriate preconditioners is an active area of research \cite{Warsa2004a}, \cite{Ipsen1998}, \cite{Knoll2004}. 
+
+%In the 1970s interest in Krylov methods in the wider computational community began to increase after it was demonstrated that these methods can converge quickly. At first Krylov methods were restricted to problems where $\ve{A}$ is symmetric positive definite (SPD). These are methods such as conjugate gradient (CG), MINRES, SYMMLQ, and others. Then, Krylov methods for non-symmetric matrices became a focus, including the Generalized Minimum Residual (GMRES) and BiConjugate Gradient Stabilized (BiCGSTAB) methods \cite{Barrett1994}, \cite{Benzi2002}. The transport problem has characteristics that make it well suited for solution with Krylov methods, and these methods are used in several novel ways throughout this work.
+
+\section*{Krylov Methods}
+An aside, because they're useful and I think they're super cool. 
+\subsection*{Arnoldi Method}
+A general issue with Krylov subspaces is that the columns of $\mathcal{K}_{k}(\ve{A},v_{1})$ become increasingly linearly dependent with increasing $k$. To deal with this, there are two factorization methods upon which many Krylov methods are based. Some use the Arnoldi method, which generates an orthonormal basis for the Krylov subspace for non-normal matrices, and others use the Lanczos method, which creates non-orthogonal bases for normal matrices. % \cite{Knoll2004}, \cite{Stewart2001}. Denovo has the option of using either restarted GMRES or BiCGSTAB, both of which use the Arnoldi method \cite{Evans2009}.  The remainder of this section will be devoted to developing an understanding of the Arnoldi method.
+We'll focus on the Arnoldi method.
+
+\subsubsection*{Galerkin Method and Weighted Residuals}
+Fundamentally, Krylov methods are Galerkin or Galerkin-Petrov methods on a Krylov subspace. \textit{Galerkin's method} uses a few fundamental concepts: 
+\begin{compactitem}
+\item an inner product of two functions is zero when the functions are orthogonal: 
+\[
+<f(x), g(x)> = 0\text{ if }f(x)\text{ and }g(x)\text{ are orthogonal.}
+\]
+
+\item any function $f(x)$ in a subspace $\mathcal{V}$ can be written as a linear combination of the vectors that make a basis for that function space. Let $\ve{V} = \{\phi_{i}(x) \}_{i=0}^{\infty}$ be the basis for $\mathcal{V}$; if $f(x) \in \mathcal{V}$ then 
+ \[f(x) = \sum_{j=0}^{\infty} c_{j} \phi_{j}(x)\] 
+ for some scalar coefficients $c_{j}$.% \cite{Matthews2005}. 
+  
+\item A \textit{weighted residual method} is a solution technique for solving some linear problem $\ve{A}u = b$ where 
+\[u = u_0 + \sum_{i=1}^{n} c_i \phi_i(x)\]
+is the approximate solution and $u_{0}$ is an initial guess. The solution is found by taking the inner product of some arbitrary weight function, $w(x)$, and the residual, $r(x) = b - \ve{A}u$, $r(x) \in \mathcal{V}$, such that $<w(x), r(x)> = 0$. The solution is the $u$ satisfying this requirement. 
+\end{compactitem}
+
+Galerkin's method is a weighted residual method where the weight function is chosen from the basis functions: $w(x)$ is selected from $\ve{V}$. % \cite{Matthews2005}. 
+In the Galerkin-Petrov method, the weight functions come from a subspace other than $\mathcal{V}$, that is $w(x) \in \mathcal{W}$.% \cite{Skeel2006}. 
+
+The weighted residual method can also be thought of as a process to minimize the residual. There are a few ways to express this idea. 
+\begin{compactitem}
+\item If $\hat{u}$ is the exact minimizer of $r(x) = b - \ve{A}\hat{u}$, then let $u' = \hat{u} + w(x)$ be a close approximation to $\hat{u}$ with $w(x) \in \mathcal{V}$. The residual is minimized if and only if $<w(x), r(x)> = 0$ for all $w(x) \in \mathcal{V}$, meeting the Galerkin condition just described. 
+
+\item This can also be written as: 
+
+\begin{align}
+  \text{find } \qquad u \in u_{0} + \mathcal{V} \qquad \text{such that} \qquad r(x) \perp \mathcal{V} \:.
+  \label{eq:galerkinMin}
+\end{align}
+%
+Further, if $y$ is the solution to
+\begin{equation}
+  \ve{V}^{T}\ve{AV}y = \ve{V}^{T} r_{0} \:, \qquad \text{then} \qquad \hat{u} = u_{0} + \ve{V}y \:.
+  \label{eq:minResidual}
+\end{equation}
+This $\hat{u}$ minimizes the residual in the some measure of interest, where the measure is determined by the selection of $y$. %In the Petrov-Galerkin formulation, $\ve{W}$ is a basis for subspace $\mathcal{W}$ and the idea is to find $ u \in u_{0} + \mathcal{V}$ such that $r(x) \perp \mathcal{W}$. Now $\ve{V}^T\ve{AW}y = \ve{V}^T r_0$ \cite{Skeel2006}.
+\end{compactitem}
+
+%Sorensen~\cite{Sorensen1996} and Stewart~\cite{Stewart 2001} 
+We can use the Galerkin Method in combination with \textit{Ritz pairs} to understand the Arnoldi method. %, and this viewpoint will be developed here. To maintain consistency with the main portion of this work, 
+For us, the subspace from which solutions are derived %in the next paragraphs 
+will be the Krylov subspace $\mathcal{K}_{k}(\ve{A},v_{1})$, and the equation will be switched to $\ve{A}x = b$.
+
+\subsubsection*{Ritz Pairs}
+A vector $z \in \mathcal{K}_{k}(\ve{A},v_{1})$ is defined as a \textit{Ritz vector} with corresponding \textit{Ritz value}, $\theta$, if it satisfies the Galerkin condition 
+\[
+<w, \ve{A}z - \theta z> = 0  \:\forall\: w \in \mathcal{K}_{k}(\ve{A}, v_{1})\:.
+\]
+To see why Ritz pairs can be important, define $\hat{p}(\ve{A})$ to be the minimum characteristic polynomial of $\ve{A}$ such that $||\hat{p}(\ve{A})v_{1}|| \le ||q(\ve{A})v_{1}||$ for all monic polynomials $q \ne \hat{p}$ of degree $k$. If $(\theta, z)$ is a Ritz pair for $\ve{A}$, then $\ve{A}z - z\theta = \gamma \hat{p}(\ve{A})v_{1} = g$ for some scalar $\gamma$. When $g = 0$, then the Ritz pair is an eigenpair. When $g$ is small, the Ritz pair is likely a close approximation to an eigenpair of $\ve{A}$.% \cite{Sorensen1996}. 
+
+\subsubsection*{Method}
+These ideas can be assembled to understand why the Arnoldi method works. Let $\ve{V}$ be a basis for a Krylov subspace $\mathcal{K}_{k}(\ve{A},v_{1})$, and $\mathcal{X} \in \mathcal{K}_{k}(\ve{A},v_{1})$ be an eigenspace of $\ve{A}$. When solving $\ve{A}x = b$, the subspace $\mathcal{K}_{k}(\ve{A},v_{1})$ and the vector $x$ must satisfy
+\begin{enumerate}
+  \item $x \in \mathcal{K}_{k}(\ve{A},v_{1})$ and
+  \item $r = \ve{A}x - b \perp \mathcal{K}_{k}(\ve{A},v_{1})$. 
+\end{enumerate} 
+%
+Let $\ve{H} = \ve{V}^{T}\ve{AV}$. There is an eigenpair $(\theta, x)$ of $\ve{H}$ such that $(\theta, \ve{V}x)$ is an eigenpair of $\ve{A}$. To reduce notational clutter let $z = \ve{V}x$, giving $\ve{A}z = \theta z$.% \cite{Stewart2001}. 
+
+If $\ve{V}$ is an orthonormal basis for  $\mathcal{K}_{k}(A,v_{1})$, then $(\theta, z)$ is a Ritz pair if and only if $x = \ve{V}y$ with $\ve{H}y = \theta y$ for some $y$. Noting the definition of $\ve{H}$, comparing to Equation \eqref{eq:minResidual}, and doing some basic matrix manipulation, it can be seen that this $y$ minimizes the residual. As the residual tends toward zero, the Ritz pair converges to an approximate eigenpair of $\ve{A}$. % \cite{Stewart2001}.
+Another way to state this is to revisit the polynomial identity expressing the minimum residual. It can be shown that $\ve{AV}y - \ve{VH}y = \gamma \hat{p}(\ve{A})v_{1} = g$. As $g \to 0$, the Ritz pair approaches the eigenpair of $\ve{A}$.% \cite{Sorensen1996}. 
+
+In summary, the eigenpairs of $\ve{A}$ are approximated by the eigenpairs of $\ve{H}$. These eigenvalues and/or eigenvectors are subsequently used in different ways by different Krylov methods to formulate the solution to $\ve{A}x = b$ to achieve specific goals, like minimizing the residual in a certain norm. The Galerkin condition is used to ensure the eigenpairs of $\ve{H}$ become increasingly good approximations to those of $\ve{A}$ as the size of the Krylov subspace increases. 
+
+The Arnoldi method is a process of establishing the $\ve{V}$ and $\ve{H}$ discussed above. % \cite{Stewart2001}.
+ $\ve{H}$ is an orthogonal projection of $\ve{A}$ onto the basis $\ve{V}$ and is upper Hessenberg in form. The Gram-Schmidt method (or the modified Gram-Schmidt method) computes $\ve{V}$. The Arnoldi method generates a Ritz estimate for the Ritz pair at each iteration. 
+The Arnoldi Algorithm is:            
+%Using these terms and ideas, the Arnoldi algorithm shown in Algorithm~\ref{algo:Arnoldi} can be understood \cite{Saad1986}, \cite{Sorensen1996}.
+%
+\begin{list}{}{}
+  \item $r_0 = b - \ve{A}x_0$ 
+  \item $v_1 = \frac{r_0}{||r_0||}$ 
+  \item For $j = 1$ to $k$: 
+  \begin{list}{}{\hspace{2em}}
+    \item $h_{i,j} = v_i \ve{A} v_j$, $i = 1, \dots, j$ 
+    \item $\text{ } \hat{v}_{j+1} = \ve{A}v_j - \sum_{i=1}^{j} v_j h_{i,j}$ 
+    \item $\text{ } h_{j+1,j} = ||\hat{v}_{j+1}||$ 
+    \item $\text{ } v_{j+1} = \frac{\hat{v}_{j+1}} {h_{j+1,j}}$ 
+  \end{list}
+  \item Form the solution $x_k = x_0 + \ve{V}_k y_k$, where $y_k = \ve{H}_k^{-1} ||r_0|| e_1$
+\end{list}
+
+The $k$th step of an Arnoldi factorization can be written as: 
+%
+\begin{equation}
+  \ve{AV}_{k} = \ve{V}_{k}\ve{H}_{k} + g_{k}e_{k}^{T} \:,
+\end{equation} 
+%
+where $e_{k}$ is the $k^{th}$ column of the identity matrix and $g$ is the residual. An alternative way to derive the Arnoldi method is as a truncation of the reduction of $\ve{A}$ to Hessenberg form using shifted QR-iteration.% \cite{Sorensen1996}.
+
+%\subsection*{Restarting Arnoldi}
+%As mentioned above, Krylov methods can become untenable if the subspace is allowed to become large. Restart methods have been developed to handle this. After $m$ iterations the Arnoldi process is halted and a new starting vector, $\hat{v}_1$, is constructed from information gained during the previous $m$ iterations. This new vector is used as the starting vector for another round of the Arnoldi process, which is now using the subspace $\mathcal{K}_k(\ve{A},\hat{v}_1)$ rather than $\mathcal{K}_m(\ve{A},v_1)$. This process is repeated, finding a new starting vector every time the subspace reaches dimension $m$, until convergence. It is assumed that of the $m$ eigenvalues available, only $r$ of them are wanted. Two such restart methods, explicit and implicit, will be discussed here from the viewpoint of how they work and how they preserve the information of interest. 
+%
+%Explicit restarting applies a polynomial to the starting vector that is designed to damp unwanted components of the eigenvector expansion. There are a few different forms of explicit restarting, but the basic idea begins with splitting the Ritz values into a wanted set, $\Omega_w$, and an unwanted set, $\Omega_u$. In one form of explicit restarting, a combination of wanted eigenvalues are used and in another form a combination of unwanted eigenvectors are used. In both formulations a filter polynomial is used to create a $\hat{v}_1$ that minimizes the residual by removing the unwanted information. The components of the new starting vector therefore become more aligned toward the directions of interest. Unfortunately, filter polynomials are expensive to apply directly and this motivates the need for a more sophisticated restart method \cite{Sorensen1996}, \cite{Stewart2001}.
+%
+%Implicit restarting is designed to be less expensive than explicit restarting. It uses an implicitly shifted QR mechanism to compress the factorization while retaining information of interest. The idea is to go from a factorization of length $m = p + r$ to one of length $r$ by applying $p$ shifts implicitly. For $j = 1,2,\dots,p$, a QR factorization is done with shifts $\mu_j$ where the shifts are derived from the spectrum of $\ve{H}$, $\sigma(\ve{H}) \equiv \{\lambda \in \mathbb{R}: rank(\ve{H} - \lambda \ve{I}) < n\}$. This gives an $r$-step Arnoldi factorization of the form $\ve{AV}_r \ve{Q} = (\ve{V}_r \ve{Q})(\ve{Q}^T \ve{H}_r \ve{Q}) + g_k e^T_k$. $\ve{Q} = \ve{Q}_1 \ve{Q}_2 \dots \ve{Q}_p$, where $\ve{Q}_j$ is an orthogonal matrix corresponding to shift $\mu_j$, and $g_r = (\ve{V}_r \ve{Q}) e_{r+1} \beta_r + g_m \sigma(\ve{H})$ \cite{Sorensen1996}.
+%
+%The shift selection strategy can be designed to create a minimal $\hat{v}_1$. The shifted QR factorization reduces the subspace size while eliminating the undesired components. In essence this is implicitly applying a filter polynomial while avoiding the matrix-vector multiplications that would be required in an explicit method. Further, $\mathcal{K}_p(\ve{A},v_1) \subset \mathcal{K}_m(\ve{A}, \hat{v}_1)$, which means the wanted Ritz vectors are still represented in the updated subspace. The implicit method is more efficient and more numerically stable than the explicit restart method \cite{Sorensen1996}, \cite{Stewart2001}.
+
+\subsection*{GMRES}
+One of the more popular Krylov methods, which uses the Arnoldi process, is the GMRES algorithm developed by Saad and Schultz. %~\cite{Saad1986}, \cite{Knoll2004}. 
+Recall that $\ve{V}_{k}$ is an orthonormal basis for the Krylov subspace $\mathcal{K}_{k}(\ve{A}, v_1)$ and that $\ve{H}_{k}$ is the representation of the part of $\ve{A}$ that is in this Krylov subspace formed from the basis $\ve{V}_{k}$. The notation $\bar{\ve{H}}^{k}$ is the $(k+1) \times k$ upper Hessenberg matrix that includes the newest $h_{k+1,k}$ element generated in the Arnolodi process. This satisfies $\ve{AV}_{k} = \ve{V}_{k+1}\bar{\ve{H}}_{k}$.% \cite{Saad1986}. 
+
+The distinguishing factor for different Krylov methods is the way in which they select the $y_k$ that makes the solution $x_k = x_0 + \ve{V}_k y_k$. GMRES uses the least squares procedure to find the $y_k$ that minimizes the norm of the residual over $z$ in $\mathcal{K}_{k}(\ve{A}, v_1)$. To accomplish this, the least squares problem
+%
+\begin{equation}
+  \min_{z \in \mathcal{K}_{k}} ||r_{0} - \ve{A}z||
+  \label{eq:least-squares}
+\end{equation} 
+%
+is solved. Here $z = \ve{V}_k y_k$. The $y_{k}$ that is selected minimizes $||\beta e_{1} - \bar{\ve{H}}^{k} y||$, where $\beta = ||r_{0}||$.%  \cite{Saad1986}. 
+
+GMRES picks the best solution within the Krylov subspace with respect to minimizing the residual. % \cite{Ipsen1998}. %The minimization is done by progressively applying plane rotations in such a way that the residual norm can always be easily and efficiently obtained to analyze convergence. 
+%This method cannot break down unless it has already converged, in which case the answer has been found. GMRES has all of the storage issues associated with Krylov methods mentioned before, but restarted GMRES can be used to mitigate this concern. \cite{Saad1986}.
+
+
+\end{document}
