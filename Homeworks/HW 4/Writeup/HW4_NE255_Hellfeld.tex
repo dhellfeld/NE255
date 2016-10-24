@@ -1,0 +1,243 @@
+\documentclass[10pt]{article}
+\usepackage[left=0.9in,top=0.9in,bottom=0.9in,right=0.9in]{geometry}
+\usepackage[english]{babel}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{caption}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+\usepackage{soul}
+\usepackage{enumerate}
+\usepackage{wrapfig}
+\usepackage{listings}
+
+
+% Listings settings
+\lstset{frame=tb,
+  language=Python,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\scriptsize\ttfamily},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3,
+  numbers=left,
+  xleftmargin=4em,
+  framexleftmargin=3.5em
+}
+
+% Remove bibliography title
+\usepackage{etoolbox}
+\patchcmd{\thebibliography}{\section*{\refname}}{}{}{}
+
+% Set up header/footers
+\pagestyle{fancy}
+\fancyhead[LE,RO]{\today}
+\fancyhead[C]{NE 255 - HW 4}
+\fancyhead[LO,RE]{D. Hellfeld}
+\fancyfoot[C]{\thepage\ of \pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% Set up figure/table captions
+\addto\captionsenglish{\renewcommand{\figurename}{Fig.}}
+\addto\captionsenglish{\renewcommand{\tablename}{\small Table}}
+\renewcommand{\thetable}{\Roman{table}}
+\captionsetup[table]{labelfont = normal, labelsep=period, singlelinecheck=false}
+\captionsetup[figure]{labelfont=normal, labelsep=period, singlelinecheck=false}
+
+% Remove paragraph indent
+\setlength\parindent{0pt}
+
+
+\begin{document}
+
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\begin{centering}
+\textbf{\large NE 255 - Homework 4}\\
+\vspace{10pt}
+University of California, Berkeley\\
+Department of Nuclear Engineering\\
+\vspace{10pt}
+Daniel Hellfeld\\
+\href{mailto:dhellfeld@berkeley.edu}{dhellfeld@berkeley.edu}\\
+\end{centering}
+
+
+
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\vspace{20pt}
+\noindent \textbf{Problem 1}\\
+Describe the sweeping process in one dimension (marching through space) along one angle using the diamond difference scheme
+%
+\begin{enumerate}[(a)]
+\item for $\mu > 0$
+\end{enumerate}
+
+...
+
+\begin{enumerate}[(b)]
+\item for $\mu < 0$
+\end{enumerate}
+
+...
+
+
+\begin{enumerate}[(c)]
+\item at a reflecting boundary on the right edge, including how to transition from $\mu > 0$ to $\mu < 0$.
+\end{enumerate}
+
+...
+
+
+\begin{enumerate}[(d)]
+\item If using the angular flux to generate flux moments during the solution process, what data do you need to store in the sweeping process?  
+\end{enumerate}
+
+...
+
+
+
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%\vspace{20pt}
+\newpage
+\noindent \textbf{Problem 2}\\
+Let's look at truncation error in the diamond difference method by examining the 1-D case. Consider uncollided neutrons with a zero group source moving along angle $a$:
+%
+\begin{equation*}
+\mu_a \frac{d \psi_a}{dx} + \Sigma_t \psi_a(x) = 0\:,
+\end{equation*}
+where the cross section is taken as constant. 
+
+\begin{enumerate}[(a)]
+\item For neutrons moving $\mu_a > 0$, write an expression for the flux at some location $x'$ in terms of the flux at location $x$ (you should have an exponential).
+\end{enumerate}
+
+...
+
+
+\begin{enumerate}[(b)]
+\item Let's say we impose a Cartesian grid with mesh index $i$. What is the expression for $\psi_{a,i+1/2}$ in terms of $\psi_{a,i-1/2}$? Use mesh spacing $\Delta_i = x_{i+1/2} - x_{i-1/2}$ and the definition $h \equiv \frac{\Sigma_t \Delta_i}{2|\mu_a|}$.
+\end{enumerate}
+
+...
+
+
+\begin{enumerate}[(c)]
+\item Plug the relationship you just found into the 1D diamond difference equations ($\alpha = 0$). Manipulate those to get another expression for
+ $\psi_{a,i+1/2}$ in terms of $\psi_{a,i-1/2}$ and $h$.  
+\end{enumerate}
+
+...
+
+
+\begin{enumerate}[(d)]
+\item Look again at your solution from part b. Expand the exponential in a power series through the $h^2$ term and show that it is the same as your solution from part c. What does that mean about the accuracy of the relationship?
+\end{enumerate}
+
+...
+
+
+\begin{enumerate}[(e)]
+\item Look carefully at the expression for 
+$\psi_{a,i+1/2}$. What is a condition on $h$ that would guarantee that the flux would be positive? What does that mean about mesh spacing given the smallest $\mu_a$ in a set and a specific $\Sigma_t$? 
+\end{enumerate}
+
+...
+
+
+
+
+
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%\vspace{20pt}
+\newpage
+\noindent \textbf{Problem 3}\\
+Write a piece of code that implements the 1-D, one-speed, steady state, weighted diamond difference equations; include scattering and an external source. Use $\psi(0) = 0$ for $\mu > 0$; non-reentrant boundary condition at $x=0.0$ and a reflecting boundary at $x=2.0$. For this case assume isotropic scattering.
+
+\begin{enumerate}[(a)]
+\item Explore negative flux: use the following values
+\begin{itemize}
+\setlength\itemsep{0em}
+\item $\alpha = 0$
+\item $\mu_a$ = $\pm$0.1
+\item $\Sigma_t$ = 1.0
+\item $\Sigma_s$ = 0
+\item $q_e(x)$ = 0
+\item mesh spacings: $h = [0.1, 0.15, 0.2, 0.3, 0.4]$.
+\end{itemize}
+Plot the cell-centered scalar flux that results from each mesh spacing. What do you notice? How does that compare with your conclusion from the previous problem? 
+\end{enumerate}
+
+...
+
+
+
+\begin{enumerate}[(b)]
+\item Impact of $\alpha$: try $\alpha = [-0.9, -0.5, 0.25, 0.5, 0.9]$. What happens?
+\end{enumerate}
+
+...
+
+
+
+\begin{enumerate}[(c)]
+\item Real results? Now try adding a source
+\begin{itemize}
+\setlength\itemsep{0em}
+\item $\alpha = [-0.5, 0, 0.5]$ (feel free to try others)
+\item $\mu$ = $\pm$[0.2, 0.7] (use 0.2 for the $\alpha$ studies and then choose one $alpha$ to use with 3 angles); for simplicity just use equi-probable weights to get scalar flux from angular flux (note: this is not a real quadrature set)
+\item $\Sigma_t$ = 1.0
+\item $\Sigma_s$ = 0.5
+\item $q_e(x)$ = 1.0
+\end{itemize}
+Report the results. 
+\end{enumerate}
+
+...
+
+
+
+\begin{enumerate}[(d)]
+\item What happens with $\alpha = 0$ and $\Sigma_s = 0.9$?
+\end{enumerate}
+
+...
+
+
+
+
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%\vspace{20pt}
+\newpage
+\noindent \textbf{Problem 4}\\
+Starting from the following general system of equations
+%
+\begin{equation*}
+\frac{\mu_a}{h_i}(\psi_{a,i+1/2}^g - \psi_{a,i-1/2}^g)+ \Sigma_{t,i}^g\psi_{a,i}^g = 2\pi\sum_{a=1}^N w_a \sum_{g'=1}^G \Sigma_{s, i}^{gg'}(a'\rightarrow a)\psi_{a',i}^{g'} + \frac{\chi_g}{2}\sum_{g'=1}^G \nu_{g'}\Sigma_{f,i}^{g'} \phi_{i}^{g'} + \frac{1}{2}Q_i^g\:,
+\end{equation*}
+
+where  $\phi$ \textit{is} scalar flux, write a set of five coupled equations for a five group problem. Assume neutrons can only downscatter from fast groups (1 and 2) to thermal groups (3, 4, and 5). Assume that thermal groups can upscattering into other thermal groups and can downscatter. Assume there is an external source and a fission source.  
+
+...
+
+
+
+
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+\end{document}
