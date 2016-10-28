@@ -101,7 +101,7 @@ Describe the sweeping process in one dimension (marching through space) along on
 
 
 \begin{enumerate}[(d)]
-\item If using the angular flux to generate flux moments during the solution process, what data do you need to store in the sweeping process?  
+\item If using the angular flux to generate flux moments during the solution process, what data do you need to store in the sweeping process?
 \end{enumerate}
 
 ...
@@ -118,7 +118,7 @@ Let's look at truncation error in the diamond difference method by examining the
 \begin{equation*}
 \mu_a \frac{d \psi_a}{dx} + \Sigma_t \psi_a(x) = 0\:,
 \end{equation*}
-where the cross section is taken as constant. 
+where the cross section is taken as constant.
 
 \begin{enumerate}[(a)]
 \item For neutrons moving $\mu_a > 0$, write an expression for the flux at some location $x'$ in terms of the flux at location $x$ (you should have an exponential).
@@ -136,7 +136,7 @@ where the cross section is taken as constant.
 
 \begin{enumerate}[(c)]
 \item Plug the relationship you just found into the 1D diamond difference equations ($\alpha = 0$). Manipulate those to get another expression for
- $\psi_{a,i+1/2}$ in terms of $\psi_{a,i-1/2}$ and $h$.  
+ $\psi_{a,i+1/2}$ in terms of $\psi_{a,i-1/2}$ and $h$.
 \end{enumerate}
 
 ...
@@ -150,8 +150,8 @@ where the cross section is taken as constant.
 
 
 \begin{enumerate}[(e)]
-\item Look carefully at the expression for 
-$\psi_{a,i+1/2}$. What is a condition on $h$ that would guarantee that the flux would be positive? What does that mean about mesh spacing given the smallest $\mu_a$ in a set and a specific $\Sigma_t$? 
+\item Look carefully at the expression for
+$\psi_{a,i+1/2}$. What is a condition on $h$ that would guarantee that the flux would be positive? What does that mean about mesh spacing given the smallest $\mu_a$ in a set and a specific $\Sigma_t$?
 \end{enumerate}
 
 ...
@@ -165,7 +165,7 @@ $\psi_{a,i+1/2}$. What is a condition on $h$ that would guarantee that the flux 
 %\vspace{20pt}
 \newpage
 \noindent \textbf{Problem 3}\\
-Write a piece of code that implements the 1-D, one-speed, steady state, weighted diamond difference equations; include scattering and an external source. Use $\psi(0) = 0$ for $\mu > 0$; non-reentrant boundary condition at $x=0.0$ and a reflecting boundary at $x=2.0$. For this case assume isotropic scattering.
+Write a piece of code that implements the 1-D, one-speed, steady state, weighted diamond difference equations; include scattering and an external source. Use $\psi(0) = 2.0$ for $\mu > 0$; non-reentrant boundary condition at $x=0.0$ and a reflecting boundary at $x=2.0$. For this case assume isotropic scattering.
 
 \begin{enumerate}[(a)]
 \item Explore negative flux: use the following values
@@ -178,7 +178,7 @@ Write a piece of code that implements the 1-D, one-speed, steady state, weighted
 \item $q_e(x)$ = 0
 \item mesh spacings: $h = [0.1, 0.15, 0.2, 0.3, 0.4]$.
 \end{itemize}
-Plot the cell-centered scalar flux that results from each mesh spacing. What do you notice? How does that compare with your conclusion from the previous problem? 
+Plot the cell-centered scalar flux that results from each mesh spacing. What do you notice? How does that compare with your conclusion from the previous problem?
 \end{enumerate}
 
 ...
@@ -203,7 +203,7 @@ Plot the cell-centered scalar flux that results from each mesh spacing. What do 
 \item $\Sigma_s$ = 0.5
 \item $q_e(x)$ = 1.0
 \end{itemize}
-Report the results. 
+Report the results.
 \end{enumerate}
 
 ...
@@ -230,9 +230,50 @@ Starting from the following general system of equations
 \frac{\mu_a}{h_i}(\psi_{a,i+1/2}^g - \psi_{a,i-1/2}^g)+ \Sigma_{t,i}^g\psi_{a,i}^g = 2\pi\sum_{a=1}^N w_a \sum_{g'=1}^G \Sigma_{s, i}^{gg'}(a'\rightarrow a)\psi_{a',i}^{g'} + \frac{\chi_g}{2}\sum_{g'=1}^G \nu_{g'}\Sigma_{f,i}^{g'} \phi_{i}^{g'} + \frac{1}{2}Q_i^g\:,
 \end{equation*}
 
-where  $\phi$ \textit{is} scalar flux, write a set of five coupled equations for a five group problem. Assume neutrons can only downscatter from fast groups (1 and 2) to thermal groups (3, 4, and 5). Assume that thermal groups can upscattering into other thermal groups and can downscatter. Assume there is an external source and a fission source.  
+where  $\phi$ \textit{is} scalar flux, write a set of five coupled equations for a five group problem. Assume neutrons can only downscatter from fast groups (1 and 2) to thermal groups (3, 4, and 5). Assume that thermal groups can upscatter into other thermal groups and can downscatter. Assume there is an external source and a fission source.\\ 
 
-...
+$\Rightarrow$ From the wording of the question, we assume the following about scattering: Neutrons in group 1 can downscatter to groups 3, 4, and 5. Neutrons in group 2 can downscatter into groups 3, 4, and 5. Neutrons in group 3 can downscatter into groups 4 and 5. Neutrons in group 4 can downscatter into group 5 and upscatter into group 3. Neutrons in group 5 can upscatter into groups 3 and 4. Neutrons in each group can also participate in in-group scattering ($3\rightarrow3$, $5\rightarrow5$, etc.). We also assume the following about fission: Neutrons can undergo fission in any group, and fission neutrons can be born into any group. Finally, we assume there is an external neutron source in every group. \\ 
+
+%\begin{table}[htb]
+%\centering
+%\begin{tabular}{|c|c|c|c|c|}
+%\hline
+%Group & Where can neutrons scatter to? & Can fission occur? & Fission neutrons born here? & External Source? \\
+%\hline
+%1 & 1,3,4,5 & Yes & Yes & Yes \\
+%2 & 2,3,4,5 & Yes & Yes & Yes \\
+%3 & 3,4,5 & Yes & Yes & Yes \\
+%4 & 3,4,5 & Yes & Yes & Yes \\
+%5 & 3,4,5 & Yes & Yes & Yes \\
+%\hline
+%\end{tabular}
+%\end{table}
+
+
+\textbf{g = 1:}
+\begin{align*}
+\frac{\mu_a}{h_i}(\psi_{a,i+1/2}^1 - \psi_{a,i-1/2}^1)+ \Sigma_{t,i}^1\psi_{a,i}^1 = 2\pi\sum_{a=1}^N w_a \left[ \Sigma_{s, i}^{1\rightarrow1}(a'\rightarrow a)\psi_{a',i}^{1} \right] + \frac{\chi_1}{2} [ \nu_{1}\Sigma_{f,i}^{1}\phi_{i}^{1} + \nu_{2}\Sigma_{f,i}^{2}\phi_{i}^{2} + \nu_{3}\Sigma_{f,i}^{3}\phi_{i}^{3} \\ + \nu_{4}\Sigma_{f,i}^{4}\phi_{i}^{4} + \nu_{5}\Sigma_{f,i}^{5}\phi_{i}^{5} ] + \frac{1}{2}Q_i^1
+\end{align*}
+
+\textbf{g = 2:}
+\begin{align*}
+\frac{\mu_a}{h_i}(\psi_{a,i+1/2}^2 - \psi_{a,i-1/2}^2)+ \Sigma_{t,i}^2\psi_{a,i}^2 = 2\pi\sum_{a=1}^N w_a \left[ \Sigma_{s, i}^{2\rightarrow2}(a'\rightarrow a)\psi_{a',i}^{2} \right] + \frac{\chi_2}{2} [ \nu_{1}\Sigma_{f,i}^{1}\phi_{i}^{1} + \nu_{2}\Sigma_{f,i}^{2}\phi_{i}^{2}  + \nu_{3}\Sigma_{f,i}^{3}\phi_{i}^{3} \\ + \nu_{4}\Sigma_{f,i}^{4}\phi_{i}^{4} + \nu_{5}\Sigma_{f,i}^{5}\phi_{i}^{5} ] + \frac{1}{2}Q_i^2
+\end{align*}
+
+\textbf{g = 3:}
+\begin{align*}
+\frac{\mu_a}{h_i}(\psi_{a,i+1/2}^3 - \psi_{a,i-1/2}^3)+ \Sigma_{t,i}^3\psi_{a,i}^3 =  2\pi\sum_{a=1}^N w_a [ \Sigma_{s, i}^{1\rightarrow3}(a'\rightarrow a)\psi_{a',i}^{1} + \Sigma_{s, i}^{2\rightarrow3}(a'\rightarrow a)\psi_{a',i}^{2} + \Sigma_{s, i}^{3\rightarrow3}(a'\rightarrow a)\psi_{a',i}^{3} \\ + \Sigma_{s, i}^{4\rightarrow3}(a'\rightarrow a)\psi_{a',i}^{4} + \Sigma_{s, i}^{5\rightarrow3}(a'\rightarrow a)\psi_{a',i}^{5} ] + \frac{\chi_3}{2} [ \nu_{1}\Sigma_{f,i}^{1}\phi_{i}^{1} + \nu_{2}\Sigma_{f,i}^{2}\phi_{i}^{2} + \nu_{3}\Sigma_{f,i}^{3}\phi_{i}^{3} \\ + \nu_{4}\Sigma_{f,i}^{4}\phi_{i}^{4} + \nu_{5}\Sigma_{f,i}^{5}\phi_{i}^{5} ] + \frac{1}{2}Q_i^3
+\end{align*}
+
+\textbf{g = 4:}
+\begin{align*}
+\frac{\mu_a}{h_i}(\psi_{a,i+1/2}^4 - \psi_{a,i-1/2}^4)+ \Sigma_{t,i}^4\psi_{a,i}^4 =  2\pi\sum_{a=1}^N w_a [ \Sigma_{s, i}^{1\rightarrow4}(a'\rightarrow a)\psi_{a',i}^{1} + \Sigma_{s, i}^{2\rightarrow4}(a'\rightarrow a)\psi_{a',i}^{2} + \Sigma_{s, i}^{3\rightarrow4}(a'\rightarrow a)\psi_{a',i}^{3} \\ + \Sigma_{s, i}^{4\rightarrow4}(a'\rightarrow a)\psi_{a',i}^{4} + \Sigma_{s, i}^{5\rightarrow4}(a'\rightarrow a)\psi_{a',i}^{5} ] + \frac{\chi_4}{2} [ \nu_{1}\Sigma_{f,i}^{1}\phi_{i}^{1} + \nu_{2}\Sigma_{f,i}^{2}\phi_{i}^{2} + \nu_{3}\Sigma_{f,i}^{3}\phi_{i}^{3} \\ + \nu_{4}\Sigma_{f,i}^{4}\phi_{i}^{4} + \nu_{5}\Sigma_{f,i}^{5}\phi_{i}^{5} ] + \frac{1}{2}Q_i^4
+\end{align*}
+
+\textbf{g = 5:}
+\begin{align*}
+\frac{\mu_a}{h_i}(\psi_{a,i+1/2}^5 - \psi_{a,i-1/2}^5)+ \Sigma_{t,i}^5\psi_{a,i}^5 =  2\pi\sum_{a=1}^N w_a [ \Sigma_{s, i}^{1\rightarrow5}(a'\rightarrow a)\psi_{a',i}^{1} + \Sigma_{s, i}^{2\rightarrow5}(a'\rightarrow a)\psi_{a',i}^{2} + \Sigma_{s, i}^{3\rightarrow5}(a'\rightarrow a)\psi_{a',i}^{3} \\ + \Sigma_{s, i}^{4\rightarrow5}(a'\rightarrow a)\psi_{a',i}^{4} + \Sigma_{s, i}^{5\rightarrow5}(a'\rightarrow a)\psi_{a',i}^{5} ] + \frac{\chi_5}{2} [ \nu_{1}\Sigma_{f,i}^{1}\phi_{i}^{1} + \nu_{2}\Sigma_{f,i}^{2}\phi_{i}^{2} + \nu_{3}\Sigma_{f,i}^{3}\phi_{i}^{3} \\ + \nu_{4}\Sigma_{f,i}^{4}\phi_{i}^{4} + \nu_{5}\Sigma_{f,i}^{5}\phi_{i}^{5} ] + \frac{1}{2}Q_i^5
+\end{align*}
 
 
 
