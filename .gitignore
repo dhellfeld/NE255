@@ -12,3 +12,7 @@
 *.DS_Store
 *.fls
 *.fdb_latexmk
+cmake_install.cmake
+CMakeCache.txt
+CMakeFiles/
+xcode/

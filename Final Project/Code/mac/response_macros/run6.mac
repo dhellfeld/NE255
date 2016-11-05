@@ -1,0 +1,19 @@
+
+# Initialize kernel
+/run/initialize
+
+/control/verbose 0
+/tracking/verbose 0
+/run/verbose 0
+/event/verbose 0
+
+# Configure HEALPix
+/PRISM_SIM/direction/setHPNside 16
+/PRISM_SIM/direction/setHPindexscheme Ring
+/PRISM_SIM/direction/SetUpHEALPix
+
+/PRISM_SIM/run/particles 100000
+/PRISM_SIM/run/HPstart 2561
+
+/run/beamOn 51200000
+
