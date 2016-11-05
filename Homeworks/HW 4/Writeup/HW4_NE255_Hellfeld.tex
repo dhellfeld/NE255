@@ -47,12 +47,12 @@
 \renewcommand{\headrulewidth}{0.4pt}
 \renewcommand{\footrulewidth}{0.4pt}
 
-% Set up figure/table captions
+% Set up figure/table captions \textbf{}
 \addto\captionsenglish{\renewcommand{\figurename}{Fig.}}
 \addto\captionsenglish{\renewcommand{\tablename}{\small Table}}
 \renewcommand{\thetable}{\Roman{table}}
 \captionsetup[table]{labelfont = normal, labelsep=period, singlelinecheck=false}
-\captionsetup[figure]{labelfont=normal, labelsep=period, singlelinecheck=false}
+\captionsetup[figure]{labelfont=normal, labelsep=period, singlelinecheck=true}
 
 % Remove paragraph indent
 \setlength\parindent{0pt}
@@ -78,33 +78,133 @@ Daniel Hellfeld\\
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \vspace{20pt}
 \noindent \textbf{Problem 1}\\
-Describe the sweeping process in one dimension (marching through space) along one angle using the diamond difference scheme
+Describe the sweeping process in one dimension (marching through space) along one angle using the diamond difference scheme.\\
+
+$\Rightarrow$ First a short note on the diamond difference (DD) scheme. The DD scheme is a finite volume method which uses a cell-average value solution. As a cell-balance method, this appraoch is essentially a statement of conservation of particles in a mesh cell of interest. For a given time step, energy group, angle, and neutron source, the neutron transport equation can be written as:
+
+\begin{equation}
+        \hat{\Omega} \cdot \nabla \psi(\vec{r}) + \Sigma_t(\vec{r})\psi(\vec{r}) = s(\vec{r})
+\end{equation}
+
+To arrive at the cell balance equation, we integrate (1) over the mesh cell ($dxdydz$), depicted in Fig.~1.
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=150pt]{Figures/mesh_cell_sn}
+    \caption{General mesh cell used to discretize spatial equations.}
+    \label{cellmesh}
+\end{figure}
+
+First we state a few useful definitions:
+%
+\begin{gather*}
+     \hat{\Omega} = \mu\hat{x} + \eta\hat{y} + \xi\hat{z} \\
+     \int_{z_{i - 1/2}}^{z_{i + 1/2}} \int_{y_{i - 1/2}}^{y_{i + 1/2}} \int_{x_{i - 1/2}}^{x_{i + 1/2}} = \iiint \\
+     dV = dxdydz \\
+     \Delta_i = x_{i + 1/2 } - x_{i - 1/2} \\
+     \Delta_j = y_{i + 1/2 } - y_{i - 1/2} \\
+     \Delta_k = z_{i + 1/2 } - z_{i - 1/2}
+\end{gather*}
+
+Now, we integrate over the mesh cell and divide by the volume of the mesh cell ($V_c = \Delta_i\Delta_j\Delta_k$)
+
+\begin{align*}
+    \frac{1}{V_c}\iiint \left( \mu \frac{\partial}{\partial x} \psi(\vec{r}) + \eta \frac{\partial}{\partial x} \psi(\vec{r})  +\xi \frac{\partial}{\partial x} \psi(\vec{r})  + \Sigma_t(\vec{r}) \psi(\vec{r}) \right) dV &= \frac{1}{V_c}\iiint s(\vec{r}) dV \\
+    \frac{\Delta_j\Delta_k}{V_c} \mu \int_{x_{i - 1/2}}^{x_{i + 1/2}} \partial \psi  + \frac{\Delta_i\Delta_k}{V_c} \eta \int_{y_{i - 1/2}}^{y_{i + 1/2}} \partial \psi + \frac{\Delta_i\Delta_j}{V_c} \xi \int_{z_{i - 1/2}}^{z_{i + 1/2}} \partial \psi + \Sigma_{t,i,j,k}\psi_{ijk} &= s_{ijk}  \\
+    \frac{\mu}{\Delta_i} (\psi_{i+1/2} - \psi_{i-1/2} ) + \frac{\eta}{\Delta_j} (\psi_{j+1/2} - \psi_{j-1/2} ) + \frac{\xi}{\Delta_k} (\psi_{k+1/2} - \psi_{k-1/2} ) + \Sigma_{t,i,j,k}\psi_{ijk} &= s_{ijk}
+\end{align*}
+
+Now we relate the center fluxes ($\psi_{ijk}$) to the edge fluxes ($\psi_{n\pm 1/2}$) by closing the above equation with a weighted average of the edge fluxes:
+%
+\begin{align*}
+\psi_{i} &= \frac{1}{2}\bigl((1+\alpha_i)\psi_{i+1/2}+(1-\alpha_i)\psi_{i-1/2}\bigr)\\
+\psi_{i+1/2} &= \frac{2}{(1+\alpha_i)}\psi_{ijk}-
+    \frac{(1-\alpha_i)}{(1+\alpha_i)}\bar{\psi}_{i-1/2}\:,\quad \mu>0\:(\psi_{i-1/2}\text{ is incoming})\\
+\psi_{i-1/2} &= \frac{2}{(1-\alpha_i)}\psi_{ijk}-
+    \frac{(1+\alpha_i)}{(1-\alpha_i)}\bar{\psi}_{i+1/2}\:,\quad \mu<0 \:(\psi_{i+1/2}\text{ is incoming})
+\end{align*}
+
+where $-1 \leq \alpha \leq 1$ and $\bar{\psi}$ indicate the incoming flux (which will depend on $\mu$). The $\alpha$'s are weighting factors that are set to zero in the DD scheme ($\alpha = \pm 1$ is the step-difference scheme):
+%
+\begin{align*}
+\psi_{i} &= \frac{1}{2}\bigl(\psi_{i+1/2}+\psi_{i-1/2}\bigr)\\
+\psi_{i+1/2} &= 2\psi_{ijk} - \bar{\psi}_{i-1/2}\:,\quad \mu>0\:(\psi_{i-1/2}\text{ is incoming})\\
+\psi_{i-1/2} &= 2\psi_{ijk} - \bar{\psi}_{i+1/2}\:,\quad \mu<0 \:(\psi_{i+1/2}\text{ is incoming})
+\end{align*}
+
+We substitute this into the cell balance transport equation and rearrange to arrive at the following set of equations:
+%
+\begin{align*}
+    \psi_{ijk} &= \frac{s_{ijk} +
+      \frac{2|\mu|}{\Delta i}\bar{\psi}_{i\mp1/2} +
+      \frac{2|\eta|}{\Delta j}\bar{\psi}_{j\mp1/2} +
+      \frac{2|\xi|}{\Delta k}\bar{\psi}_{k\mp1/2}}{
+      \Sigma_{t,ijk} + \frac{2|\mu|}{\Delta i} +
+      \frac{2|\eta|}{\Delta j} +
+      \frac{2|\xi|}{\Delta k} }\\
+    \psi_{i\pm1/2} &= 2\psi_{ijk} - \bar{\psi}_{i\mp1/2}\\
+    \psi_{j\pm1/2} &= 2\psi_{ijk} - \bar{\psi}_{j\mp1/2}\\
+    \psi_{k\pm1/2} &= 2\psi_{ijk} - \bar{\psi}_{k\mp1/2}
+\end{align*}
+
+for $\mu\gtrless0\:,\,\eta\gtrless0\:,\,\xi\gtrless0$. Now, in one dimension this reduces to, for $\mu\gtrless0$:
+%
+\begin{align*}
+    \psi_{i} &= \frac{s_{i} + \frac{2|\mu|}{\Delta i}\bar{\psi}_{i\mp1/2}}{\Sigma_{t,i} + \frac{2|\mu|}{\Delta i}} \\
+    \psi_{i\pm1/2} &= 2\psi_{i} - \bar{\psi}_{i\mp1/2}
+\end{align*}
+
+
+
+\vspace{10pt}
 %
 \begin{enumerate}[(a)]
-\item for $\mu > 0$
+\item for $\mu > 0$ (or moving from left to right)
 \end{enumerate}
 
-...
+In this case, our equations become
+%
+\begin{align*}
+\psi_{i} &= \frac{s_{i} + \frac{2\mu}{\Delta i}\bar{\psi}_{i-1/2}}{\Sigma_{t,i} + \frac{2\mu}{\Delta i}} \\
+\psi_{i\pm1/2} &= 2\psi_{i} - \bar{\psi}_{i\mp1/2}
+\end{align*}
 
+Now to march through the sweeping process for one angle using the DD scheme we would first need to assume some value for the incoming flux on the left most face of our geometry. Let's number our geometry such that the first cell is $i=0$, and the next one to the right is $i=1$, and so on. So we would need to know (or be given) the incoming flux at cell 0, $\bar{\psi}_{-1/2}$. With this we can then solve for $\psi_0$ using the equation above, and then also solve for $\psi_{1/2}$ using $\bar{\psi}_{-1/2}$ and $\psi_0$. With $\psi_{1/2}$ in hand, we could then move to the next cell, $i=1$, and then solve for $\psi_1$, and then $\psi_{3/2}$. We would then repeat the process of using the left face flux to solve for the center flux, and then using the left and center fluxes together to solve for the right face flux for each cell. We do this in order, moving from the left to the right (in the direction of particle flow). Also, in each cell we are computing the source $s_i$ which very well may depend on the flux. Therefore after the sweep, we would need to update $s_i$ before starting another sweep. We continue the sweeps until we have satisfied some convergence criterion.
+
+
+\vspace{40pt}
 \begin{enumerate}[(b)]
-\item for $\mu < 0$
+\item for $\mu < 0$ (or moving from right to left)
 \end{enumerate}
 
-...
+In this case, our equations become
+%
+\begin{align*}
+\psi_{i} &= \frac{s_{i} + \frac{2\mu}{\Delta i}\bar{\psi}_{i+1/2}}{\Sigma_{t,i} + \frac{2\mu}{\Delta i}} \\
+\psi_{i\pm1/2} &= 2\psi_{i} - \bar{\psi}_{i\mp1/2}
+\end{align*}
+
+The only difference now is that in order to calculate the center flux, we need to use the right face flux. Once we have the right and center fluxes, we can then solve for the left face flux. To start the sweep, we would need to assume (or be given) some value for the right-most right face flux. If we have a total of $N$ cells, then we would need to know $\bar{\psi}_{N+1/2}$. With this we would solve for $\psi_N$, and then for $\psi_{N-1/2}$ (the left face). We would then continue the process like above, but now in the opposite direction. Starting from the right most right face flux, solving for the center and left face fluxes, then moving to the next cell to the left and using the left face flux from the previous cell as the incoming flux. Again, after the sweep we update $s_i$, and then keep performing sweeps until convergence.
 
 
+
+
+\vspace{10pt}
 \begin{enumerate}[(c)]
 \item at a reflecting boundary on the right edge, including how to transition from $\mu > 0$ to $\mu < 0$.
 \end{enumerate}
 
-...
+If there was a reflecting boundary on the right most edge of the geometry, then the right moving ($\mu>0$) face flux in the right most cell will act as the left incoming flux when we switch to the $\mu < 0$ case. Using the same indexing scheme as above, the right most cell is $i=N$. We would sweep in the $\mu >0$ direction just as we did in part A (needing to be given the incoming flux on the left, $\bar{\psi}_{-1/2}$). Once we reach cell $N$, we would finish by calculating $\psi_{N+1/2}$. This flux would then be used as $\bar{\psi}_{N+1/2}$ (notice the bar) when we move into the $\mu<0$ direction and begin by solving for $\psi_N$. Once we have swept in to the right AND left, we then update $s_i$ and repeat until convergence.
 
 
+
+
+\vspace{10pt}
 \begin{enumerate}[(d)]
 \item If using the angular flux to generate flux moments during the solution process, what data do you need to store in the sweeping process?
 \end{enumerate}
 
-...
+For each cell, we need to know the incoming flux and the source to calculate the center flux and then subsequently the outgoing flux. So we will need to store the moments of the incoming flux in order to calculate the source moments for that cell. With the incoming flux moments and source moments stored, we can calculate the center flux moments. We can then discard the source moments and use the center flux moments and incoming flux moments to calculate the outgoing flux moments. Once we have the outgoing flux moments stored, we can discard the incoming and center flux moments of that cell and then move on to the next cell, using the previous outgoing flux moments now as the incoming flux moments.
 
 
 
@@ -143,7 +243,7 @@ where the cross section is taken as constant.
 
 
 \begin{enumerate}[(d)]
-\item Look again at your solution from part b. Expand the exponential in a power series through the $h^2$ term and show that it is the same as your solution from part c. What does that mean about the accuracy of the relationship?
+\item Look again at your solution from part b. Expand the exponential in a power series and expand your part c expression in a power series through the $h^2$ terms and show they are the same. What does that mean about the accuracy of the relationship?
 \end{enumerate}
 
 ...
@@ -176,7 +276,7 @@ Write a piece of code that implements the 1-D, one-speed, steady state, weighted
 \item $\Sigma_t$ = 1.0
 \item $\Sigma_s$ = 0
 \item $q_e(x)$ = 0
-\item mesh spacings: $h = [0.1, 0.15, 0.2, 0.3, 0.4]$.
+\item mesh spacings: $h = [0.08, 0.1, 0.125, 0.2, 0.4]$.
 \end{itemize}
 Plot the cell-centered scalar flux that results from each mesh spacing. What do you notice? How does that compare with your conclusion from the previous problem?
 \end{enumerate}
@@ -230,9 +330,9 @@ Starting from the following general system of equations
 \frac{\mu_a}{h_i}(\psi_{a,i+1/2}^g - \psi_{a,i-1/2}^g)+ \Sigma_{t,i}^g\psi_{a,i}^g = 2\pi\sum_{a=1}^N w_a \sum_{g'=1}^G \Sigma_{s, i}^{gg'}(a'\rightarrow a)\psi_{a',i}^{g'} + \frac{\chi_g}{2}\sum_{g'=1}^G \nu_{g'}\Sigma_{f,i}^{g'} \phi_{i}^{g'} + \frac{1}{2}Q_i^g\:,
 \end{equation*}
 
-where  $\phi$ \textit{is} scalar flux, write a set of five coupled equations for a five group problem. Assume neutrons can only downscatter from fast groups (1 and 2) to thermal groups (3, 4, and 5). Assume that thermal groups can upscatter into other thermal groups and can downscatter. Assume there is an external source and a fission source.\\ 
+where  $\phi$ \textit{is} scalar flux, write a set of five coupled equations for a five group problem. Assume neutrons can only downscatter from fast groups (1 and 2) to thermal groups (3, 4, and 5). Assume that thermal groups can upscatter into other thermal groups and can downscatter. Assume there is an external source and a fission source.\\
 
-$\Rightarrow$ From the wording of the question, we assume the following about scattering: Neutrons in group 1 can downscatter to groups 3, 4, and 5. Neutrons in group 2 can downscatter into groups 3, 4, and 5. Neutrons in group 3 can downscatter into groups 4 and 5. Neutrons in group 4 can downscatter into group 5 and upscatter into group 3. Neutrons in group 5 can upscatter into groups 3 and 4. Neutrons in each group can also participate in in-group scattering ($3\rightarrow3$, $5\rightarrow5$, etc.). We also assume the following about fission: Neutrons can undergo fission in any group, and fission neutrons can be born into any group. Finally, we assume there is an external neutron source in every group. \\ 
+$\Rightarrow$ From the wording of the question, we assume the following about scattering: Neutrons in group 1 can downscatter to groups 3, 4, and 5. Neutrons in group 2 can downscatter into groups 3, 4, and 5. Neutrons in group 3 can downscatter into groups 4 and 5. Neutrons in group 4 can downscatter into group 5 and upscatter into group 3. Neutrons in group 5 can upscatter into groups 3 and 4. Neutrons in each group can also participate in in-group scattering ($3\rightarrow3$, $5\rightarrow5$, etc.). We also assume the following about fission: Neutrons can undergo fission in any group, and fission neutrons can be born into any group. Finally, we assume there is an external neutron source in every group. \\
 
 %\begin{table}[htb]
 %\centering
