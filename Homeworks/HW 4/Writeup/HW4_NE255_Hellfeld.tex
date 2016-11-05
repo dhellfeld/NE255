@@ -75,6 +75,8 @@ Daniel Hellfeld\\
 
 
 
+
+
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \vspace{20pt}
 \noindent \textbf{Problem 1}\\
@@ -99,7 +101,7 @@ First we state a few useful definitions:
 %
 \begin{gather*}
      \hat{\Omega} = \mu\hat{x} + \eta\hat{y} + \xi\hat{z} \\
-     \int_{z_{i - 1/2}}^{z_{i + 1/2}} \int_{y_{i - 1/2}}^{y_{i + 1/2}} \int_{x_{i - 1/2}}^{x_{i + 1/2}} = \iiint \\
+     \iiint = \int_{z_{i - 1/2}}^{z_{i + 1/2}} \int_{y_{i - 1/2}}^{y_{i + 1/2}} \int_{x_{i - 1/2}}^{x_{i + 1/2}} \\
      dV = dxdydz \\
      \Delta_i = x_{i + 1/2 } - x_{i - 1/2} \\
      \Delta_j = y_{i + 1/2 } - y_{i - 1/2} \\
@@ -107,14 +109,14 @@ First we state a few useful definitions:
 \end{gather*}
 
 Now, we integrate over the mesh cell and divide by the volume of the mesh cell ($V_c = \Delta_i\Delta_j\Delta_k$)
-
+%
 \begin{align*}
     \frac{1}{V_c}\iiint \left( \mu \frac{\partial}{\partial x} \psi(\vec{r}) + \eta \frac{\partial}{\partial x} \psi(\vec{r})  +\xi \frac{\partial}{\partial x} \psi(\vec{r})  + \Sigma_t(\vec{r}) \psi(\vec{r}) \right) dV &= \frac{1}{V_c}\iiint s(\vec{r}) dV \\
     \frac{\Delta_j\Delta_k}{V_c} \mu \int_{x_{i - 1/2}}^{x_{i + 1/2}} \partial \psi  + \frac{\Delta_i\Delta_k}{V_c} \eta \int_{y_{i - 1/2}}^{y_{i + 1/2}} \partial \psi + \frac{\Delta_i\Delta_j}{V_c} \xi \int_{z_{i - 1/2}}^{z_{i + 1/2}} \partial \psi + \Sigma_{t,i,j,k}\psi_{ijk} &= s_{ijk}  \\
     \frac{\mu}{\Delta_i} (\psi_{i+1/2} - \psi_{i-1/2} ) + \frac{\eta}{\Delta_j} (\psi_{j+1/2} - \psi_{j-1/2} ) + \frac{\xi}{\Delta_k} (\psi_{k+1/2} - \psi_{k-1/2} ) + \Sigma_{t,i,j,k}\psi_{ijk} &= s_{ijk}
 \end{align*}
 
-Now we relate the center fluxes ($\psi_{ijk}$) to the edge fluxes ($\psi_{n\pm 1/2}$) by closing the above equation with a weighted average of the edge fluxes:
+Now we relate the center fluxes ($\psi_{ijk}$) to the edge fluxes ($\psi_{n\pm 1/2}$) and close the above equation with a weighted average of the edge fluxes:
 %
 \begin{align*}
 \psi_{i} &= \frac{1}{2}\bigl((1+\alpha_i)\psi_{i+1/2}+(1-\alpha_i)\psi_{i-1/2}\bigr)\\
@@ -154,10 +156,11 @@ for $\mu\gtrless0\:,\,\eta\gtrless0\:,\,\xi\gtrless0$. Now, in one dimension thi
     \psi_{i\pm1/2} &= 2\psi_{i} - \bar{\psi}_{i\mp1/2}
 \end{align*}
 
-
+%
+%
+%
 
 \vspace{10pt}
-%
 \begin{enumerate}[(a)]
 \item for $\mu > 0$ (or moving from left to right)
 \end{enumerate}
@@ -169,8 +172,11 @@ In this case, our equations become
 \psi_{i\pm1/2} &= 2\psi_{i} - \bar{\psi}_{i\mp1/2}
 \end{align*}
 
-Now to march through the sweeping process for one angle using the DD scheme we would first need to assume some value for the incoming flux on the left most face of our geometry. Let's number our geometry such that the first cell is $i=0$, and the next one to the right is $i=1$, and so on. So we would need to know (or be given) the incoming flux at cell 0, $\bar{\psi}_{-1/2}$. With this we can then solve for $\psi_0$ using the equation above, and then also solve for $\psi_{1/2}$ using $\bar{\psi}_{-1/2}$ and $\psi_0$. With $\psi_{1/2}$ in hand, we could then move to the next cell, $i=1$, and then solve for $\psi_1$, and then $\psi_{3/2}$. We would then repeat the process of using the left face flux to solve for the center flux, and then using the left and center fluxes together to solve for the right face flux for each cell. We do this in order, moving from the left to the right (in the direction of particle flow). Also, in each cell we are computing the source $s_i$ which very well may depend on the flux. Therefore after the sweep, we would need to update $s_i$ before starting another sweep. We continue the sweeps until we have satisfied some convergence criterion.
+Now to march through the sweeping process for one angle using the DD scheme we would first need to assume some value for the incoming flux on the left most face of our geometry. Let's number our geometry such that the first cell is $i=0$, and the next one to the right is $i=1$, and so on. So we would need to know (or be given) the incoming flux at cell 0, $\bar{\psi}_{-1/2}$. With this we can then solve for $\psi_0$ using the equation above, and then also solve for $\psi_{1/2}$ using $\bar{\psi}_{-1/2}$ and $\psi_0$. With $\psi_{1/2}$ in hand, we could then move to the next cell, $i=1$, set $\psi_{1/2} = \bar{\psi}_{1/2}$ and then solve for $\psi_1$, and then $\psi_{3/2}$. We would then repeat the process of using the left face flux to solve for the center flux, and then using the left and center fluxes together to solve for the right face flux for each cell. We do this in order, moving from the left to the right (in the direction of particle flow). Also, in each cell we are computing the source $s_i$ which very well may depend on the flux. Therefore after the sweep, we would need to update $s_i$ before starting another sweep. We continue the sweeps until we have satisfied some convergence criterion.
 
+%
+%
+%
 
 \vspace{40pt}
 \begin{enumerate}[(b)]
@@ -186,31 +192,37 @@ In this case, our equations become
 
 The only difference now is that in order to calculate the center flux, we need to use the right face flux. Once we have the right and center fluxes, we can then solve for the left face flux. To start the sweep, we would need to assume (or be given) some value for the right-most right face flux. If we have a total of $N$ cells, then we would need to know $\bar{\psi}_{N+1/2}$. With this we would solve for $\psi_N$, and then for $\psi_{N-1/2}$ (the left face). We would then continue the process like above, but now in the opposite direction. Starting from the right most right face flux, solving for the center and left face fluxes, then moving to the next cell to the left and using the left face flux from the previous cell as the incoming flux. Again, after the sweep we update $s_i$, and then keep performing sweeps until convergence.
 
-
-
+%
+%
+%
 
 \vspace{10pt}
 \begin{enumerate}[(c)]
 \item at a reflecting boundary on the right edge, including how to transition from $\mu > 0$ to $\mu < 0$.
 \end{enumerate}
 
-If there was a reflecting boundary on the right most edge of the geometry, then the right moving ($\mu>0$) face flux in the right most cell will act as the left incoming flux when we switch to the $\mu < 0$ case. Using the same indexing scheme as above, the right most cell is $i=N$. We would sweep in the $\mu >0$ direction just as we did in part A (needing to be given the incoming flux on the left, $\bar{\psi}_{-1/2}$). Once we reach cell $N$, we would finish by calculating $\psi_{N+1/2}$. This flux would then be used as $\bar{\psi}_{N+1/2}$ (notice the bar) when we move into the $\mu<0$ direction and begin by solving for $\psi_N$. Once we have swept in to the right AND left, we then update $s_i$ and repeat until convergence.
+If there was a reflecting boundary on the right most edge of the geometry, then the right moving ($\mu>0$) face flux in the right most cell will act as the left incoming flux when we switch to the $\mu < 0$ case. Using the same indexing scheme as above, the right most cell is $i=N$. We would sweep in the $\mu >0$ direction just as we did in part A (needing to be given the incoming flux on the left, $\bar{\psi}_{-1/2}$). Once we reach cell $N$, we would finish by calculating $\psi_{N+1/2}$. This flux would then be used as $\bar{\psi}_{N+1/2}$ (notice the bar) when we move into the $\mu<0$ direction and begin by solving for $\psi_N$. Once we have swept to the right AND left, we then update $s_i$ and repeat until convergence.
 
-
-
+%
+%
+%
 
 \vspace{10pt}
 \begin{enumerate}[(d)]
 \item If using the angular flux to generate flux moments during the solution process, what data do you need to store in the sweeping process?
 \end{enumerate}
 
-For each cell, we need to know the incoming flux and the source to calculate the center flux and then subsequently the outgoing flux. So we will need to store the moments of the incoming flux in order to calculate the source moments for that cell. With the incoming flux moments and source moments stored, we can calculate the center flux moments. We can then discard the source moments and use the center flux moments and incoming flux moments to calculate the outgoing flux moments. Once we have the outgoing flux moments stored, we can discard the incoming and center flux moments of that cell and then move on to the next cell, using the previous outgoing flux moments now as the incoming flux moments.
+For each cell, we need to know the incoming flux and the source to calculate the center flux and then subsequently the outgoing flux. So we will need to store the moments of the incoming flux in order to calculate the source moments for that cell. With the incoming flux moments and source moments stored, we can calculate the center flux moments. We can then discard the source moments and use the center flux moments and incoming flux moments to calculate the outgoing flux moments. Once we have the outgoing flux moments stored, we can discard the incoming and center flux moments of that cell and then move on to the next cell, using the previous outgoing flux moments now as the incoming flux moments.\\
+
+In each cell we need to perform three calculations - the source term, the center flux, and the outgoing flux. We do these in order and we only need the incoming flux moments to determine all three. Therefore, for each cell we only need to store the flux moments of the incoming flux into that cell. Once we move to the next cell, we can overwrite those fluxes with the incoming flux in the next cell.
+
+
+
 
 
 
 
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-%\vspace{20pt}
 \newpage
 \noindent \textbf{Problem 2}\\
 Let's look at truncation error in the diamond difference method by examining the 1-D case. Consider uncollided neutrons with a zero group source moving along angle $a$:
@@ -224,37 +236,131 @@ where the cross section is taken as constant.
 \item For neutrons moving $\mu_a > 0$, write an expression for the flux at some location $x'$ in terms of the flux at location $x$ (you should have an exponential).
 \end{enumerate}
 
-...
+The differential equation above is simple enough to solve by hand. First, we rearrange:
+%
+\begin{align*}
+    \frac{d\psi_a(x)}{dx} &= -\frac{\Sigma_t}{\mu_a } \psi_a(x) \\
+    \frac{d\psi_a(x)}{\psi_a(x)} &= -\frac{\Sigma_t}{\mu_a } dx
+\end{align*}
 
+We now integrate both sides:
 
+\begin{align*}
+    \int \frac{d\psi_a(x)}{\psi_a(x)} &= -\frac{\Sigma_t}{\mu_a } \int dx \\
+    \ln(\psi_a(x)) &= -\frac{\Sigma_t}{\mu_a }x + C \\
+    \psi_a(x) &= e^{-\frac{\Sigma_t}{\mu_a }x + C} \\
+    &= e^{-\frac{\Sigma_t}{\mu_a }x}e^C \\
+    &= Ce^{-\frac{\Sigma_t}{\mu_a }x}
+\end{align*}
+
+Now we can write an expression for the flux at $x'$ to the flux at $x$:
+%
+\begin{align*}
+    \frac{\psi_a(x')}{\psi_a(x)} &= \frac{e^{-\frac{\Sigma_t}{\mu_a }x'}}{e^{-\frac{\Sigma_t}{\mu_a }x}} \\
+    &= e^{-\frac{\Sigma_t}{\mu_a }x'} e^{\frac{\Sigma_t}{\mu_a }x} \\
+    &= e^{-\frac{\Sigma_t}{\mu_a }(x' - x)} \\
+    \psi_a(x') &= \psi_a(x)e^{-\frac{\Sigma_t}{\mu_a }(x' - x)}
+\end{align*}
+
+The agrees with intuition (exponential falloff of flux into an absorbing material).
+
+%
+%
+%
+
+\vspace{10pt}
 \begin{enumerate}[(b)]
 \item Let's say we impose a Cartesian grid with mesh index $i$. What is the expression for $\psi_{a,i+1/2}$ in terms of $\psi_{a,i-1/2}$? Use mesh spacing $\Delta_i = x_{i+1/2} - x_{i-1/2}$ and the definition $h \equiv \frac{\Sigma_t \Delta_i}{2|\mu_a|}$.
 \end{enumerate}
 
-...
+To gain more intuition on this problem and to relate it to part A, lets rewrite the given fluxes:
+%
+\begin{align*}
+    \psi_{a,i+1/2} &= \psi_a(x_{i+1/2}) \\
+    \psi_{a,i-1/2} &= \psi_a(x_{i-1/2})
+\end{align*}
 
+Now we see it is easy to substitute into our expression in part A:
+
+\begin{align*}
+     \psi_a(x_{i+1/2}) &= \psi_a(x_{i-1/2})e^{-\frac{\Sigma_t}{\mu_a }(x_{i+1/2} - x_{i-1/2})} \\
+     \Rightarrow \quad \psi_{a,i+1/2} &= \psi_{a,i-1/2}\,\,e^{-\frac{\Sigma_t}{\mu_a }\Delta_i} \\
+     &= \psi_{a,i-1/2}\,\,e^{-\frac{\Sigma_t}{\mu_a }\Delta_i} \\
+     &= \psi_{a,i-1/2}\,\,e^{-2h} \\
+\end{align*}
+
+%
+%
+%
 
 \begin{enumerate}[(c)]
 \item Plug the relationship you just found into the 1D diamond difference equations ($\alpha = 0$). Manipulate those to get another expression for
  $\psi_{a,i+1/2}$ in terms of $\psi_{a,i-1/2}$ and $h$.
 \end{enumerate}
 
-...
+The 1D DD equations are as follows:
+%
+\begin{align*}
+    \mu_a(\psi_{a,i+1/2} - \psi_{a,i-1/2}) + \Sigma_t \Delta_i \psi_i = 0 \\
+    \psi_i = \frac{1}{2}(\psi_{a,i+1/2} + \psi_{a,i-1/2})
+\end{align*}
 
+Plugging in the bottom equation into the top equation we get
+%
+\begin{align*}
+    \psi_{a,i+1/2} - \psi_{a,i-1/2} &= -\frac{\Sigma_t \Delta_i}{2\mu_a} (\psi_{a,i+1/2} + \psi_{a,i-1/2}) \\
+    \psi_{a,i+1/2} - \psi_{a,i-1/2} &= -h (\psi_{a,i+1/2} + \psi_{a,i-1/2}) \\
+    \psi_{a,i+1/2}(1+h) &= \psi_{a,i-1/2}(1-h) \\
+    \Rightarrow \quad \psi_{a,i+1/2} &= \left(\frac{1-h}{1+h}\right)\psi_{a,i-1/2}
+\end{align*}
 
+We did not need to plug in anything from part B... I am not sure why that was suggested.
+
+%
+%
+%
+
+\vspace{10pt}
 \begin{enumerate}[(d)]
 \item Look again at your solution from part b. Expand the exponential in a power series and expand your part c expression in a power series through the $h^2$ terms and show they are the same. What does that mean about the accuracy of the relationship?
 \end{enumerate}
 
-...
+Expanding the exponential term found in part B up to the $h^2$ term, we get:
+%
+\begin{align*}
+    e^{-2h} &\approx \frac{e^{-2h}|_{h=0}}{0!}(h-0)^0 + \frac{-2e^{-2h}|_{h=0}}{1!}(h-0)^1 + \frac{4e^{-2h}|_{h=0}}{2!}(h-0)^2 \\
+    &\approx 1 - 2h + 2h^2
+\end{align*}
 
+And expanding the $\frac{1-h}{1+h}$ from part c, we get:
+%
+\begin{align*}
+    \frac{1-h}{1+h} &\approx \frac{\frac{1-h}{1+h}|_{h=0}}{0!}(h-0)^0 + \frac{-2(1+h)^{-2}|_{h=0}}{1!}(h-0)^1 + \frac{4(1+h)^{-3}|_{h=0}}{2!}(h-0)^2 \\
+    &\approx 1-2h+2h^2
+\end{align*}
 
+We see that they are the same up to $O(h^2)$ in the power series expansions. Therefore the DD scheme is a second order accurate, or $O(h^2)$, method. If we use $h$, we will get some truncation error, $\epsilon$. The second order accuracy tells us that if we use $h/2$ instead of $h$, the truncation error will be $\epsilon/4$. If we use $h/4$, the truncation error will be $\epsilon/16$, and so on.
+
+%
+%
+%
+
+\vspace{10pt}
 \begin{enumerate}[(e)]
 \item Look carefully at the expression for
 $\psi_{a,i+1/2}$. What is a condition on $h$ that would guarantee that the flux would be positive? What does that mean about mesh spacing given the smallest $\mu_a$ in a set and a specific $\Sigma_t$?
 \end{enumerate}
 
-...
+Inspecting the expression for $\psi_{a,i+1/2}$ in part C, we see that the resulting flux will be negative if $h>1$. Therefore to guarantee the flux to be positive, we must enforce that $h\leq1$ when using the DD scheme. It also does not make physical sense to have a negative value for $h$ (by inspection of its definition), so to be explicit, $h$ must be defined on the following domain: $0\leq h \leq 1$. Given the smallest $\mu_a$ and a specific $\Sigma_t$, the mesh spacing, $\Delta_i$, must defined to accommodate the requirement on $h$.
+%
+\begin{align*}
+    h=\frac{\Sigma_t \Delta_i}{2|\mu_a|} \quad \Rightarrow \quad \Delta_i &= \frac{2|\mu_a| h}{\Sigma_t} = \frac{2|\mu_a| [0\rightarrow1]}{\Sigma_t} = [0 \rightarrow \frac{2|\mu_a|}{\Sigma_t}] = [0 \rightarrow 2|\mu_a| \lambda]
+\end{align*}
+
+where $\lambda$ is the mean free path in the material. Therefore we have $0 \leq \Delta_i \leq 2|\mu_a|\lambda$. Which can be very small in highly absorbing media (small mean free path) and with highly anisotropic fluxes where high order $S_N$ is needed (small minimum $|\mu_a|$ values)! With a small $\Delta_i$ (or small $h$), we have many mesh cells and thus the computation time will increase!
+
+
+
 
 
 
@@ -262,7 +368,6 @@ $\psi_{a,i+1/2}$. What is a condition on $h$ that would guarantee that the flux 
 
 
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-%\vspace{20pt}
 \newpage
 \noindent \textbf{Problem 3}\\
 Write a piece of code that implements the 1-D, one-speed, steady state, weighted diamond difference equations; include scattering and an external source. Use $\psi(0) = 2.0$ for $\mu > 0$; non-reentrant boundary condition at $x=0.0$ and a reflecting boundary at $x=2.0$. For this case assume isotropic scattering.
@@ -285,6 +390,10 @@ Plot the cell-centered scalar flux that results from each mesh spacing. What do 
 
 
 
+%
+%
+%
+
 \begin{enumerate}[(b)]
 \item Impact of $\alpha$: try $\alpha = [-0.9, -0.5, 0.25, 0.5, 0.9]$. What happens?
 \end{enumerate}
@@ -292,6 +401,10 @@ Plot the cell-centered scalar flux that results from each mesh spacing. What do 
 ...
 
 
+
+%
+%
+%
 
 \begin{enumerate}[(c)]
 \item Real results? Now try adding a source
@@ -309,6 +422,10 @@ Report the results.
 ...
 
 
+
+%
+%
+%
 
 \begin{enumerate}[(d)]
 \item What happens with $\alpha = 0$ and $\Sigma_s = 0.9$?
