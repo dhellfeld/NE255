@@ -82,13 +82,13 @@ Daniel Hellfeld\\
 \noindent \textbf{Problem 1}\\
 Describe the sweeping process in one dimension (marching through space) along one angle using the diamond difference scheme.\\
 
-$\Rightarrow$ First a short note on the diamond difference (DD) scheme. The DD scheme is a finite volume method which uses a cell-average value solution. As a cell-balance method, this appraoch is essentially a statement of conservation of particles in a mesh cell of interest. For a given time step, energy group, angle, and neutron source, the neutron transport equation can be written as:
+$\Rightarrow$ The diamond difference (DD) scheme is a finite volume method which uses a cell-average value solution. As a cell-balance method, this appraoch is essentially a statement of conservation of particles in a mesh cell of interest. For a given time step, energy group, angle, and neutron source, the neutron transport equation can be written as:
 
-\begin{equation}
+\begin{equation*}
         \hat{\Omega} \cdot \nabla \psi(\vec{r}) + \Sigma_t(\vec{r})\psi(\vec{r}) = s(\vec{r})
-\end{equation}
+\end{equation*}
 
-To arrive at the cell balance equation, we integrate (1) over the mesh cell ($dxdydz$), depicted in Fig.~1.
+To arrive at the cell balance equation, we integrate this over the mesh cell ($dxdydz$), depicted in Fig.~1.
 
 \begin{figure}[htb]
     \centering
@@ -126,7 +126,7 @@ Now we relate the center fluxes ($\psi_{ijk}$) to the edge fluxes ($\psi_{n\pm 1
     \frac{(1+\alpha_i)}{(1-\alpha_i)}\bar{\psi}_{i+1/2}\:,\quad \mu<0 \:(\psi_{i+1/2}\text{ is incoming})
 \end{align*}
 
-where $-1 \leq \alpha \leq 1$ and $\bar{\psi}$ indicate the incoming flux (which will depend on $\mu$). The $\alpha$'s are weighting factors that are set to zero in the DD scheme ($\alpha = \pm 1$ is the step-difference scheme):
+where $-1 \leq \alpha \leq 1$ and $\bar{\psi}$ indicate the incoming flux (which will depend on $\mu$). The $\alpha$'s are weighting factors that are set to zero in the classic DD scheme ($\alpha = \pm 1$ is the step-difference scheme):
 %
 \begin{align*}
 \psi_{i} &= \frac{1}{2}\bigl(\psi_{i+1/2}+\psi_{i-1/2}\bigr)\\
@@ -172,7 +172,7 @@ In this case, our equations become
 \psi_{i\pm1/2} &= 2\psi_{i} - \bar{\psi}_{i\mp1/2}
 \end{align*}
 
-Now to march through the sweeping process for one angle using the DD scheme we would first need to assume some value for the incoming flux on the left most face of our geometry. Let's number our geometry such that the first cell is $i=0$, and the next one to the right is $i=1$, and so on. So we would need to know (or be given) the incoming flux at cell 0, $\bar{\psi}_{-1/2}$. With this we can then solve for $\psi_0$ using the equation above, and then also solve for $\psi_{1/2}$ using $\bar{\psi}_{-1/2}$ and $\psi_0$. With $\psi_{1/2}$ in hand, we could then move to the next cell, $i=1$, set $\psi_{1/2} = \bar{\psi}_{1/2}$ and then solve for $\psi_1$, and then $\psi_{3/2}$. We would then repeat the process of using the left face flux to solve for the center flux, and then using the left and center fluxes together to solve for the right face flux for each cell. We do this in order, moving from the left to the right (in the direction of particle flow). Also, in each cell we are computing the source $s_i$ which very well may depend on the flux. Therefore after the sweep, we would need to update $s_i$ before starting another sweep. We continue the sweeps until we have satisfied some convergence criterion.
+Now to march through the sweeping process for one angle using the DD scheme we would first need to assume some value for the incoming flux on the left most face of our geometry. Let's number our geometry such that the first cell is $i=0$, and the next one to the right is $i=1$, and so on. So we would need to know (or be given) the incoming flux at cell 0, $\bar{\psi}_{-1/2}$. With this we can then solve for $\psi_0$ using the equation above, and then also solve for $\psi_{1/2}$ using $\bar{\psi}_{-1/2}$ and $\psi_0$. With $\psi_{1/2}$ in hand, we could then move to the next cell, $i=1$, set $\bar{\psi}_{1/2} = \psi_{1/2}$ and then solve for $\psi_1$, and then $\psi_{3/2}$. We would then repeat the process of using the left face flux to solve for the center flux, and then using the left and center fluxes together to solve for the right face flux for each cell. We do this in order, moving from the left to the right (in the direction of particle flow). Also, in each cell we are computing the source $s_i$ which very well may depend on the flux. Therefore after the sweep, we would need to update $s_i$ before starting another sweep. We continue the sweeps until we have satisfied some convergence criterion.
 
 %
 %
@@ -201,7 +201,9 @@ The only difference now is that in order to calculate the center flux, we need t
 \item at a reflecting boundary on the right edge, including how to transition from $\mu > 0$ to $\mu < 0$.
 \end{enumerate}
 
-If there was a reflecting boundary on the right most edge of the geometry, then the right moving ($\mu>0$) face flux in the right most cell will act as the left incoming flux when we switch to the $\mu < 0$ case. Using the same indexing scheme as above, the right most cell is $i=N$. We would sweep in the $\mu >0$ direction just as we did in part A (needing to be given the incoming flux on the left, $\bar{\psi}_{-1/2}$). Once we reach cell $N$, we would finish by calculating $\psi_{N+1/2}$. This flux would then be used as $\bar{\psi}_{N+1/2}$ (notice the bar) when we move into the $\mu<0$ direction and begin by solving for $\psi_N$. Once we have swept to the right AND left, we then update $s_i$ and repeat until convergence.
+If there was a reflecting boundary on the right most edge of the geometry, then the right moving ($\mu>0$) face flux in the right most cell will act as the left incoming flux when we switch to the $\mu < 0$ case. Using the same indexing scheme as above, the right most cell is $i=N$. We would sweep in the $\mu >0$ direction just as we did in part A (needing to be given the incoming flux on the left, $\bar{\psi}_{-1/2}$). Once we reach cell $N$, we would finish by calculating $\psi_{N+1/2}$. This flux would then be used as $\bar{\psi}_{N+1/2}$ (notice the bar) when we move into the $\mu<0$ direction and begin by solving for $\psi_N$. Once we have swept to the right AND left, we then update $s_i$ and repeat until convergence.\\
+
+What if we have multiple angles in each direction? The above case would only work if we performed our sweep for each angle individually and the reflecting boundary reflected the particles from $\mu_1$ to $-\mu_1$. This is not always the case (some reflectors can exhibit an isotropic reflection, $\mu_1$ can reflect to $-\mu_1,\,\,-\mu_2$, etc.)
 
 %
 %
@@ -244,7 +246,7 @@ The differential equation above is simple enough to solve by hand. First, we rea
 \end{align*}
 
 We now integrate both sides:
-
+%
 \begin{align*}
     \int \frac{d\psi_a(x)}{\psi_a(x)} &= -\frac{\Sigma_t}{\mu_a } \int dx \\
     \ln(\psi_a(x)) &= -\frac{\Sigma_t}{\mu_a }x + C \\
@@ -281,7 +283,7 @@ To gain more intuition on this problem and to relate it to part A, lets rewrite 
 \end{align*}
 
 Now we see it is easy to substitute into our expression in part A:
-
+%
 \begin{align*}
      \psi_a(x_{i+1/2}) &= \psi_a(x_{i-1/2})e^{-\frac{\Sigma_t}{\mu_a }(x_{i+1/2} - x_{i-1/2})} \\
      \Rightarrow \quad \psi_{a,i+1/2} &= \psi_{a,i-1/2}\,\,e^{-\frac{\Sigma_t}{\mu_a }\Delta_i} \\
@@ -424,7 +426,7 @@ The above method was implemented in Python for each mesh spacing and the code is
     \label{fig2}
 \end{figure}
 
-We see that the right moving angular flux has an exponential fall off as expected. The flux is quite small by the time it reaches the reflecting boundary, so the left moving angular flux is essentially zero in all cells. In the scalar flux case, we simply add the two angular flux values together (their weights are equal to 1), and since the left moving angular flux is essentially zero, we see the scalar flux is about the same as the right moving angular flux. Now the most important thing to notice is that the flux (in both angular and scalar) goes negative in the $\Delta_i = 0.4$ case. In the previous problem, we derived that $\Delta_i$ must be less than or equal to $\frac{2|\mu|}{\Sigma_t}$, which in this case is equal to 0.2. In the only case in which this is violated ($\Delta_i = 0.4$), we see this to be true. This agrees with out conclusion from the previous problem.
+We see that the right moving angular flux has an exponential fall off as expected. The flux is quite small by the time it reaches the reflecting boundary, so the left moving angular flux is essentially zero in all cells. In the scalar flux case, we simply add the two angular flux values together (their weights are equal to 1), and since the left moving angular flux is essentially zero, we see the scalar flux is about the same as the right moving angular flux. Now the most important thing to notice is that the flux (in both angular and scalar) goes negative in the $\Delta_i = 0.4$ case. In the previous problem, we derived that $\Delta_i$ must be less than or equal to $\frac{2|\mu|}{\Sigma_t}$ to avoid negative flux, which in this case is equal to 0.2. This is violated  when $\Delta_i = 0.4$, and thus our calculation indeed results in a negative flux value. This agrees with our conclusion from the previous problem.
 
 %
 %
@@ -437,7 +439,7 @@ We see that the right moving angular flux has an exponential fall off as expecte
 
 We use the same code as above, but we now vary $\alpha$. The results are shown in Figs.~3-7. \\
 
-For $\alpha=-0.9$, we observe positive and negative fluxes for mesh spacings greater than 0.1. For a mesh spacing of 0.1, the flux seems to drop off rather quickly near the left boundary. The smallest mesh spacing (0.08) seems to produce a reasonable looking flux. For $\alpha=-0.5$, we again observe positive and negative fluxes, but now only for mesh spacings greater than 0.12. The flux also exhibits the quick exponential fall-off for mesh spacing smaller than 0.12, but it begins to look more reasonable as the mesh spacing is decreased further. For $\alpha=0.25$, only a mesh spacing of 0.4 produces negative flux values. And again, the flux begins to look more reasonable as the mesh spacing is decreased further. For $\alpha=0.5$, we no longer have any negative fluxes and the flux looks more reasonable as the mesh spacing is decreased (only have a quick fall off for a mesh spacing of 0.4). For $\alpha=0.9$, we no longer have any negative fluxes and the flux looks more reasonable as the mesh spacing is decreased (looks smoother than $\alpha=0.5$ for all mesh spacings).\\
+For $\alpha=-0.9$, we observe positive and negative fluxes for mesh spacings greater than 0.1. For a mesh spacing of 0.1, the flux seems to drop off rather quickly near the left boundary. The smallest mesh spacing (0.08) seems to produce a reasonable looking flux. For $\alpha=-0.5$, we again observe positive and negative fluxes, but now only for mesh spacings greater than 0.12. The flux also exhibits the quick exponential fall-off for mesh spacing smaller than 0.12, but it begins to look more reasonable as the mesh spacing is decreased further. For $\alpha=0.25$, only a mesh spacing of 0.4 produces negative flux values. And again, the flux begins to look more reasonable as the mesh spacing is decreased further. For $\alpha=0.5$, we no longer have any negative fluxes and the flux looks more reasonable as the mesh spacing is decreased (only have a quick fall off for a mesh spacing of 0.4). For $\alpha=0.9$, we no longer have any negative fluxes and the flux looks more reasonable as the mesh spacing is decreased (it also looks smoother than $\alpha=0.5$ for all mesh spacings).\\
 
 It seems that as we increase the value of $\alpha$, we start to improve the behavior for large mesh spacings. This is good because in the instance where large meshing is needed (to reduce computational time), we can introduce a large positive value of $\alpha$ to assist in better reconstructing the flux (at least for the parameters we are using here).
 
@@ -493,16 +495,16 @@ It seems that as we increase the value of $\alpha$, we start to improve the beha
 Report the results.
 \end{enumerate}
 
-Now we wish to include scattering, an external source, as well as more angles. Let's first consider scattering. We can use the quadrature to evaluate the integral over angle, but now we have 4 angles and thus to keep the same normalization as before (=2), each equiprobable weight will now be 0.5. Therefore our scattering source will in each mesh cell $i$ will be given by
-
+Now we wish to include scattering, an external source, and more angles. Let's first consider scattering. We can use the quadrature to evaluate the integral over angle, but now we have 4 angles and thus to keep the same normalization as before (= 2), each equiprobable weight will now be 0.5. Therefore our scattering source in each mesh cell $i$ will be given by
+%
 \begin{align*}
     \sum_\mu w_\mu \Sigma_s \psi_i(\mu) = \frac{\Sigma_s}{2}\left[\psi_i(-0.7) + \psi_i(-0.2) + \psi_i(0.2) + \psi_i(0.7)\right]
 \end{align*}
 
-In each sweep we now calculate $s_i$ and we also now calculate the angular flux for both angles (in both directions). Once we do a full sweep (right and left), we then update the source term with the newly calculated angular flux values. At each step we also calculate the scalar flux with our new quadrature weights and then we use the $l_2$ norm of the difference between the current scalar flux and the previous scalar flux as a convergence criterion. Once we have satisfied:
+In each sweep we now calculate $s_i$ and we also now calculate the angular flux for both angles (in both directions). We will need to assume some initial values of the angular flux when we first calculate the scattering source (I will assume a value of 1 in all cells and all directions). Once we do a full sweep (right and left), we then update the source term with the newly calculated angular flux values. After each sweep (right and left) we also calculate the scalar flux with our new quadrature weights. As we iterate through the sweeps and update the flux, we need to define a convergence criterion to eventually stop our calculation. My first attempt is to use the $l_2$ norm of the difference between the current scalar flux and the previous scalar flux. Once we have satisfied:
 %
 \begin{align*}
-    || \phi^k - \phi^{k-1} ||_{l_2} < 0.001
+    || \phi^k - \phi^{k-1} ||_{l_2} < 10^{-4}
 \end{align*}
 
 we stop the calculation and plot the results. The modified code is shown below, and the results using the three different values of $\alpha$ are shown in Figs.~8-10.
@@ -530,16 +532,19 @@ we stop the calculation and plot the results. The modified code is shown below, 
     \label{fig10}
 \end{figure}
 
+\newpage
+We see that the value of $\alpha$ did not make much of a difference in the results. But it did however have an effect on the required number of iterations before convergence (at least moving away from $\alpha = -0.5$).
+
 %
 %
 %
 
-\newpage
+\vspace{10pt}
 \begin{enumerate}[(d)]
 \item What happens with $\alpha = 0$ and $\Sigma_s = 0.9$?
 \end{enumerate}
 
-If we rerun the above code with these inputs, Python indicates that an overflow has occurred. If we profile the code a bit, we see that the flux keeps increasing with every iteration. The values eventually get larger than the declared variable type can handle, thus it reports an overflow. With scattering essentially being the only interaction ($\Sigma_s$ close to $\Sigma_t$), we are unable to converge on a flux solution.
+If we rerun the above code with these inputs, Python indicates that an overflow has occurred. If we profile the code a bit, we see that the flux keeps increasing with every iteration. The values eventually get larger than the declared variable type can handle, thus it reports an overflow. With scattering essentially being the only interaction ($\Sigma_s$ close to $\Sigma_t$), it seems we are unable to converge on a flux solution.
 
 
 

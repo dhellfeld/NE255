@@ -7,10 +7,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Define variables
-a = 0.0 # -0.5, 0.0, 0.5
+a = 0.5    # -0.5, 0.0, 0.5
 mu = np.asarray([0.2,0.7,-0.2,-0.7])
 sig_t = 1.0
-sig_s = 0.9
+sig_s = 0.5
 q = 1.0
 d_array = np.asarray([0.4,0.2,0.125,0.1,0.08])
 weight = np.asarray([0.5,0.5,0.5,0.5])   # (made up quaderature set, equiprobable, normalized to 2)
@@ -24,11 +24,11 @@ for d in d_array:
     x = np.linspace((d/2.), 2.-(d/2.),N)   # get center points for plotting
 
     # Initialize center fluxes arrays (2D now b/c two angles)
-    psi_cent_right = np.zeros((N,2))
-    psi_cent_left  = np.zeros((N,2))
+    psi_cent_right = np.ones((N,2))
+    psi_cent_left  = np.ones((N,2))
+    phi = np.zeros(N)
     psi_cent_right_new = np.zeros((N,2))
     psi_cent_left_new  = np.zeros((N,2))
-    phi = np.zeros(N)
     phi_new = np.zeros(N)
 
     # Iterate
@@ -37,8 +37,8 @@ for d in d_array:
     while (converge == False):
 
         # Boundary condition
-        psi_in = np.asarray([2.,2.])
-        psi_out = np.asarray([0.,0.])
+        psi_in  = np.asarray([2.,2.])
+        psi_out = np.asarray([1.,1.])
 
         # Sweep in mu > 0 (right)
         for i in range(int(N)):
@@ -50,8 +50,7 @@ for d in d_array:
             psi_out[0] = ((2. / (1.+a)) * psi_cent_right[i,0]) - ((1.-a)/(1.+a))*psi_in[0]
             psi_out[1] = ((2. / (1.+a)) * psi_cent_right[i,1]) - ((1.-a)/(1.+a))*psi_in[1]
 
-            psi_in[0] = psi_out[0]
-            psi_in[1] = psi_out[1]
+            psi_in = psi_out
 
         # Sweep in mu < 0 (left)
         for i in range(int(N)):
@@ -63,25 +62,25 @@ for d in d_array:
             psi_out[0] = ((2./(1.-a)) * psi_cent_left[N-i-1,0]) - ((1.+a)/(1.-a))*psi_in[0]
             psi_out[1] = ((2./(1.-a)) * psi_cent_left[N-i-1,1]) - ((1.+a)/(1.-a))*psi_in[1]
 
-            psi_in[0] = psi_out[0]
-            psi_in[1] = psi_out[1]
+            psi_in = psi_out
 
         # Calculate scalar flux from angular flux (quaderature)
         phi_new = weight[0]*psi_cent_right_new[:,0] + weight[1]*psi_cent_right_new[:,1] + weight[2]*psi_cent_left_new[:,0] + weight[3]*psi_cent_left_new[:,1]
 
-        # Calculate convergence criterion
+        # Calculate convergence criterion (l2 norm of differences)
         crit = np.sqrt(np.sum((phi_new - phi)**2))
+
+        # Check convergence
+        if (crit < 0.0001):
+            converge = True
 
         # Update fluxes
         psi_cent_right = psi_cent_right_new
         psi_cent_left = psi_cent_left_new
         phi = phi_new
 
-        # Check convergence
-        if (crit < 0.001):
-            converge = True
-        else:
-            itr += 1
+        # Increment iteration number
+        itr += 1
 
     # How many iterations did we do?
     print '(mesh spacing = %.3f) Number of iterations = %i' % (d,itr)

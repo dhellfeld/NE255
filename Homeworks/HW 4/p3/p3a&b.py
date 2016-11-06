@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Define variables
-a = 0.0   # -0.9, -0.5, 0, 0.25, 0.5, 0.9
+a = 0.0     # -0.9, -0.5, 0, 0.25, 0.5, 0.9
 mu = np.asarray([0.1,-0.1])
 sig_t = 1.0
 d_array = np.asarray([0.4,0.2,0.125,0.1,0.08])
