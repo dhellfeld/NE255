@@ -186,7 +186,7 @@ Now to march through the sweeping process for one angle using the DD scheme we w
 In this case, our equations become
 %
 \begin{align*}
-\psi_{i} &= \frac{s_{i} + \frac{2\mu}{\Delta i}\bar{\psi}_{i+1/2}}{\Sigma_{t,i} + \frac{2\mu}{\Delta i}} \\
+\psi_{i} &= \frac{s_{i} + \frac{2|\mu|}{\Delta i}\bar{\psi}_{i+1/2}}{\Sigma_{t,i} + \frac{2|\mu|}{\Delta i}} \\
 \psi_{i\pm1/2} &= 2\psi_{i} - \bar{\psi}_{i\mp1/2}
 \end{align*}
 
@@ -370,7 +370,32 @@ where $\lambda$ is the mean free path in the material. Therefore we have $0 \leq
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \newpage
 \noindent \textbf{Problem 3}\\
-Write a piece of code that implements the 1-D, one-speed, steady state, weighted diamond difference equations; include scattering and an external source. Use $\psi(0) = 2.0$ for $\mu > 0$; non-reentrant boundary condition at $x=0.0$ and a reflecting boundary at $x=2.0$. For this case assume isotropic scattering.
+Write a piece of code that implements the 1-D, one-speed, steady state, weighted diamond difference equations; include scattering and an external source. Use $\psi(0) = 2.0$ for $\mu > 0$; non-reentrant boundary condition at $x=0.0$ and a reflecting boundary at $x=2.0$. For this case assume isotropic scattering.\\
+
+$\Rightarrow$ The 1-D, one-speed, steady-state, DD equations are given by:
+%
+\begin{align*}
+    \psi_i &= \frac{s_i + \frac{2}{(1\pm\alpha_i)}\frac{|\mu|}{\Delta_i}\bar{\psi}_{i\mp1/2}}{\Sigma_{t,i} + \frac{2}{(1\pm\alpha_i)}\frac{|\mu|}{\Delta_i}}\\
+    \psi_{i\pm1/2} &= \frac{2}{(1\pm\alpha_i)}\psi_{ijk}-\frac{(1\mp\alpha_i)}{(1\pm\alpha_i)}\bar{\psi}_{i\mp1/2}
+\end{align*}
+
+for $\mu\gtrless0$ and where $s_i$ includes the scattering and external source, given by:
+%
+\begin{align*}
+    s_i &= q_{e,i} + \int_{-1}^1 d\mu' \Sigma_s(\mu'\rightarrow \mu) \psi_i(\mu') \\
+    &\approx q_{e,i} + \sum_\mu w_\mu \Sigma_s \psi_i(\mu)
+\end{align*}
+
+where $q_{e,i}$ is the external source and $w_\mu$ is the quadrature weight for direction $\mu$. We are interesting in the scalar flux, which is given by:
+%
+\begin{align*}
+    \phi &= \int_{-1}^1 d\mu \psi_i(\mu) \\
+    &\approx \sum_\mu w_\mu \psi_i(\mu)
+\end{align*}
+
+%
+%
+%
 
 \begin{enumerate}[(a)]
 \item Explore negative flux: use the following values
@@ -381,26 +406,75 @@ Write a piece of code that implements the 1-D, one-speed, steady state, weighted
 \item $\Sigma_t$ = 1.0
 \item $\Sigma_s$ = 0
 \item $q_e(x)$ = 0
-\item mesh spacings: $h = [0.08, 0.1, 0.125, 0.2, 0.4]$.
+\item mesh spacings: $\Delta_i = [0.08, 0.1, 0.125, 0.2, 0.4]$.
 \end{itemize}
 Plot the cell-centered scalar flux that results from each mesh spacing. What do you notice? How does that compare with your conclusion from the previous problem?
 \end{enumerate}
 
-...
+$\Rightarrow$ In this case, the problem is greatly simplified. We do not need to concern ourselves with the source at all. Therefore we only need to perform one sweep (to the right and then left). Beginning with the boundary condition of $\psi(0) = 2$, we can solve for the center flux of the first mesh cell, and then subsequently the outgoing flux from that cell (all with $\mu >0$). We then set the outgoing flux as the incoming flux of the next cell and repeat for all cells until we reach the reflecting boundary at $x=2$. At this point, the outgoing flux in the $\mu>0$ direction becomes the incoming flux in the $\mu<0$ direction. We then solve for the center and outgoing flux and march through the mesh cells in the left direction. After the sweep is done, we will have an array of center flux values (angular flux). We then use our quadrature rule to integrate over direction to get the scalar flux. In this case we use an equiprobable quadrature set that is normalized to 2 (as suggested by Prof.~Slaybaugh, this will lead to cancelations later on). We only have two directions in this case, so each weight, $w_\mu$ is equal to 1.\\
 
+The above method was implemented in Python for each mesh spacing and the code is shown below. The results of the center angular flux and center scalar flux in each mesh cell is shown in Fig.~2. The code is able to handle non-zero values of $\alpha$, therefore this same code was used for part B below. \\
 
+\lstinputlisting[language=Python]{../p3/p3a&b.py}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Figures/FluxProfile_a=0}
+    \caption{Center angular and scalar flux profiles for varying mesh spacings with $\alpha = 0$, and no scattering or external source.}
+    \label{fig2}
+\end{figure}
+
+We see that the right moving angular flux has an exponential fall off as expected. The flux is quite small by the time it reaches the reflecting boundary, so the left moving angular flux is essentially zero in all cells. In the scalar flux case, we simply add the two angular flux values together (their weights are equal to 1), and since the left moving angular flux is essentially zero, we see the scalar flux is about the same as the right moving angular flux. Now the most important thing to notice is that the flux (in both angular and scalar) goes negative in the $\Delta_i = 0.4$ case. In the previous problem, we derived that $\Delta_i$ must be less than or equal to $\frac{2|\mu|}{\Sigma_t}$, which in this case is equal to 0.2. In the only case in which this is violated ($\Delta_i = 0.4$), we see this to be true. This agrees with out conclusion from the previous problem.
 
 %
 %
 %
 
+\vspace{10pt}
 \begin{enumerate}[(b)]
 \item Impact of $\alpha$: try $\alpha = [-0.9, -0.5, 0.25, 0.5, 0.9]$. What happens?
 \end{enumerate}
 
-...
+We use the same code as above, but we now vary $\alpha$. The results are shown in Figs.~3-7. \\
 
+For $\alpha=-0.9$, we observe positive and negative fluxes for mesh spacings greater than 0.1. For a mesh spacing of 0.1, the flux seems to drop off rather quickly near the left boundary. The smallest mesh spacing (0.08) seems to produce a reasonable looking flux. For $\alpha=-0.5$, we again observe positive and negative fluxes, but now only for mesh spacings greater than 0.12. The flux also exhibits the quick exponential fall-off for mesh spacing smaller than 0.12, but it begins to look more reasonable as the mesh spacing is decreased further. For $\alpha=0.25$, only a mesh spacing of 0.4 produces negative flux values. And again, the flux begins to look more reasonable as the mesh spacing is decreased further. For $\alpha=0.5$, we no longer have any negative fluxes and the flux looks more reasonable as the mesh spacing is decreased (only have a quick fall off for a mesh spacing of 0.4). For $\alpha=0.9$, we no longer have any negative fluxes and the flux looks more reasonable as the mesh spacing is decreased (looks smoother than $\alpha=0.5$ for all mesh spacings).\\
 
+It seems that as we increase the value of $\alpha$, we start to improve the behavior for large mesh spacings. This is good because in the instance where large meshing is needed (to reduce computational time), we can introduce a large positive value of $\alpha$ to assist in better reconstructing the flux (at least for the parameters we are using here).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{Figures/FluxProfile_a=-09}
+    \caption{Center angular and scalar flux profiles for varying mesh spacings with $\alpha = -0.9$, and no scattering or external source.}
+    \label{fig3}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{Figures/FluxProfile_a=-05}
+    \caption{Center angular and scalar flux profiles for varying mesh spacings with $\alpha = -0.5$, and no scattering or external source.}
+    \label{fig4}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{Figures/FluxProfile_a=025}
+    \caption{Center angular and scalar flux profiles for varying mesh spacings with $\alpha = 0.25$, and no scattering or external source.}
+    \label{fig5}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{Figures/FluxProfile_a=05}
+    \caption{Center angular and scalar flux profiles for varying mesh spacings with $\alpha = 0.5$, and no scattering or external source.}
+    \label{fig6}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{Figures/FluxProfile_a=09}
+    \caption{Center angular and scalar flux profiles for varying mesh spacings with $\alpha = 0.9$, and no scattering or external source.}
+    \label{fig7}
+\end{figure}
 
 %
 %
@@ -411,7 +485,7 @@ Plot the cell-centered scalar flux that results from each mesh spacing. What do 
 \begin{itemize}
 \setlength\itemsep{0em}
 \item $\alpha = [-0.5, 0, 0.5]$ (feel free to try others)
-\item $\mu$ = $\pm$[0.2, 0.7] (use 0.2 for the $\alpha$ studies and then choose one $alpha$ to use with 3 angles); for simplicity just use equi-probable weights to get scalar flux from angular flux (note: this is not a real quadrature set)
+\item $\mu$ = $\pm$[0.2, 0.7] %(use 0.2 for the $\alpha$ studies and then choose one $alpha$ to use with 3 angles); for simplicity just use equiprobable weights to get scalar flux from angular flux (note: this is not a real quadrature set)
 \item $\Sigma_t$ = 1.0
 \item $\Sigma_s$ = 0.5
 \item $q_e(x)$ = 1.0
@@ -419,19 +493,53 @@ Plot the cell-centered scalar flux that results from each mesh spacing. What do 
 Report the results.
 \end{enumerate}
 
-...
+Now we wish to include scattering, an external source, as well as more angles. Let's first consider scattering. We can use the quadrature to evaluate the integral over angle, but now we have 4 angles and thus to keep the same normalization as before (=2), each equiprobable weight will now be 0.5. Therefore our scattering source will in each mesh cell $i$ will be given by
 
+\begin{align*}
+    \sum_\mu w_\mu \Sigma_s \psi_i(\mu) = \frac{\Sigma_s}{2}\left[\psi_i(-0.7) + \psi_i(-0.2) + \psi_i(0.2) + \psi_i(0.7)\right]
+\end{align*}
 
+In each sweep we now calculate $s_i$ and we also now calculate the angular flux for both angles (in both directions). Once we do a full sweep (right and left), we then update the source term with the newly calculated angular flux values. At each step we also calculate the scalar flux with our new quadrature weights and then we use the $l_2$ norm of the difference between the current scalar flux and the previous scalar flux as a convergence criterion. Once we have satisfied:
+%
+\begin{align*}
+    || \phi^k - \phi^{k-1} ||_{l_2} < 0.001
+\end{align*}
+
+we stop the calculation and plot the results. The modified code is shown below, and the results using the three different values of $\alpha$ are shown in Figs.~8-10.
+
+\lstinputlisting[language=Python]{../p3/p3c&d.py}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{Figures/FluxProfile_a=-05_source}
+    \caption{Center angular and scalar flux profiles for varying mesh spacings with $\alpha = -0.5$, with scattering ($\Sigma_s = 0.5$) and external source ($q_e=1$).}
+    \label{fig8}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{Figures/FluxProfile_a=0_source}
+    \caption{Center angular and scalar flux profiles for varying mesh spacings with $\alpha = 0$, with scattering ($\Sigma_s = 0.5$) and external source ($q_e=1$).}
+    \label{fig9}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{Figures/FluxProfile_a=05_source}
+    \caption{Center angular and scalar flux profiles for varying mesh spacings with $\alpha = 0.5$, with scattering ($\Sigma_s = 0.5$) and external source ($q_e=1$).}
+    \label{fig10}
+\end{figure}
 
 %
 %
 %
 
+\newpage
 \begin{enumerate}[(d)]
 \item What happens with $\alpha = 0$ and $\Sigma_s = 0.9$?
 \end{enumerate}
 
-...
+If we rerun the above code with these inputs, Python indicates that an overflow has occurred. If we profile the code a bit, we see that the flux keeps increasing with every iteration. The values eventually get larger than the declared variable type can handle, thus it reports an overflow. With scattering essentially being the only interaction ($\Sigma_s$ close to $\Sigma_t$), we are unable to converge on a flux solution.
 
 
 
