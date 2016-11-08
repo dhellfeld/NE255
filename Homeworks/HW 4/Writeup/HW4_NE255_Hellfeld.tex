@@ -88,7 +88,7 @@ $\Rightarrow$ The diamond difference (DD) scheme is a finite volume method which
         \hat{\Omega} \cdot \nabla \psi(\vec{r}) + \Sigma_t(\vec{r})\psi(\vec{r}) = s(\vec{r})
 \end{equation*}
 
-To arrive at the cell balance equation, we integrate this over the mesh cell ($dxdydz$), depicted in Fig.~1.
+To arrive at the cell balance equation, we integrate this over the mesh cell ($dV = dxdydz$), depicted in Fig.~1, and divide by the total volume.
 
 \begin{figure}[htb]
     \centering
@@ -101,22 +101,22 @@ First we state a few useful definitions:
 %
 \begin{gather*}
      \hat{\Omega} = \mu\hat{x} + \eta\hat{y} + \xi\hat{z} \\
-     \iiint = \int_{z_{i - 1/2}}^{z_{i + 1/2}} \int_{y_{i - 1/2}}^{y_{i + 1/2}} \int_{x_{i - 1/2}}^{x_{i + 1/2}} \\
+     \iiint = \int_{z_{k - 1/2}}^{z_{k + 1/2}} \int_{y_{j - 1/2}}^{y_{j + 1/2}} \int_{x_{i - 1/2}}^{x_{i + 1/2}} \\
      dV = dxdydz \\
-     \Delta_i = x_{i + 1/2 } - x_{i - 1/2} \\
-     \Delta_j = y_{i + 1/2 } - y_{i - 1/2} \\
-     \Delta_k = z_{i + 1/2 } - z_{i - 1/2}
+     \Delta_i = x_{i + 1/2 } - x_{i - 1/2} = \\
+     \Delta_j = y_{j + 1/2 } - y_{j - 1/2} \\
+     \Delta_k = z_{k + 1/2 } - z_{k - 1/2}
 \end{gather*}
 
 Now, we integrate over the mesh cell and divide by the volume of the mesh cell ($V_c = \Delta_i\Delta_j\Delta_k$)
 %
 \begin{align*}
     \frac{1}{V_c}\iiint \left( \mu \frac{\partial}{\partial x} \psi(\vec{r}) + \eta \frac{\partial}{\partial x} \psi(\vec{r})  +\xi \frac{\partial}{\partial x} \psi(\vec{r})  + \Sigma_t(\vec{r}) \psi(\vec{r}) \right) dV &= \frac{1}{V_c}\iiint s(\vec{r}) dV \\
-    \frac{\Delta_j\Delta_k}{V_c} \mu \int_{x_{i - 1/2}}^{x_{i + 1/2}} \partial \psi  + \frac{\Delta_i\Delta_k}{V_c} \eta \int_{y_{i - 1/2}}^{y_{i + 1/2}} \partial \psi + \frac{\Delta_i\Delta_j}{V_c} \xi \int_{z_{i - 1/2}}^{z_{i + 1/2}} \partial \psi + \Sigma_{t,i,j,k}\psi_{ijk} &= s_{ijk}  \\
+    \frac{\Delta_j\Delta_k}{V_c} \mu \int_{x_{i - 1/2}}^{x_{i + 1/2}} \partial \psi  + \frac{\Delta_i\Delta_k}{V_c} \eta \int_{y_{j - 1/2}}^{y_{j + 1/2}} \partial \psi + \frac{\Delta_i\Delta_j}{V_c} \xi \int_{z_{k - 1/2}}^{z_{k + 1/2}} \partial \psi + \Sigma_{t,i,j,k}\psi_{ijk} &= s_{ijk}  \\
     \frac{\mu}{\Delta_i} (\psi_{i+1/2} - \psi_{i-1/2} ) + \frac{\eta}{\Delta_j} (\psi_{j+1/2} - \psi_{j-1/2} ) + \frac{\xi}{\Delta_k} (\psi_{k+1/2} - \psi_{k-1/2} ) + \Sigma_{t,i,j,k}\psi_{ijk} &= s_{ijk}
 \end{align*}
 
-Now we relate the center fluxes ($\psi_{ijk}$) to the edge fluxes ($\psi_{n\pm 1/2}$) and close the above equation with a weighted average of the edge fluxes:
+Now we relate the center fluxes ($\psi_{i}$) to the edge fluxes ($\psi_{i\pm 1/2}$) and close the above equation with a weighted average of the edge fluxes. We show this in just one dimension ($x$) here for brevity. 
 %
 \begin{align*}
 \psi_{i} &= \frac{1}{2}\bigl((1+\alpha_i)\psi_{i+1/2}+(1-\alpha_i)\psi_{i-1/2}\bigr)\\
@@ -134,7 +134,7 @@ where $-1 \leq \alpha \leq 1$ and $\bar{\psi}$ indicate the incoming flux (which
 \psi_{i-1/2} &= 2\psi_{ijk} - \bar{\psi}_{i+1/2}\:,\quad \mu<0 \:(\psi_{i+1/2}\text{ is incoming})
 \end{align*}
 
-We substitute this into the cell balance transport equation and rearrange to arrive at the following set of equations:
+We substitute this into the cell balance transport equation (for all three dimensions) and rearrange to arrive at the following set of equations:
 %
 \begin{align*}
     \psi_{ijk} &= \frac{s_{ijk} +
@@ -169,7 +169,7 @@ In this case, our equations become
 %
 \begin{align*}
 \psi_{i} &= \frac{s_{i} + \frac{2\mu}{\Delta i}\bar{\psi}_{i-1/2}}{\Sigma_{t,i} + \frac{2\mu}{\Delta i}} \\
-\psi_{i\pm1/2} &= 2\psi_{i} - \bar{\psi}_{i\mp1/2}
+\psi_{i +1/2} &= 2\psi_{i} - \bar{\psi}_{i - 1/2}
 \end{align*}
 
 Now to march through the sweeping process for one angle using the DD scheme we would first need to assume some value for the incoming flux on the left most face of our geometry. Let's number our geometry such that the first cell is $i=0$, and the next one to the right is $i=1$, and so on. So we would need to know (or be given) the incoming flux at cell 0, $\bar{\psi}_{-1/2}$. With this we can then solve for $\psi_0$ using the equation above, and then also solve for $\psi_{1/2}$ using $\bar{\psi}_{-1/2}$ and $\psi_0$. With $\psi_{1/2}$ in hand, we could then move to the next cell, $i=1$, set $\bar{\psi}_{1/2} = \psi_{1/2}$ and then solve for $\psi_1$, and then $\psi_{3/2}$. We would then repeat the process of using the left face flux to solve for the center flux, and then using the left and center fluxes together to solve for the right face flux for each cell. We do this in order, moving from the left to the right (in the direction of particle flow). Also, in each cell we are computing the source $s_i$ which very well may depend on the flux. Therefore after the sweep, we would need to update $s_i$ before starting another sweep. We continue the sweeps until we have satisfied some convergence criterion.
@@ -187,7 +187,7 @@ In this case, our equations become
 %
 \begin{align*}
 \psi_{i} &= \frac{s_{i} + \frac{2|\mu|}{\Delta i}\bar{\psi}_{i+1/2}}{\Sigma_{t,i} + \frac{2|\mu|}{\Delta i}} \\
-\psi_{i\pm1/2} &= 2\psi_{i} - \bar{\psi}_{i\mp1/2}
+\psi_{i - 1/2} &= 2\psi_{i} - \bar{\psi}_{i + 1/2}
 \end{align*}
 
 The only difference now is that in order to calculate the center flux, we need to use the right face flux. Once we have the right and center fluxes, we can then solve for the left face flux. To start the sweep, we would need to assume (or be given) some value for the right-most right face flux. If we have a total of $N$ cells, then we would need to know $\bar{\psi}_{N+1/2}$. With this we would solve for $\psi_N$, and then for $\psi_{N-1/2}$ (the left face). We would then continue the process like above, but now in the opposite direction. Starting from the right most right face flux, solving for the center and left face fluxes, then moving to the next cell to the left and using the left face flux from the previous cell as the incoming flux. Again, after the sweep we update $s_i$, and then keep performing sweeps until convergence.
@@ -198,7 +198,7 @@ The only difference now is that in order to calculate the center flux, we need t
 
 \vspace{10pt}
 \begin{enumerate}[(c)]
-\item at a reflecting boundary on the right edge, including how to transition from $\mu > 0$ to $\mu < 0$.
+\item At a reflecting boundary on the right edge, including how to transition from $\mu > 0$ to $\mu < 0$.
 \end{enumerate}
 
 If there was a reflecting boundary on the right most edge of the geometry, then the right moving ($\mu>0$) face flux in the right most cell will act as the left incoming flux when we switch to the $\mu < 0$ case. Using the same indexing scheme as above, the right most cell is $i=N$. We would sweep in the $\mu >0$ direction just as we did in part A (needing to be given the incoming flux on the left, $\bar{\psi}_{-1/2}$). Once we reach cell $N$, we would finish by calculating $\psi_{N+1/2}$. This flux would then be used as $\bar{\psi}_{N+1/2}$ (notice the bar) when we move into the $\mu<0$ direction and begin by solving for $\psi_N$. Once we have swept to the right AND left, we then update $s_i$ and repeat until convergence.\\
@@ -334,7 +334,7 @@ Expanding the exponential term found in part B up to the $h^2$ term, we get:
     &\approx 1 - 2h + 2h^2
 \end{align*}
 
-And expanding the $\frac{1-h}{1+h}$ from part c, we get:
+And expanding the $\frac{1-h}{1+h}$ term from part C, we get:
 %
 \begin{align*}
     \frac{1-h}{1+h} &\approx \frac{\frac{1-h}{1+h}|_{h=0}}{0!}(h-0)^0 + \frac{-2(1+h)^{-2}|_{h=0}}{1!}(h-0)^1 + \frac{4(1+h)^{-3}|_{h=0}}{2!}(h-0)^2 \\
@@ -374,7 +374,7 @@ where $\lambda$ is the mean free path in the material. Therefore we have $0 \leq
 \noindent \textbf{Problem 3}\\
 Write a piece of code that implements the 1-D, one-speed, steady state, weighted diamond difference equations; include scattering and an external source. Use $\psi(0) = 2.0$ for $\mu > 0$; non-reentrant boundary condition at $x=0.0$ and a reflecting boundary at $x=2.0$. For this case assume isotropic scattering.\\
 
-$\Rightarrow$ The 1-D, one-speed, steady-state, DD equations are given by:
+$\Rightarrow$ The 1-D, one-speed, steady-state, weighted DD equations are given by:
 %
 \begin{align*}
     \psi_i &= \frac{s_i + \frac{2}{(1\pm\alpha_i)}\frac{|\mu|}{\Delta_i}\bar{\psi}_{i\mp1/2}}{\Sigma_{t,i} + \frac{2}{(1\pm\alpha_i)}\frac{|\mu|}{\Delta_i}}\\
@@ -385,10 +385,10 @@ for $\mu\gtrless0$ and where $s_i$ includes the scattering and external source, 
 %
 \begin{align*}
     s_i &= q_{e,i} + \int_{-1}^1 d\mu' \Sigma_s(\mu'\rightarrow \mu) \psi_i(\mu') \\
-    &\approx q_{e,i} + \sum_\mu w_\mu \Sigma_s \psi_i(\mu)
+    &\approx q_{e,i} + \sum_{\mu '} w_{\mu '} \Sigma_s \psi_i(\mu ')
 \end{align*}
 
-where $q_{e,i}$ is the external source and $w_\mu$ is the quadrature weight for direction $\mu$. We are interesting in the scalar flux, which is given by:
+where $q_{e,i}$ is the external source and $w_\mu$ is the quadrature weight for direction $\mu$. We are ultimately interested in the scalar flux, which is given by:
 %
 \begin{align*}
     \phi &= \int_{-1}^1 d\mu \psi_i(\mu) \\
@@ -413,9 +413,9 @@ where $q_{e,i}$ is the external source and $w_\mu$ is the quadrature weight for 
 Plot the cell-centered scalar flux that results from each mesh spacing. What do you notice? How does that compare with your conclusion from the previous problem?
 \end{enumerate}
 
-$\Rightarrow$ In this case, the problem is greatly simplified. We do not need to concern ourselves with the source at all. Therefore we only need to perform one sweep (to the right and then left). Beginning with the boundary condition of $\psi(0) = 2$, we can solve for the center flux of the first mesh cell, and then subsequently the outgoing flux from that cell (all with $\mu >0$). We then set the outgoing flux as the incoming flux of the next cell and repeat for all cells until we reach the reflecting boundary at $x=2$. At this point, the outgoing flux in the $\mu>0$ direction becomes the incoming flux in the $\mu<0$ direction. We then solve for the center and outgoing flux and march through the mesh cells in the left direction. After the sweep is done, we will have an array of center flux values (angular flux). We then use our quadrature rule to integrate over direction to get the scalar flux. In this case we use an equiprobable quadrature set that is normalized to 2 (as suggested by Prof.~Slaybaugh, this will lead to cancelations later on). We only have two directions in this case, so each weight, $w_\mu$ is equal to 1.\\
+$\Rightarrow$ In this case, the problem is greatly simplified. We do not need to concern ourselves with the source at all. Therefore we only need to perform one sweep (to the right and then left). Beginning with the boundary condition of $\psi(0) = 2$, we can solve for the center flux of the first mesh cell, and then subsequently the outgoing flux from that cell (all with $\mu >0$). We then set the outgoing flux as the incoming flux of the next cell and repeat for all cells until we reach the reflecting boundary at $x=2$. At this point, the outgoing flux in the $\mu>0$ direction becomes the incoming flux in the $\mu<0$ direction. We then solve for the center and outgoing flux and march through the mesh cells in the left direction. After the sweep is done, we will have an array of center flux values (angular flux). We then use our quadrature rule to integrate over direction to get the scalar flux. In this case we use an equiprobable quadrature set that is normalized to 2 (\ul{as suggested by Prof.~Slaybaugh, this will lead to cancelations with all the $2\pi$'s that results from the integration over $d\phi$ - I will thus neglect these integrations here}). We only have two directions in this case, so each weight, $w_\mu$ is equal to 1.\\
 
-The above method was implemented in Python for each mesh spacing and the code is shown below. The results of the center angular flux and center scalar flux in each mesh cell is shown in Fig.~2. The code is able to handle non-zero values of $\alpha$, therefore this same code was used for part B below. \\
+The above method was implemented in Python for each mesh spacing and the code is shown below. The results of the center angular flux and center scalar flux in each mesh cell are shown in Fig.~2. The code is able to handle non-zero values of $\alpha$, therefore this same code was used for part B below. \\
 
 \lstinputlisting[language=Python]{../p3/p3a&b.py}
 
@@ -495,13 +495,13 @@ It seems that as we increase the value of $\alpha$, we start to improve the beha
 Report the results.
 \end{enumerate}
 
-Now we wish to include scattering, an external source, and more angles. Let's first consider scattering. We can use the quadrature to evaluate the integral over angle, but now we have 4 angles and thus to keep the same normalization as before (= 2), each equiprobable weight will now be 0.5. Therefore our scattering source in each mesh cell $i$ will be given by
+Now we wish to include scattering, an external source, and more angles. Let's first consider scattering. We can use the quadrature to evaluate the integral over angle, but now we have 4 angles and thus to keep the same normalization as before (= 2), each equiprobable weight will now be 0.5. Using equiprobable weights for each angle is equivalent to isotropic scattering. Therefore our scattering source in each mesh cell $i$ will be given by
 %
 \begin{align*}
     \sum_\mu w_\mu \Sigma_s \psi_i(\mu) = \frac{\Sigma_s}{2}\left[\psi_i(-0.7) + \psi_i(-0.2) + \psi_i(0.2) + \psi_i(0.7)\right]
 \end{align*}
 
-In each sweep we now calculate $s_i$ and we also now calculate the angular flux for both angles (in both directions). We will need to assume some initial values of the angular flux when we first calculate the scattering source (I will assume a value of 1 in all cells and all directions). Once we do a full sweep (right and left), we then update the source term with the newly calculated angular flux values. After each sweep (right and left) we also calculate the scalar flux with our new quadrature weights. As we iterate through the sweeps and update the flux, we need to define a convergence criterion to eventually stop our calculation. My first attempt is to use the $l_2$ norm of the difference between the current scalar flux and the previous scalar flux. Once we have satisfied:
+In each sweep we now calculate $s_i$ and we also now calculate the angular flux for both angles (in both directions). We will need to assume some initial values of the angular flux when we first calculate the scattering source (I will assume a value of 1 in all cells and all directions). Once we do a full sweep (right and left), we then update the source term with the newly calculated angular flux values. After each sweep (right and left) we also calculate the scalar flux with our new quadrature weights. As we iterate through the sweeps and update the flux, we need to define a convergence criterion to eventually stop our calculation. My first attempt is to use the $l_2$ norm of the difference between the current scalar flux and the previous scalar flux (one could also use the difference in the scattering source, but since this is defined using the fluxes they should produce similar results). Once we have satisfied:
 %
 \begin{align*}
     || \phi^k - \phi^{k-1} ||_{l_2} < 10^{-4}
@@ -533,7 +533,7 @@ we stop the calculation and plot the results. The modified code is shown below, 
 \end{figure}
 
 \newpage
-We see that the value of $\alpha$ did not make much of a difference in the results. But it did however have an effect on the required number of iterations before convergence (at least moving away from $\alpha = -0.5$). We also notice that the shape of the flux is dramatically different than in part A and B. With scattering and a constant source included, the particles make it much further into the material and have a peak flux near the reflecting boundary. We then see a drop off near the vacuum boundary due to neutrons leaving the system and not returning (we do have essentially have a source of neutrons at the vacuum boundary, but its value is 2 and thus much lower than the flux in the other cells). 
+We see that the value of $\alpha$ did not make much of a difference in the results. But it did however have an effect on the required number of iterations before convergence (at least moving away from $\alpha = -0.5$) (see the $y$-axes in the plots for the number of iterations). We also notice that the shape of the flux is dramatically different than in part A and B. With scattering and a constant source included, the particles make it much further into the material and have a peak flux near the reflecting boundary. We then see a drop off (still nonzero though) near the vacuum boundary due to neutrons leaving the system and not returning (we do have a source of right-moving neutrons at the vacuum boundary, but its value is much lower than the flux in the other cells). 
 
 %
 %
@@ -544,7 +544,7 @@ We see that the value of $\alpha$ did not make much of a difference in the resul
 \item What happens with $\alpha = 0$ and $\Sigma_s = 0.9$?
 \end{enumerate}
 
-If we rerun the above code with these inputs, Python indicates that an overflow has occurred. If we profile the code a bit, we see that the flux keeps increasing with every iteration. The values eventually get larger than the declared variable type can handle, thus it reports an overflow. With scattering essentially being the only interaction ($\Sigma_s$ close to $\Sigma_t$), it seems we are unable to converge on a flux solution.
+If we rerun the above code with these inputs, Python indicates that an overflow has occurred (for all mesh spacings). If we profile the code a bit, we see that the flux keeps increasing with every iteration. The values eventually get larger than the declared variable type can handle, thus it reports an overflow. With scattering essentially being the only interaction ($\Sigma_s$ close to $\Sigma_t$), it seems our simple model is unable to converge on a flux solution. Perhaps we need a more sophisticated quadrature set, include higher scattering moments, or use a finer mesh spacing? 
 
 
 
@@ -562,7 +562,7 @@ Starting from the following general system of equations
 
 where  $\phi$ \textit{is} scalar flux, write a set of five coupled equations for a five group problem. Assume neutrons can only downscatter from fast groups (1 and 2) to thermal groups (3, 4, and 5). Assume that thermal groups can upscatter into other thermal groups and can downscatter. Assume there is an external source and a fission source.\\
 
-$\Rightarrow$ From the wording of the question, we assume the following about scattering: Neutrons in group 1 can downscatter to groups 3, 4, and 5. Neutrons in group 2 can downscatter into groups 3, 4, and 5. Neutrons in group 3 can downscatter into groups 4 and 5. Neutrons in group 4 can downscatter into group 5 and upscatter into group 3. Neutrons in group 5 can upscatter into groups 3 and 4. Neutrons in each group can also participate in in-group scattering ($3\rightarrow3$, $5\rightarrow5$, etc.). We also assume the following about fission: Neutrons can undergo fission in any group, and fission neutrons can be born into any group. Finally, we assume there is an external neutron source in every group. \\
+$\Rightarrow$ From the wording of the question, we assume the following about scattering: Neutrons in group 1 can downscatter to groups 3, 4, and 5 (it says fast groups can only downscatter to thermal groups, so group 1 cannot scatter to group 2). Neutrons in group 2 can downscatter into groups 3, 4, and 5. Neutrons in group 3 can downscatter into groups 4 and 5. Neutrons in group 4 can downscatter into group 5 and upscatter into group 3. Neutrons in group 5 can upscatter into groups 3 and 4. Neutrons in each group can also participate in in-group scattering ($1\rightarrow1$, $3\rightarrow3$, $5\rightarrow5$, etc.). We also assume the following about fission: Neutrons can undergo fission in any group (which is a bit unphysical), and fission neutrons can be born into any group (which is quite unphysical). Finally, we assume there is an external neutron source in every group. Expanding out the equation above for each group (not expanding over angles), we arrive at the following \\
 
 %\begin{table}[htb]
 %\centering
