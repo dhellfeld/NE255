@@ -1,5 +1,5 @@
-#ifndef actioninitialization_hh_
-#define actioninitialization_hh_
+#ifndef actioninitialization_hh
+#define actioninitialization_hh
 
 #include "globals.hh"
 #include "G4VUserActionInitialization.hh"

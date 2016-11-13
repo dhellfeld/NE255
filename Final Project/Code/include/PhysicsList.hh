@@ -1,7 +1,7 @@
 #ifndef physicslist_hh
-#define physicslist_hh 1
+#define physicslist_hh
 
-#include "globals.hh" 
+#include "globals.hh"
 #include "G4VUserPhysicsList.hh"
 #include "G4VModularPhysicsList.hh"
 #include "G4VPhysicsConstructor.hh"

@@ -1,5 +1,5 @@
 #ifndef runaction_hh
-#define runaction_hh 1
+#define runaction_hh
 
 #include "globals.hh"
 #include "G4UserRunAction.hh"

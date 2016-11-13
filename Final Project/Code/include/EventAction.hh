@@ -1,7 +1,7 @@
 #ifndef eventaction_hh
-#define eventaction_hh 1
+#define eventaction_hh
 
-#include "globals.hh" 
+#include "globals.hh"
 #include "G4UserEventAction.hh"
 #include "Hit.hh"
 
@@ -18,7 +18,7 @@ public:
 public:
 	void BeginOfEventAction(const G4Event*);
 	void EndOfEventAction(const G4Event*);
-    
+
     void FillTuples(const G4Event*);
 
 

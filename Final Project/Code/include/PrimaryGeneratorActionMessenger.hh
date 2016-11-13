@@ -1,6 +1,6 @@
 
 #ifndef primarygeneratoractionmessenger_hh
-#define primarygeneratoractionmessenger_hh 1
+#define primarygeneratoractionmessenger_hh
 
 #include "globals.hh"
 #include "G4UIcommand.hh"
@@ -27,7 +27,7 @@ private:
 
     G4UIdirectory* fDirDirectory;
     G4UIdirectory* fOutDirectory;
-    
+
     G4UIcmdWithAnInteger*    fHPCmd;
     G4UIcmdWithAnInteger*    fHPNsideCmd;
     G4UIcmdWithAString*      fHPindexingCmd;

@@ -1,7 +1,7 @@
 #ifndef steppingaction_hh
-#define steppingaction_hh 1
+#define steppingaction_hh
 
-#include "globals.hh" 
+#include "globals.hh"
 #include "G4UserSteppingAction.hh"
 
 class G4Step;

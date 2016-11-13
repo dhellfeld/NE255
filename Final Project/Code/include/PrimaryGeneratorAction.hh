@@ -1,5 +1,5 @@
 #ifndef primarygeneratoraction_hh
-#define primarygeneratoraction_hh 1
+#define primarygeneratoraction_hh
 
 #include "globals.hh"
 #include "G4VUserPrimaryGeneratorAction.hh"

@@ -1,44 +1,37 @@
-# Set of the verbosities
+# Verbosities
 /control/verbose 0
 /tracking/verbose 0
 /run/verbose 0
 /event/verbose 0
 
 # Tracking secondary electrons
-#/PRISM_SIM/tracking/trackElectrons Off
+/PRISM/tracking/trackElectrons Off
 
 # Detector indexing
-/PRISM_SIM/geom/detIndexing Ring
+/PRISM/geo/detIndexing Ring
 
 # Configure mask
-#/PRISM_SIM/geom/setMask 21524FA478BD521AB44791322B545C979943A029753854BB
-#/PRISM_SIM/geom/randomMask
-/PRISM_SIM/geom/fullMask
-
-# Set number of threads
-#/run/numberOfThreads 4
+#/PRISM/geo/setMask 21524FA478BD521AB44791322B545C979943A029753854BB
+#/PRISM/geo/randomMask
+/PRISM/geo/fullMask
 
 # Change the energy
 /gun/energy 60 keV
 
-# Set the direction of far field source
-#/PRISM_SIM/direction/setTheta 45
-#/PRISM_SIM/direction/setPhi 20
-
 # Configure HEALPix
-/PRISM_SIM/direction/setHPNside 8
-/PRISM_SIM/direction/setHPindexscheme Ring
-/PRISM_SIM/direction/SetUpHEALPix
+/PRISM/direction/setHPNside 16
+/PRISM/direction/setHPindexscheme Ring
+/PRISM/direction/SetUpHEALPix
 
 # Choose a HealPix angle (start at 1)
-/PRISM_SIM/direction/setHPindex 45
+/PRISM/direction/setHPindex 45
 
 # Change output file name
-/PRISM_SIM/output/filename output1
+/PRISM/output/filename output
 
 #Print to text or binary format
-/PRISM_SIM/output/printText Off
-/PRISM_SIM/output/printBinary On
+/PRISM/output/printText On
+/PRISM/output/printBinary Off
 
 # Beam on
-/run/beamOn 100
+/run/beamOn 1000

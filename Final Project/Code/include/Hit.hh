@@ -1,5 +1,5 @@
-#ifndef Hit_h
-#define Hit_h 1
+#ifndef hit_hh
+#define hit_hh
 
 #include "G4VHit.hh"
 #include "G4THitsCollection.hh"
