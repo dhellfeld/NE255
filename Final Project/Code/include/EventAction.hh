@@ -1,28 +1,31 @@
-#ifndef EventAction_h
-#define EventAction_h 1
+#ifndef eventaction_hh
+#define eventaction_hh 1
 
+#include "globals.hh" 
 #include "G4UserEventAction.hh"
-#include "globals.hh"
+#include "Hit.hh"
+
 
 class EventAction : public G4UserEventAction
 {
-  public:
-    EventAction();
-    virtual ~EventAction();
-    
-    static EventAction* Instance();
-
-    virtual void  BeginOfEventAction(const G4Event* event);
-    virtual void    EndOfEventAction(const G4Event* event);
-    
-  private:
-    static EventAction* fgInstance;
-
-    
 public:
+	EventAction();
+	~EventAction();
+
+	static EventAction* Instance();
+
+
+public:
+	void BeginOfEventAction(const G4Event*);
+	void EndOfEventAction(const G4Event*);
+    
+    void FillTuples(const G4Event*);
+
+
+private:
+	static EventAction* fgInstance;
+    G4int HCollID;
 
 };
-                     
-#endif
 
-    
+#endif

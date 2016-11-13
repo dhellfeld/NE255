@@ -1,0 +1,39 @@
+/control/verbose 0
+/tracking/verbose 0
+/run/verbose 0
+/event/verbose 0
+
+######
+
+# Detector indexing
+/PRISM_SIM/geom/detIndexing Ring
+
+# Set up mask
+/PRISM_SIM/geom/fullMask
+#/PRISM_SIM/geom/setMask 21524FA478BD521AB44791322B545C979943A029753854BB
+
+# Set number of threads
+#/run/numberOfThreads 4
+
+# Change the energy
+/gun/energy 60 keV
+
+# Set the direction of far field source
+#/PRISM_SIM/direction/setTheta 45
+#/PRISM_SIM/direction/setPhi 20
+
+# Configure HEALPix
+/PRISM_SIM/direction/setHPNside 16
+/PRISM_SIM/direction/setHPindexscheme Ring
+/PRISM_SIM/direction/SetUpHEALPix
+
+# Change output file name
+#/PRISM_SIM/output/filename HP16Ring_DetRing_Response_100k_2152Mask
+/PRISM_SIM/output/filename test
+
+#Print to text or binary format
+/PRISM_SIM/output/printText Off
+/PRISM_SIM/output/printBinary On
+
+#/control/loop macros/response/main.mac hpindex 1 768 1.
+/control/loop macros/response/main.mac hpindex 1 3072 1.

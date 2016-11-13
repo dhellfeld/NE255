@@ -1,4 +1,0 @@
-Python turned off
-Geant4_MT turned on
-To compile/build: run $sh compile.sh & make
-To run: $./PRISM

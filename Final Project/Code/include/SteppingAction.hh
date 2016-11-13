@@ -1,28 +1,26 @@
-#ifndef SteppingAction_h
-#define SteppingAction_h 1
+#ifndef steppingaction_hh
+#define steppingaction_hh 1
 
+#include "globals.hh" 
 #include "G4UserSteppingAction.hh"
 
+class G4Step;
 
 class SteppingAction : public G4UserSteppingAction
 {
 public:
-  SteppingAction();
-  virtual ~SteppingAction();
+	SteppingAction();
+	~SteppingAction();
 
-  virtual void UserSteppingAction(const G4Step* step);
-    
-private:
-    
+	static SteppingAction* Instance();
+
 public:
-    int det;
-    int hpi;
-    
-    int doi;
-    int CalculateDOI(const G4Step*);
+	void UserSteppingAction(const G4Step*);
 
-    
+private:
+	static SteppingAction* fgInstance;
+
+
 };
-
 
 #endif

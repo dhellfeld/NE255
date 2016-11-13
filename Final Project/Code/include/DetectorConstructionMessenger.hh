@@ -1,3 +1,4 @@
+
 #ifndef detectorconstructionnmessenger_hh
 #define detectorconstructionnmessenger_hh 1
 
@@ -9,6 +10,7 @@
 class DetectorConstruction;
 class G4UIdirectory;
 class G4UIcmdWithAString;
+class G4UIcmdWith3Vector;
 class G4UIcmdWithoutParameter;
 
 class DetectorConstructionMessenger : public G4UImessenger {
@@ -28,6 +30,8 @@ private:
     G4UIcmdWithAString*      fSetMaskCmd;
     G4UIcmdWithoutParameter* fRandMaskCmd;
     G4UIcmdWithoutParameter* fFullMaskCmd;
+    G4UIcmdWith3Vector*      fDetDimCmd;
+    G4UIcmdWithAString*      fSetDetIndexCmd;
     
 };
 

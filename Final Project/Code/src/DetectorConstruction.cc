@@ -1,41 +1,26 @@
 #include "DetectorConstruction.hh"
 
-#include "G4Material.hh"
-#include "G4NistManager.hh"
+#include "G4SDManager.hh"
+#include "SensitiveDetector.hh"
 
+#include "G4RunManager.hh"
 #include "G4Box.hh"
 #include "G4Tubs.hh"
 #include "G4Sphere.hh"
 #include "G4Orb.hh"
-
 #include "G4LogicalVolume.hh"
 #include "G4VPhysicalVolume.hh"
+#include "G4Material.hh"
+#include "G4NistManager.hh"
 #include "G4PVPlacement.hh"
 #include "G4PVReplica.hh"
-#include "G4GlobalMagFieldMessenger.hh"
-#include "G4AutoDelete.hh"
-
-#include "G4GeometryManager.hh"
-#include "G4PhysicalVolumeStore.hh"
-#include "G4LogicalVolumeStore.hh"
-#include "G4SolidStore.hh"
-
 #include "G4VisAttributes.hh"
 #include "G4Colour.hh"
-
-#include "G4PhysicalConstants.hh"
-#include "G4SystemOfUnits.hh"
 #include "G4UnitsTable.hh"
-
-#include "Randomize.hh"
-
-#include "G4RunManager.hh"
-
-
+#include "G4Material.hh"
 
 using namespace std;
 using namespace CLHEP;
-
 
 //==================================================================================================
 
@@ -44,130 +29,137 @@ DetectorConstruction* DetectorConstruction::fgInstance = 0;
 //==================================================================================================
 
 DetectorConstruction* DetectorConstruction::Instance() {
-    
-    return fgInstance;
+
+	return fgInstance;
 }
 
-// ====================================================================================================
+//==================================================================================================
 
-DetectorConstruction::DetectorConstruction(): G4VUserDetectorConstruction(){
+DetectorConstruction::DetectorConstruction()
+: detindexing("Ring"),
+  worldPhys(0),
+  mworld(0),
+  mdetector(0),
+  world_dim(30*cm),                                                     // default world is a 50 cm radius sphere
+  detector_dim(G4ThreeVector(0.5*cm, 0.5*cm, 0.5*cm)),                  // default detector is 1 cc cube (use half sizes)
+  detector_pos(G4ThreeVector(0.)),                                      // default position at 0, 0, 0
+  _checkoverlaps(false)                                                 // by default, dont check overlaps while constructing
+{
 
-    //SetMask(GetRandomMask());
-    SetMask(HexToBin("21524FA478BD521AB44791322B545C979943A029753854BB"));
-    //SetMask(HexToBin("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"));
-    
+    // Get a random mask
+    _mask = GetRandomMask();
+
+    // Put it into hex form for storage later...
+    G4String mask_hex = BinToHex(_mask);
+
     // Create a new messenger class
     detectorconstructionmessenger = new DetectorConstructionMessenger(this);
-    
-    fgInstance = this;
 
+	fgInstance = this;
 }
 
-// ====================================================================================================
+//==================================================================================================
 
-DetectorConstruction::~DetectorConstruction(){
-    
+DetectorConstruction::~DetectorConstruction() {
+
     // Delete messenger class
     delete detectorconstructionmessenger;
-    
-    fgInstance = 0;
 
+	fgInstance = 0;
 }
 
-// ====================================================================================================
+//==================================================================================================
 
 G4VPhysicalVolume* DetectorConstruction::Construct()
 {
-  // Define materials 
-  DefineMaterials();
-  
-  // Define volumes
-  return DefineVolumes();
+    ConstructMaterials();
+    return ConstructWorld();
 }
 
-// ====================================================================================================
+//==================================================================================================
 
-void DetectorConstruction::DefineMaterials()
-{ 
+void DetectorConstruction::ConstructMaterials() {
+
     // Define CZT material
     G4Element* elCd = new G4Element("Cadmium"  ,"Cd", 48., 112.411*g/mole);
     G4Element* elZn = new G4Element("Zinc"     ,"Zn", 30., 65.39  *g/mole);
     G4Element* elTe = new G4Element("Tellurium","Te", 52., 127.6  *g/mole);
-    
+
     G4Material* CZT = new G4Material("CZT", 5.78*g/cm3, 3);
     CZT->AddElement(elCd, 9);
     CZT->AddElement(elZn, 1);
     CZT->AddElement(elTe, 10);
-    
+
+    // Assign to detector material
+    mdetector = CZT;
+
     // the NIST manager has simple materials
     G4NistManager* nist = G4NistManager::Instance();
-    nist->FindOrBuildMaterial("G4_Galactic");
-    
+
+    // Make the world a vacuum
+    mworld = nist->FindOrBuildMaterial("G4_Galactic");
+    //mworld = nist->FindOrBuildMaterial("G4_AIR");
+
+
 }
 
-// ====================================================================================================
+//==================================================================================================
 
-G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
-{
-    
-    // Geometry parameters
-    G4double world_dim = 30*cm;
-    G4ThreeVector detector_dim = G4ThreeVector(0.5*cm, 0.5*cm, 0.5*cm);
-    G4ThreeVector detector_pos;
-    
-    
-    // Get Materials
-    G4Material* mdetector = G4Material::GetMaterial("CZT");
-    G4Material* mworld    = G4Material::GetMaterial("G4_Galactic");
-    
-    
+G4VPhysicalVolume* DetectorConstruction::ConstructWorld() {
+
+
     // ---------------------------------------
     // Create world volume
     // ---------------------------------------
-    
+
     G4VSolid* worldSolid = new G4Orb("World",  // name
                                      world_dim
                                      );
-    
+
     G4LogicalVolume* worldLog = new G4LogicalVolume(worldSolid, // corresponding solid volume
                                                     mworld,     // material
                                                     "World"     // name
                                                     );
-    
-    G4VPhysicalVolume* worldPhys = new G4PVPlacement(0,       // no rotations so give it a null pointer
-                                       G4ThreeVector(0.),     // the placement of the volume at (0, 0, 0)
-                                       "World",               // name
-                                       worldLog,              // the corresponding logical volume -- gives
-                                                              //   volume the material (and the dimensions
-                                                              //   via the solid assigned to the logical volume)
-                                       0,                     // the mother physical volume (the world doesn't
-                                                              //   have a mother so pass it a null pointer
-                                       false,                 // many = false (no copies)
-                                       0                      // the replica id number (only > 0 if copies exist)
-                                       );
-    
-    
-    
+
+    worldPhys = new G4PVPlacement(0,                    // no rotations so give it a null pointer
+                                  G4ThreeVector(0.),    // the placement of the volume at (0, 0, 0)
+                                  "World",              // name
+                                  worldLog,             // the corresponding logical volume -- gives
+                                                        //   volume the material (and the dimensions
+                                                        //   via the solid assigned to the logical volume)
+                                  0,                    // the mother physical volume (the world doesn't
+                                                        //   have a mother so pass it a null pointer
+                                  false,                // many = false (no copies)
+                                  0                     // the replica id number (only > 0 if copies exist)
+                                  );
+
+
     // ---------------------------------------
     // Create detectors
     // ---------------------------------------
-    
-    G4VSolid* detectorSolid = new G4Box("DetectorSolid",      // name
-                                        detector_dim.x(),     // x half-length
-                                        detector_dim.y(),     // y half-length
-                                        detector_dim.z()      // z half-length
-                                        );
-    
-     G4LogicalVolume* detectorLog = new G4LogicalVolume(detectorSolid,    // target solid
-                                        mdetector,                        // target material
-                                        "DetectorLog"                     // name
-                                        );
 
-    
+    G4VSolid* detectorSolid = new G4Box("DetectorSolid",    // name
+                                      detector_dim.x(),     // x half-length
+                                      detector_dim.y(),     // y half-length
+                                      detector_dim.z()      // z half-length
+                                      );
+
+    // Create 192 logical volumes (so we can have different colors)
+    vector<G4LogicalVolume*> logvols;
+    for (int i = 0; i < 192; i++){
+        //logname += to_string(i+1);
+        logvols.push_back(new G4LogicalVolume(detectorSolid,    // target solid
+                                              mdetector,        // target material
+                                              "DetectorLog"     // name
+                                              ));
+    }
+
+
     // Pull in detector center verticies from file
-    G4String centfilename = "geo/ring/centervertices_Ring.txt";
+    G4String centfilename = "geo/centervertices_";
+    centfilename.append(detindexing).append(".txt");
     ifstream centerfile(centfilename);
-    G4double x_, y_, z_;
+    double x_, y_, z_;
     string line;
     centers.clear();
     if (centerfile.is_open()){
@@ -177,11 +169,12 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
         }
         centerfile.close();
     }
-    
+
     // Pull in rotation matrices from file
-    G4String rotfilename = "geo/ring/rotationmatrices_Ring.txt";
+    G4String rotfilename = "geo/rotationmatrices_";
+    rotfilename.append(detindexing).append(".txt");
     ifstream myfile3(rotfilename);
-    G4double x1_,x2_,x3_,y1_,y2_,y3_,z1_,z2_,z3_;
+    double x1_,x2_,x3_,y1_,y2_,y3_,z1_,z2_,z3_;
     rotationmat.clear();
     if (myfile3.is_open()){
         while (getline(myfile3,line)){
@@ -190,58 +183,76 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
         }
         myfile3.close();
     }
-    
-    
+
+
+
     // ---------------------------------------
     // Place masked detectors (192 slots)
     // ---------------------------------------
-    
+
     // Loop through mask vector
-    for (int i = 0; i < 192; i++){
-        
+    for (int i = 0; i < int(_mask.size()); i++){
+
         // Detctor ID are just numbers
         G4String detID = to_string(i+1);
-        
+
         // if mask value is 1 then fill, if not leave empty
         if (_mask[i]){
-            
+
             detector_pos = centers[i];
             G4Transform3D transform = G4Transform3D(rotationmat[i],detector_pos);
-            
-            new G4PVPlacement(transform,                // the placement of the volume in center
-                              detID,                    // name
-                              detectorLog,              // the corresponding logical volume -- gives
-                                                        //   volume the material (and the dimensions
-                                                        //   via the solid assigned to the logical volume)
-                              worldPhys,                // inside the world so the world is the mother
-                                                        //   physical volume,
-                              false,                    // many = false (no copies)
-                              0                         // the replica id number (only > 0 if copies exist)
-                              );
 
+            G4PVPlacement *p = new G4PVPlacement(transform,               // the placement of the volume in center
+                                                 detID,                   // name
+                                                 logvols[i],              // the corresponding logical volume -- gives
+                                                                          //   volume the material (and the dimensions
+                                                                          //   via the solid assigned to the logical volume)
+                                                 worldPhys,               // inside the world so the world is the mother
+                                                                          //   physical volume,
+                                                 false,                   // many = false (no copies)
+                                                 0                        // the replica id number (only > 0 if copies exist)
+                                                 );
+
+            // Check for overlapping geometry
+            if (_checkoverlaps){
+                p->CheckOverlaps();
+            }
         }
     }
-    
-    
+
+
+
     // ---------------------------------------
     // Set up visualization of geometry
     // ---------------------------------------
-    
-    G4VisAttributes* detector_vis_att = new G4VisAttributes(G4Color(1.0,1.0,1.0));
-    detector_vis_att->SetForceSolid(true);
-    detector_vis_att->SetVisibility(true);
-    detectorLog->SetVisAttributes(detector_vis_att);
 
-    
+    for (int i = 0; i < 192; i++){
+        G4VisAttributes* detector_vis_att = new G4VisAttributes(G4Color(1.,1.,(i+1)/192.,1.0));
+        detector_vis_att->SetForceSolid(true);
+        detector_vis_att->SetVisibility(true);
+        logvols[i]->SetVisAttributes(detector_vis_att);
+    }
+
     G4VisAttributes* world_vis_att = new G4VisAttributes(G4Color(1.,0.,0.));
     world_vis_att->SetForceWireframe(true);
     world_vis_att->SetVisibility(true);
     worldLog->SetVisAttributes(world_vis_att);
-    
-    
-   
-    // Return the physical world
+
+
+
     return worldPhys;
+}
+
+//==================================================================================================
+
+void DetectorConstruction::ConstructSDandField(){
+
+    // Sensitive detectors
+    G4String SDname = "PRISM_SIM/SD";
+    SensitiveDetector * SD = new SensitiveDetector(SDname,"fHitsCollection");
+    SetSensitiveDetector("DetectorLog", SD, true);
+
+    // how to delete these when updating geometry?
 
 }
 
@@ -249,54 +260,54 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
 
 
 vector<G4int> DetectorConstruction::GetRandomMask(){
-    
+
     vector<G4int> mask;
     G4double rand;
-    
+
     // Get random number, convert to 1 or 0, fill mask array
     for (int q = 0; q < 192; q++){
         rand = G4UniformRand();
         if (rand > 0.5){mask.push_back(1);}
         else {mask.push_back(0);}
     }
-    
+
     return mask;
 }
 
 //==================================================================================================
 
 void DetectorConstruction::SetMask(vector<G4int> inputmask){
-    
+
     _mask = inputmask;
 }
 
 //==================================================================================================
 
 G4String DetectorConstruction::BinToHex(vector<G4int> mask){
-    
+
     // Digit to hex table
     const char *hex_dig[] = {"0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f"};
-    
+
     G4String hex_;
-    
+
     // Loop through mask arry, convert chucks of 4 into respective hex form, append to string
     for (int q = 0; q < int(mask.size()/4); q++){
         int idx = 8*mask[0+(q*4)] + 4*mask[1+(q*4)] + 2*mask[2+(q*4)] + mask[3+(q*4)];
         hex_.append(hex_dig[idx]);
     }
-    
+
     return hex_;
 }
 
 //==================================================================================================
 
 vector<G4int> DetectorConstruction::HexToBin(G4String hex_){
-    
+
     vector<G4int> mask;
-    
+
     // Loop through hex string and create a binary string with hex to binary table
     G4String mask_string = "";
-    for (int i = 0; i < int(hex_.length()); i++)
+    for (int i = 0; i < int(hex_.length()); ++i)
     {
         switch (hex_[i])
         {
@@ -324,20 +335,32 @@ vector<G4int> DetectorConstruction::HexToBin(G4String hex_){
             case 'F': mask_string.append ("1111"); break;
         }
     }
-    
+
     // Convert string into an int array
     for (int i = 0; i < 192; i++){mask.push_back((G4int)mask_string[i]-48);}
-    
+
     return mask;
 }
 
 //==================================================================================================
 
 void DetectorConstruction::UpdateGeometry(){
-    
-    //G4RunManager::GetRunManager()->DefineWorldVolume(ConstructWorld());
-    G4RunManager::GetRunManager()->ReinitializeGeometry();   // pass it "true" so it clears the geometry first...
-    //G4RunManager::GetRunManager()->GeometryHasBeenModified();
+
+    G4RunManager::GetRunManager()->ReinitializeGeometry(true);   // pass it "true" so it clear the geometry first...
+}
+
+//==================================================================================================
+
+void DetectorConstruction::SetDetDim(G4ThreeVector dim){
+
+    detector_dim = G4ThreeVector((dim.x()/2.)*cm, (dim.y()/2.)*cm, (dim.z()/2.)*cm);
+}
+
+//==================================================================================================
+
+void DetectorConstruction::CheckOverlapsOn(){
+
+    _checkoverlaps = true;
 }
 
 //==================================================================================================

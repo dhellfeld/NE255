@@ -56,17 +56,6 @@ CMAKE_BINARY_DIR = "/Users/Hellfeld/Documents/School/UCB/Classes/For Credit/Fall
 #=============================================================================
 # Targets provided globally by CMake.
 
-# Special rule for the target install/strip
-install/strip: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
-	/Applications/CMake.app/Contents/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
-.PHONY : install/strip
-
-# Special rule for the target install/strip
-install/strip/fast: install/strip
-
-.PHONY : install/strip/fast
-
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
@@ -88,39 +77,6 @@ rebuild_cache:
 rebuild_cache/fast: rebuild_cache
 
 .PHONY : rebuild_cache/fast
-
-# Special rule for the target install
-install: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
-	/Applications/CMake.app/Contents/bin/cmake -P cmake_install.cmake
-.PHONY : install
-
-# Special rule for the target install
-install/fast: preinstall/fast
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
-	/Applications/CMake.app/Contents/bin/cmake -P cmake_install.cmake
-.PHONY : install/fast
-
-# Special rule for the target list_install_components
-list_install_components:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Available install components are: \"Unspecified\""
-.PHONY : list_install_components
-
-# Special rule for the target list_install_components
-list_install_components/fast: list_install_components
-
-.PHONY : list_install_components/fast
-
-# Special rule for the target install/local
-install/local: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
-	/Applications/CMake.app/Contents/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
-.PHONY : install/local
-
-# Special rule for the target install/local
-install/local/fast: install/local
-
-.PHONY : install/local/fast
 
 # The main all target
 all: cmake_check_build_system
@@ -302,6 +258,33 @@ src/EventAction.cc.s:
 	$(MAKE) -f CMakeFiles/PRISM.dir/build.make CMakeFiles/PRISM.dir/src/EventAction.cc.s
 .PHONY : src/EventAction.cc.s
 
+src/Hit.o: src/Hit.cc.o
+
+.PHONY : src/Hit.o
+
+# target to build an object file
+src/Hit.cc.o:
+	$(MAKE) -f CMakeFiles/PRISM.dir/build.make CMakeFiles/PRISM.dir/src/Hit.cc.o
+.PHONY : src/Hit.cc.o
+
+src/Hit.i: src/Hit.cc.i
+
+.PHONY : src/Hit.i
+
+# target to preprocess a source file
+src/Hit.cc.i:
+	$(MAKE) -f CMakeFiles/PRISM.dir/build.make CMakeFiles/PRISM.dir/src/Hit.cc.i
+.PHONY : src/Hit.cc.i
+
+src/Hit.s: src/Hit.cc.s
+
+.PHONY : src/Hit.s
+
+# target to generate assembly for a file
+src/Hit.cc.s:
+	$(MAKE) -f CMakeFiles/PRISM.dir/build.make CMakeFiles/PRISM.dir/src/Hit.cc.s
+.PHONY : src/Hit.cc.s
+
 src/PhysicsList.o: src/PhysicsList.cc.o
 
 .PHONY : src/PhysicsList.o
@@ -410,6 +393,33 @@ src/RunAction.cc.s:
 	$(MAKE) -f CMakeFiles/PRISM.dir/build.make CMakeFiles/PRISM.dir/src/RunAction.cc.s
 .PHONY : src/RunAction.cc.s
 
+src/SensitiveDetector.o: src/SensitiveDetector.cc.o
+
+.PHONY : src/SensitiveDetector.o
+
+# target to build an object file
+src/SensitiveDetector.cc.o:
+	$(MAKE) -f CMakeFiles/PRISM.dir/build.make CMakeFiles/PRISM.dir/src/SensitiveDetector.cc.o
+.PHONY : src/SensitiveDetector.cc.o
+
+src/SensitiveDetector.i: src/SensitiveDetector.cc.i
+
+.PHONY : src/SensitiveDetector.i
+
+# target to preprocess a source file
+src/SensitiveDetector.cc.i:
+	$(MAKE) -f CMakeFiles/PRISM.dir/build.make CMakeFiles/PRISM.dir/src/SensitiveDetector.cc.i
+.PHONY : src/SensitiveDetector.cc.i
+
+src/SensitiveDetector.s: src/SensitiveDetector.cc.s
+
+.PHONY : src/SensitiveDetector.s
+
+# target to generate assembly for a file
+src/SensitiveDetector.cc.s:
+	$(MAKE) -f CMakeFiles/PRISM.dir/build.make CMakeFiles/PRISM.dir/src/SensitiveDetector.cc.s
+.PHONY : src/SensitiveDetector.cc.s
+
 src/StackingAction.o: src/StackingAction.cc.o
 
 .PHONY : src/StackingAction.o
@@ -436,6 +446,33 @@ src/StackingAction.s: src/StackingAction.cc.s
 src/StackingAction.cc.s:
 	$(MAKE) -f CMakeFiles/PRISM.dir/build.make CMakeFiles/PRISM.dir/src/StackingAction.cc.s
 .PHONY : src/StackingAction.cc.s
+
+src/StackingActionMessenger.o: src/StackingActionMessenger.cc.o
+
+.PHONY : src/StackingActionMessenger.o
+
+# target to build an object file
+src/StackingActionMessenger.cc.o:
+	$(MAKE) -f CMakeFiles/PRISM.dir/build.make CMakeFiles/PRISM.dir/src/StackingActionMessenger.cc.o
+.PHONY : src/StackingActionMessenger.cc.o
+
+src/StackingActionMessenger.i: src/StackingActionMessenger.cc.i
+
+.PHONY : src/StackingActionMessenger.i
+
+# target to preprocess a source file
+src/StackingActionMessenger.cc.i:
+	$(MAKE) -f CMakeFiles/PRISM.dir/build.make CMakeFiles/PRISM.dir/src/StackingActionMessenger.cc.i
+.PHONY : src/StackingActionMessenger.cc.i
+
+src/StackingActionMessenger.s: src/StackingActionMessenger.cc.s
+
+.PHONY : src/StackingActionMessenger.s
+
+# target to generate assembly for a file
+src/StackingActionMessenger.cc.s:
+	$(MAKE) -f CMakeFiles/PRISM.dir/build.make CMakeFiles/PRISM.dir/src/StackingActionMessenger.cc.s
+.PHONY : src/StackingActionMessenger.cc.s
 
 src/SteppingAction.o: src/SteppingAction.cc.o
 
@@ -470,13 +507,9 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
-	@echo "... install/strip"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... PRISM"
-	@echo "... install"
-	@echo "... list_install_components"
-	@echo "... install/local"
 	@echo "... PRISM.o"
 	@echo "... PRISM.i"
 	@echo "... PRISM.s"
@@ -492,6 +525,9 @@ help:
 	@echo "... src/EventAction.o"
 	@echo "... src/EventAction.i"
 	@echo "... src/EventAction.s"
+	@echo "... src/Hit.o"
+	@echo "... src/Hit.i"
+	@echo "... src/Hit.s"
 	@echo "... src/PhysicsList.o"
 	@echo "... src/PhysicsList.i"
 	@echo "... src/PhysicsList.s"
@@ -504,9 +540,15 @@ help:
 	@echo "... src/RunAction.o"
 	@echo "... src/RunAction.i"
 	@echo "... src/RunAction.s"
+	@echo "... src/SensitiveDetector.o"
+	@echo "... src/SensitiveDetector.i"
+	@echo "... src/SensitiveDetector.s"
 	@echo "... src/StackingAction.o"
 	@echo "... src/StackingAction.i"
 	@echo "... src/StackingAction.s"
+	@echo "... src/StackingActionMessenger.o"
+	@echo "... src/StackingActionMessenger.i"
+	@echo "... src/StackingActionMessenger.s"
 	@echo "... src/SteppingAction.o"
 	@echo "... src/SteppingAction.i"
 	@echo "... src/SteppingAction.s"

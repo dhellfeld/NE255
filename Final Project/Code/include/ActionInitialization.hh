@@ -1,23 +1,22 @@
-#ifndef ActionInitialization_h
-#define ActionInitialization_h 1
+#ifndef actioninitialization_hh_
+#define actioninitialization_hh_
 
+#include "globals.hh"
 #include "G4VUserActionInitialization.hh"
-
-class DetectorConstruction;
 
 class ActionInitialization : public G4VUserActionInitialization
 {
-  public:
-    ActionInitialization(DetectorConstruction*);
-    virtual ~ActionInitialization();
+public:
+	ActionInitialization();
+	virtual ~ActionInitialization();
 
+public:
     virtual void BuildForMaster() const;
     virtual void Build() const;
 
-  private:
-    DetectorConstruction* fDetConstruction;
+private:
+
+
 };
 
 #endif
-
-    
