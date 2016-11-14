@@ -47,23 +47,28 @@ G4bool SensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*){
     // Track ID
     newHit->SetTrackID(aStep->GetTrack()->GetTrackID());
 
-    // Incident energy
-    newHit->SetEnergy(G4float(aStep->GetPreStepPoint()->GetTotalEnergy()));
+    // Deposited energy (assume all from gamma interaction - neglect electrons)
+    //newHit->SetEnergy(G4float(aStep->GetPreStepPoint()->GetTotalEnergy()));
+    newHit->SetEnergy(fabs(aStep->GetDeltaEnergy()));
 
     // Detector ID
     newHit->SetVol(atoi(aStep->GetPreStepPoint()->GetPhysicalVolume()->GetName()));
 
     // Interaction Process
     G4String proc = aStep->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName();
-    if (proc == "photo"){
+    if (proc == "phot"){
         newHit->SetProcess(1);
     }
     else if (proc == "compt"){
         newHit->SetProcess(2);
     }
-    else if (proc == "rayl"){
+    else if (proc == "Rayl"){
         newHit->SetProcess(3);
     }
+    else {
+        newHit->SetProcess(4);
+    }
+
 
     // HEALPix index
     newHit->SetHPindex(PrimaryGeneratorAction::Instance()->GetHP_index());
