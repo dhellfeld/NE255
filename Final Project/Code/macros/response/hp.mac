@@ -23,9 +23,6 @@
 /PRISM/direction/setHPindexscheme Ring
 /PRISM/direction/SetUpHEALPix
 
-# Choose a HealPix angle (start at 1)
-/PRISM/direction/setHPindex 45
-
 # Change output file name
 /PRISM/output/filename output_response
 

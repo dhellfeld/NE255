@@ -80,7 +80,7 @@ void EventAction::FillTuples(const G4Event* evt_){
             runaction->FillHitNumtuple     (i+1);
             runaction->FillTrackIDtuple    ((*HC)[i]->GetTrackID());
             runaction->FillEnergytuple     ((*HC)[i]->GetEnergy()/keV);
-            runaction->FillDetIDtuple      (atoi((*HC)[i]->GetVol()));
+            runaction->FillDetIDtuple      ((*HC)[i]->GetVol());
             runaction->FillProcesstuple    ((*HC)[i]->GetProcess());
             runaction->FillHPindextuple    ((*HC)[i]->GetHPindex());
 

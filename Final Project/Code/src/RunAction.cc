@@ -129,14 +129,14 @@ void RunAction::PrintToBinaryFile(){
 
     for (int i = 0; i < int(EvtNtuple.size()); i++){
 
-        myfile.write(reinterpret_cast<char*>(&EvtNtuple[i]), 4);    // 4 Bytes (1 to 1e9)
-        myfile.write(reinterpret_cast<char*>(&HitNumtuple[i]), 1);  // 1 Byte  (1 to 5)
-        myfile.write(reinterpret_cast<char*>(&TrackIDtuple[i]), 1); // 1 Byte  (1 to 10)
-        myfile.write(reinterpret_cast<char*>(&Energytuple[i]), 4);  // 4 Bytes (float)
-        myfile.write(reinterpret_cast<char*>(&DetIDtuple[i]), 1);   // 1 Byte  (1 to 192)
-        myfile.write(reinterpret_cast<char*>(&Processtuple[i]), 1); // 1 Byte  (1 to 4)
-        myfile.write(reinterpret_cast<char*>(&DOIbintuple[i]), 1);  // 1 Byte  (1 to 20)
-        myfile.write(reinterpret_cast<char*>(&HPindextuple[i]), 2); // 2 Bytes (1 to 768 or 3072)
+        myfile.write(reinterpret_cast<char*>(&EvtNtuple[i]),    4);  // 4 Bytes (1 to 1e9)
+        myfile.write(reinterpret_cast<char*>(&HitNumtuple[i]),  1);  // 1 Byte  (1 to 5)
+        myfile.write(reinterpret_cast<char*>(&TrackIDtuple[i]), 1);  // 1 Byte  (1 to 10)
+        myfile.write(reinterpret_cast<char*>(&Energytuple[i]),  4);  // 4 Bytes (float)
+        myfile.write(reinterpret_cast<char*>(&DetIDtuple[i]),   1);  // 1 Byte  (1 to 192)
+        myfile.write(reinterpret_cast<char*>(&Processtuple[i]), 1);  // 1 Byte  (1 to 4)
+        myfile.write(reinterpret_cast<char*>(&DOIbintuple[i]),  1);  // 1 Byte  (1 to 20)
+        myfile.write(reinterpret_cast<char*>(&HPindextuple[i]), 2);  // 2 Bytes (1 to 768 or 3072)
 
     }
     myfile.close();

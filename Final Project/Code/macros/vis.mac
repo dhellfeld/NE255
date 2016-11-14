@@ -24,11 +24,9 @@
 /vis/modeling/trajectories/drawByCharge-0/default/setDrawStepPts true
 /vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 2
 
-
 # To draw only gammas
 #/vis/filtering/trajectories/create/particleFilter
 #/vis/filtering/trajectories/particleFilter-0/add gamma
-
 
 # Select color by particle ID
 /vis/modeling/trajectories/create/drawByParticleID
@@ -36,6 +34,10 @@
 
 # To superimpose all of the events from a given run:
 /vis/scene/endOfEventAction accumulate 100
+
+# Reestablish
+/vis/viewer/set/autoRefresh true
+/vis/verbose warnings
 
 # Verbosities
 /tracking/verbose 1

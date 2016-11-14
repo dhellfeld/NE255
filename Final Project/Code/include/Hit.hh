@@ -26,25 +26,24 @@ public:
     // Set methods
     void SetTrackID     (G4int track)          {fTrackID = track;}
     void SetEnergy      (G4float de)           {fEnergy = de;}
-    void SetVol         (G4String volname)     {fVol = volname;}
-    void SetProcess     (G4int procname)    {fProc = procname;}
+    void SetVol         (G4int volname)        {fVol = volname;}
+    void SetProcess     (G4int procname)       {fProc = procname;}
     void SetDOI         (G4double doi)         {fDOI = doi;}
     void SetHPindex     (G4int hpindex)        {fHP = hpindex;}
 
     // Get methods
     G4int GetTrackID() const               {return fTrackID;}
     G4float GetEnergy() const              {return fEnergy;}
-    G4String GetVol() const                {return fVol;}
+    G4int GetVol() const                   {return fVol;}
     G4int GetProcess() const               {return fProc;}
     G4double GetDOI() const                {return fDOI;}
     G4int GetHPindex() const               {return fHP;}
 
 private:
 
-    G4int         fTrackID, fHP, fProc;
+    G4int         fTrackID, fHP, fProc, fVol;
     G4float       fEnergy;
     G4double      fDOI;
-    G4String      fVol;
 
 };
 
