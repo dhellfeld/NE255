@@ -17,3 +17,5 @@ CMakeCache.txt
 CMakeFiles/
 xcode/
 G4History.macro
+PRISM
+*.bin
