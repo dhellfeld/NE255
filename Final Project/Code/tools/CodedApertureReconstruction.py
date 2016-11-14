@@ -18,11 +18,29 @@ data = GetBinaryOutputData("../output/output_response.bin")
 # Pull out only full energy absorptions (60 keV)
 data = FullEnergyAbsorptions(data, 60.0)
 
-# Get system response (only full energy deposition interactions for coded aperture)
-response = np.histogram2d(data['DetID'], data['HPidx'], bins=(192,3072))
+# Get non-DOI system response (only full energy deposition interactions for coded aperture)
+response_noDOI = (np.histogram2d(data['DetID'], data['HPidx'], bins=(192,3072)))[0]
 
 # Plot
 plt.figure()
-im = plt.imshow(response[0], origin='lower', interpolation='nearest', aspect='auto')
+im = plt.imshow(response_noDOI, origin='lower', interpolation='nearest', aspect='auto')
 plt.colorbar(im)
+plt.xlabel('HEALPix index (Source Location)'), plt.ylabel('Detector ID')
+plt.title('System Response (no DOI)')
+
+# Do the same for DOI
+DOI = True
+if (DOI):
+
+    # Get DOI (10 bins) system response (only full energy deposition interactions for coded aperture)
+    response_DOI10 = (np.histogram2d(data['DetID'] + 192.*data['DOI'], data['HPidx'], bins=(192*10,3072)))[0]
+
+    # Plot
+    plt.figure()
+    im = plt.imshow(response_DOI10, origin='lower', interpolation='nearest', aspect='auto')
+    plt.colorbar(im)
+    plt.xlabel('HEALPix index (Source Location)'), plt.ylabel('Detector ID')
+    plt.title('System Response (DOI - 10 bins)')
+
+# Render
 plt.show()
