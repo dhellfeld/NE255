@@ -45,6 +45,8 @@ void RunAction::BeginOfRunAction(const G4Run* /*aRun*/) {}
 
 void RunAction::EndOfRunAction(const G4Run* /*aRun*/) {
 
+	cout << "HEALPix index = " << GetHPindextuple()[0] << "/3072\n";
+
     // Dump data to file
     if (printbin){PrintToBinaryFile();}
     if (printtext){PrintToTextFile();}
