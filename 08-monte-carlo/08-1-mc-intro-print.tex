@@ -1,0 +1,1143 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  NE 255
+%%
+
+\documentclass[xcolor=x11names,compress]{beamer}
+
+\definecolor{CoolBlack}{rgb}{0.0, 0.18, 0.39}
+%% General document %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{decorations.fractals}
+\usepackage{hyperref}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Beamer Layout %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\useoutertheme[subsection=false,shadow]{miniframes}
+\useinnertheme{default}
+\usefonttheme{serif}
+\usepackage{palatino}
+\usepackage{tabu}
+\usepackage{ulem}
+% Links
+\usepackage{hyperref}
+\definecolor{links}{HTML}{003262}
+\hypersetup{colorlinks,linkcolor=,urlcolor=links}
+
+% addition of color
+\usepackage{xcolor}
+\definecolor{CoolBlack}{rgb}{0.0, 0.18, 0.39}
+\definecolor{byellow}{rgb}{0.55037, 0.38821, 0.06142}
+\definecolor{dgreen}{rgb}{0.,0.6,0.}
+\definecolor{RawSienna}{cmyk}{0,0.72,1,0.45}
+\definecolor{forestgreen(web)}{rgb}{0.13, 0.55, 0.13}
+\definecolor{cardinal}{rgb}{0.77, 0.12, 0.23}
+
+\setbeamerfont{title like}{shape=\scshape}
+\setbeamerfont{frametitle}{shape=\scshape}
+
+\setbeamercolor*{lower separation line head}{bg=CoolBlack}
+\setbeamercolor*{normal text}{fg=black,bg=white}
+\setbeamercolor*{alerted text}{fg=dgreen} % just testing; I think this looks better
+\setbeamercolor*{example text}{fg=black}
+\setbeamercolor*{structure}{fg=black}
+
+\setbeamercolor*{palette tertiary}{fg=black,bg=black!10}
+\setbeamercolor*{palette quaternary}{fg=black,bg=black!10}
+
+% Margins
+\usepackage{changepage}
+
+\mode<presentation>
+{
+  \definecolor{berkeleyblue}{HTML}{003262}
+  \definecolor{berkeleygold}{HTML}{FDB515}
+  \usetheme{Boadilla}      % or try Darmstadt, Madrid, Warsaw, Boadilla...
+  %\usecolortheme{dove} % or try albatross, beaver, crane, ...
+  \setbeamercolor{structure}{fg=berkeleyblue,bg=berkeleygold}
+  \setbeamercolor{palette primary}{bg=berkeleyblue,fg=white} % changed this
+  \setbeamercolor{palette secondary}{fg=berkeleyblue,bg=berkeleygold} % changed this
+  \setbeamercolor{palette tertiary}{bg=berkeleyblue,fg=white} % changed this
+  \usefonttheme{structurebold}  % or try serif, structurebold, ...
+  \useinnertheme{circles}
+  \setbeamertemplate{navigation symbols}{}
+  \setbeamertemplate{caption}[numbered]
+  \usebackgroundtemplate{}
+}
+%---
+
+\renewcommand{\(}{\begin{columns}}
+\renewcommand{\)}{\end{columns}}
+\newcommand{\<}[1]{\begin{column}{#1}}
+\renewcommand{\>}{\end{column}}
+
+% adding slide numbers
+\addtobeamertemplate{navigation symbols}{}{%
+    \usebeamerfont{footline}%
+    \usebeamercolor[fg]{footline}%
+    \hspace{1em}%
+    \insertframenumber/\inserttotalframenumber
+}
+
+% equation stuff
+\newcommand{\Macro}{\ensuremath{\Sigma}}
+\newcommand{\Sn}{\ensuremath{S_N} }
+\newcommand{\vOmega}{\ensuremath{\hat{\Omega}}}
+\usepackage{mathrsfs}
+\usepackage[mathcal]{euscript}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{epsfig}
+\usepackage{amsmath}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% title stuff for footer
+\title{NE 255}
+\author{R.\ N.\ Slaybaugh}
+\date{November 17, 2016}
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\title{NE 255\\Numerical Simulations in Radiation Transport}
+\subtitle{Introduction to Monte Carlo}
+\titlepage
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Learning Objectives}
+
+\begin{columns}
+  \begin{column}{0.5\textwidth}
+    \begin{enumerate}
+    \item Define Monte Carlo simulation
+    \item Justify the choice of Monte Carlo for radiation transport
+    \item Understand the mathematical validity of Monte Carlo for radiation
+    \item Understand the major components of Monte Carlo methods transport
+    \end{enumerate}
+  \end{column}
+  \begin{column}{0.5\textwidth}
+  	\begin{figure}
+  	\begin{center}
+  		\includegraphics[height=2in,clip]{fig/atr-model}
+  		\caption{ATR reactor geometry}
+  		%http://www.ornl.gov/science-discovery/more-science/mathematics/nuclear-systems-modeling-and-simulation
+	\end{center}
+  	\end{figure}
+  \end{column}
+\end{columns}
+
+Notes derived from Jasmina Vujic and Paul Wilson
+\end{frame}
+
+%Patterson and Henesey; computer architecture bible; written at berkeley
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{What is Monte Carlo?}
+
+  \begin{itemize}
+  \item The use of \textit{random processes} to determine a 
+        \textit{statistically-expected} solution to a problem
+  \vspace*{1em}
+  \item Random processes can fulfill two roles:
+  \begin{itemize}
+    \item Statistical approximation to \alert{mathematical equations}
+    \item Statistical approximations to \alert{physical processes}
+  \end{itemize}   
+ \vspace*{1em} 
+  \item Construct a random process for a problem, 
+  \item Carry out a numerical simulation by N-fold sampling from a random \# sequence
+\end{itemize}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Evaluate $\pi$ by Random Sampling}
+
+\begin{columns}
+  \begin{column}{0.45\textwidth}
+  	\begin{figure}
+  	\begin{center}
+  		\includegraphics[height=2in,clip]{fig/pi-circle}
+	\end{center}
+  	\end{figure}
+  \end{column}
+  \begin{column}{0.55\textwidth}
+    \begin{itemize}
+    \item Area of square, $A_s= 4$
+    \item Area of circle, $A_c = \pi$
+    \item Fraction of random points \\in circle
+    \[p = \frac{A_c}{A_s} = \frac{\pi}{4}\]
+    \item Random points = $N$
+    \item Random points in circle  = $N_c$, $\therefore$
+    \[p = \frac{N_c}{N}\:; \quad \pi = \frac{4N_c}{N}\]
+    \end{itemize}
+  \end{column}
+\end{columns}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Evaluate $\pi$ by Random Sampling (math)}
+
+\begin{columns}
+  \begin{column}{0.3\textwidth}
+  	\begin{figure}
+  	\begin{center}
+  		\includegraphics[height=0.75in,clip]{fig/quarter-circle}
+	\end{center}
+  	\end{figure}
+  \end{column}
+  \begin{column}{0.7\textwidth}
+    \begin{equation}
+      g(x) = \sqrt{1 - x^2}	\qquad G = \int_0^1 g(x)dx = \frac{\pi}{4} \nonumber
+    \end{equation}
+  \end{column}
+\end{columns}
+
+\begin{equation}
+  G = \int_0^1 g(x)dx = (1-0)\overline{g(x)} \nonumber
+\end{equation}
+Determine $\overline{g(x)}$ by random sampling:\\
+\vspace*{0.5em}
+\hspace*{2 em}for $k = 1, \dots, N$, choose $\hat{x}_k$ randomly on the interval $(0,1)$,
+\[ \overline{g(x)} \equiv \frac{1}{N}\sum_{k=1}^N g(\hat{x}_k) = \frac{1}{N}\sqrt{1 - \hat{x}_k^2}\]
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Evaluate $\pi$ by Random Sampling (physics)}
+
+\begin{columns}
+  \begin{column}{0.3\textwidth}
+  	\begin{figure}
+  	\begin{center}
+  		\includegraphics[height=0.75in,clip]{fig/quarter-circle}
+	\end{center}
+  	\end{figure}
+  \end{column}
+  \begin{column}{0.7\textwidth}
+    \begin{equation}
+      g(x) = \sqrt{1 - x^2}	\qquad G = \int_0^1 g(x)dx = \frac{\pi}{4} \nonumber
+    \end{equation}
+  \end{column}
+\end{columns}
+
+\vspace*{0.5em}
+G = area under curve, \\
+\hspace*{0.75 em} = fraction of unit square under curve\\
+\vspace*{0.5em}
+\hspace*{2 em}for $k = 1, \dots, N$, chose $\hat{x}_k, \hat{y}_k$ randomly on the interval $[0,1]$,\\
+\vspace*{0.5em}
+$m_N$ = $\#$ of times in $N$ trials that $\hat{x}_k^2 + \hat{y}_k^2 \leq 1$,
+\[G = \frac{m_N}{N}\]
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Manhattan Project}
+
+\begin{columns}
+  \begin{column}{0.5\textwidth}
+    \begin{itemize}
+    \item The first human engineered nuclear detonation, 
+    the Trinity Test in New Mexico.
+    \item Active: 1942--1945
+    \item Branch: U.S.\ Army Corps of Engineers
+    \item Monte Carlo Pioneers:
+    \begin{itemize}
+      \item Enrico Fermi,
+      \item Stanislaw Ulam,
+      \item John von Neumann, 
+      \item Robert Richtmeyer, 
+      \item Nicholas Metropolis
+    \end{itemize}
+    \end{itemize}
+  \end{column}
+  \begin{column}{0.5\textwidth}
+  	\begin{figure}
+  	\begin{center}
+  		\includegraphics[height=1.75in,clip]{fig/OppieNeumannMANIAC}
+  		\caption{Oppenheimer, von Neumann, MANIAC}
+  		%http://www.atomicheritage.org/history/computing-and-manhattan-project
+	\end{center}
+  	\end{figure}
+  \end{column}
+\end{columns}
+
+Nicholas Metropolis, S.\ Ulam. ''The Monte Carlo Method," J\textit{ournal of the American Statistical Association}, \textbf{44}, No.\ 247, 335-341 (Sep. 1949).
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{General Purpose MC Codes}
+
+\begin{itemize}
+\item \alert{MCNP}: developed at LANL, distributed via RSICC, \href{http://rsicc.ornl.gov}{http://rsicc.ornl.gov}
+%
+%\item PENELOPE: developed and maintained at U Barcelona, distributed via the Nuclear Energy Agency (http://www.nea.fr/abs/html/nea-1525.html
+
+\item \alert{Geant4}: developed by a large collaboration in the HEP community, \href{ http://geant4.web.cern.ch/geant4/}{http://geant4.web.cern.ch/geant4/}
+
+\item \alert{EGSnrc}: developed at NRC (Canada), \href{http://www.irs.inms.nrc.ca/EGSnrc/EGSnrc.html}{http://www.irs.inms.nrc.ca/EGSnrc/EGSnrc.html}
+
+\item \alert{SERPENT}: Developed by Dr. Jaakko Leppanen, VTT, Finland, \href{ http://montecarlo.vtt.fi/}{http://montecarlo.vtt.fi/}
+
+\item \alert{Shift}: developed at ORNL, distributed via RSICC, \href{http://rsicc.ornl.gov}{http://rsicc.ornl.gov}
+
+\item \alert{Capsaicin}: developed at LANL, \href{http://permalink.lanl.gov/object/tr?what=info:lanl-repo/lareport/LA-UR-11-01410}{http://permalink.lanl.gov/object/tr?what=info:lanl-repo/lareport/LA-UR-11-01410}
+
+\end{itemize}
+
+\end{frame}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Why/When Monte Carlo?}
+
+\begin{itemize}
+\item Applications that are mathematically equivalent to \textit{integration over many dimensions}
+\vspace*{0.25 em}
+\begin{itemize}
+\item Analytic integration may be impossible
+\vspace*{0.25 em}
+\item Deterministic numerical integration may be slow and/or require error prone approximations
+\end{itemize} 
+\vspace*{0.5 em}
+
+\item However, statistically accurate results can require \textbf{significant computer time}
+\item Fortunately, Monte Carlo and parallel computing go well together
+\item and we also have Variance Reduction methods
+\end{itemize}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{What is MC Radiation Transport?}
+
+Simulate many independent particles in a system
+\begin{itemize}
+\item Treat each physical process as a
+\textit{probabilistic process}
+
+\item \textit{Randomly sample} each process using an
+independent stream of random numbers
+
+\item Follow each particle from birth until it no
+longer matters
+
+\item Accumulate the contributions of each
+particle to find the statistically-expected
+mean behavior and variance
+\end{itemize}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Mathematical Validity}
+
+\begin{itemize}
+\item Consider particles with a phase space
+describing position, $\vec{r}$, and velocity, $\vec{v}$
+\vspace*{0.5 em}
+\item A neutral particle can be transmitted
+from one position to another at a
+constant velocity
+\[T(\vec{r}\:' \rightarrow \vec{r}, \vec{v})\]
+
+\item A particle can undergo a collision at a
+single position that changes its velocity
+\[C(\vec{r}, \vec{v}\:' \rightarrow \vec{v})\]
+\end{itemize}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Contributions After 0 Collisions}
+
+\begin{itemize}
+\item Consider a particle born from a source
+described by 
+\[Q(\vec{r}\:', \vec{v}\:')\]
+\item This particle will contribute to the flux at $(\vec{r}, \vec{v})$ before any collisions
+\end{itemize}
+
+\[\psi_0(\vec{r}, \vec{v}) = \int_{\vec{r}\:'} Q(\vec{r}\:', \vec{v}\:')T(\vec{r}\:' \rightarrow \vec{r}, \vec{v}) d\vec{r}\:'\]
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Contributions After 1 Collision}
+
+\begin{itemize}
+\item The uncollided particles, $\psi_0(\vec{r}\:', \vec{v}\:')$, could undergo 1 \textcolor{cardinal}{collision} and then be \alert{transmitted} to the point $(\vec{r}, \vec{v})$
+\end{itemize}
+
+\[\psi_1(\vec{r}, \vec{v}) = \underbrace{\int_{\vec{r}\:'} \biggl[ \underbrace{\int_{\vec{v}\:'} \psi_0(\vec{r}\:', \vec{v}\:') C(\vec{r}\:', \vec{v}\:' \rightarrow \vec{v})  d\vec{v}\:'}_{\textcolor{cardinal}{collision}}\biggr] T(\vec{r}\:' \rightarrow \vec{r}, \vec{v}) d\vec{r}\:'}_{\alert{transmission}}\]
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Contributions After $k$ Collisions}
+
+\begin{itemize}
+\item Particles that have undergone $k$ collisions, $\psi_k(\vec{r}\:', \vec{v}\:')$, could undergo another \textcolor{cardinal}{collision} and then be \alert{transmitted} to the point $(\vec{r}, \vec{v})$ 
+\end{itemize}
+
+\[\psi_{k+1}(\vec{r}, \vec{v}) = \underbrace{\int_{\vec{r}\:'} \biggl[ \underbrace{\int_{\vec{v}\:'} \psi_k(\vec{r}\:', \vec{v}\:') C(\vec{r}\:', \vec{v}\:' \rightarrow \vec{v})  d\vec{v}\:'}_{\textcolor{cardinal}{collision}}\biggr] T(\vec{r}\:' \rightarrow \vec{r}, \vec{v}) d\vec{r}\:'}_{\alert{transmission}}\]
+
+\end{frame}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Combine Collision and Transmission Kernels}
+
+\begin{align*}
+\vec{p} &= (\vec{r}, \vec{v}) \quad \text{and}\\
+%
+R(\vec{p}\:'\rightarrow\vec{p}) &\equiv C(\vec{r}\:', \vec{v}\:' \rightarrow \vec{v}) T(\vec{r}\:' \rightarrow \vec{r}, \vec{v}) \\
+&\\
+%
+\psi_{k+1}(\vec{r}, \vec{v}) = \int_{\vec{p}_k} \psi_k(\vec{p}_k) &R(\vec{p}_k \rightarrow \vec{p}_{k+1}) d\vec{p}_k \\
+%
+&\\
+\psi_{k+1}(\vec{r}, \vec{v}) = \int_{\vec{p}_k} \biggl[ \int_{\vec{p}_{k-1}}  &\psi_{k-1}(\vec{p}_{k-1}) R(\vec{p}_{k-1} \rightarrow \vec{p}_{k}) d\vec{p}_{k-1} \biggr] R(\vec{p}_k \rightarrow \vec{p}_{k+1}) d\vec{p}_k \\
+&\text{\dots and so on \dots}
+&\\
+\psi_{k+1}(\vec{r}, \vec{v}) = \int_{\vec{p}_k} &\int_{\vec{p}_{k-1}} \cdots \int_{\vec{p}_0} \psi_{0}(\vec{p}_{0}) R(\vec{p}_{0} \rightarrow \vec{p}_{1}) d\vec{p}_{0} \cdots \\
+&\psi_{k-1}(\vec{p}_{k-1}) R(\vec{p}_{k-1} \rightarrow \vec{p}_{k}) d\vec{p}_{k-1} R(\vec{p}_k \rightarrow \vec{p}_{k+1}) d\vec{p}_k \\
+\end{align*}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Sum Over All Collisions}
+
+\[\psi(\vec{p}) = \sum_{k=0}^{\infty} \psi_k(\vec{p})\]
+
+\vspace*{1 em}
+Arriving at the \textit{integral form} of the transport equation
+
+\[\psi(\vec{r}, \vec{v}) = \int_{\vec{r}\:'} \biggl[ \int_{\vec{v}\:'} \psi(\vec{r}\:', \vec{v}\:') C(\vec{r}\:', \vec{v}\:' \rightarrow \vec{v})  d\vec{v}\:'\biggr] T(\vec{r}\:' \rightarrow \vec{r}, \vec{v}) d\vec{r}\:'\]
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Mathematical Validity}
+
+\begin{align*}
+\Psi_{k}(\vec{p}) = \int\int &\cdots \int \Psi_{0}(\vec{p}_{0}) R(\vec{p}_{0} \rightarrow \vec{p}_{1})R(\vec{p}_{1} \rightarrow \vec{p}_{2}) \\&\cdots R(\vec{p}_{k-1} \rightarrow \vec{p}_{k}) d\vec{p}_{0} d\vec{p}_{1} \cdots d\vec{p}_{k-1}
+\end{align*}
+
+\begin{itemize}
+\item Integration over many variables
+\hspace*{0.5 em}
+\item Generate a ``history"\\
+(sequence of states $\vec{p}_0, \vec{p}_1 , \dots, \vec{p}_k$)
+\begin{itemize}
+ \item Randomly sample from source: $\Psi_0 (\vec{p}_0)$
+ \item Randomly sample for each of $k$ transitions: $R(\vec{p}_{k-1} \rightarrow \vec{p}_{k})$
+\end{itemize}
+
+\item Average for result $A$ by averaging of $M$ histories
+\end{itemize}
+
+\[\left\langle A \right\rangle = \int A(\vec{p})\Psi(\vec{p}) d\vec{p} 
+= \frac{1}{M} \sum_{m=1}^M \biggl[ \sum_{k=1}^{\infty} A(\vec{p}_{k,m}) \Psi(\vec{p}_{k,m}) \biggr] \]
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Can Model Very Complex Things}
+
+  	\begin{figure}
+  	\begin{center}
+  		\includegraphics[height=3in,clip]{fig/pbmr}
+	\end{center}
+  	\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Major Components of MC Algorithm}
+
+\begin{itemize}
+  \item \textbf{PDFs}: the physical/mathematical system must be described by a set of pdfs.
+  % That's next class
+  
+  \item \textbf{Random number generator}: a source of random \#s uniformly distributed on the unit interval.
+  % We're going to skip this
+  
+  \item \textbf{Sampling rule}: prescription for sampling the pdf (given having random \#s)
+  % That's also next class
+  
+  \item \textbf{Scoring}: the outcomes must be accumulated/\underline{tallied} for quantities of interest
+  % we might cover it
+  
+  \item \textbf{Error estimation}: an estimate of the statistical error (\underline{variance}) of the solution
+  % This class!
+    
+  \item \textbf{Variance Reduction}: methods for reducing the variance and computation time simultaneously
+  % briefly this class, maybe more at the end
+    
+  \item \textbf{Parallelization}: efficient use of computers
+  % probably not
+\end{itemize}
+\end{frame}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Basic Event-Based Algorithm}
+
+\begin{figure}[h!]
+\begin{center}
+  \includegraphics[height=3 in,clip]{fig/MC-algorithm}
+\end{center}
+  \label{fig:mc-algo}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Let's Get Started With}
+
+    \begin{enumerate}
+    \item Physics as Probability
+    \item Definitions: PDF \& CDF
+    \item Motivation \& Goal of Random Sampling
+    \item Basic Random Sampling Techniques
+      \begin{itemize}
+        \item Direct Discrete Sampling
+        \item Direct Continuous Sampling
+        \item Rejection Sampling
+      \end{itemize}
+    \end{enumerate}
+
+\vspace*{1em}
+Notes derived from Jasmina Vujic and Paul Wilson
+\end{frame}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Learning Objectives}
+
+    \begin{enumerate}
+    \item Provide examples of probabilistic
+representations of physics
+    \item Distinguish between a PDF and CDF
+    \item Distinguish between a \textit{discrete} PDF
+(CDF) and \\ a \textit{continuous} PDF (CDF)
+    \item Describe the goal of random sampling
+    \item Identify and implement the best
+random sampling technique for a given
+distribution
+    \end{enumerate}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Physics as Probability}
+
+Various physical phenomena can be
+represented by probability distributions
+
+\begin{itemize}
+  \item Photon emission energy
+    \begin{itemize}
+    \item Each possible energy has a different probability
+(intensity)
+    \end{itemize} 
+    
+    \vspace*{0.5 em}
+  \item Scattering cross-sections
+    \begin{itemize}
+    \item Each possible scattering angle has a different
+probability as a function of the energy
+    \end{itemize}
+    
+    \vspace*{0.5 em}
+  \item Transmission through a medium
+    \begin{itemize}
+    \item Probability of reaching a particular position
+depends on the cross-section
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Probability Density Functions}
+
+All variables, $x$, have a \underline{Probability Density Function (PDF)}, $p(x)$, with the following characteristics:
+
+\begin{columns}
+  \begin{column}{0.5\textwidth}
+    \begin{center}
+    \textcolor{berkeleygold}{\underline{Continuous}} 
+    \end{center}
+    %
+    \begin{align*}
+    p\left\lbrace a \leq x \leq b \right\rbrace &= \int_a^b p(x)dx\\
+    & \\
+    p(x) & \geq 0 \\
+    \int_{-\infty}^{\infty} p(x)dx &= 1
+    \end{align*}
+  \end{column}
+  \begin{column}{0.5\textwidth}
+    \begin{center}
+    \textcolor{berkeleyblue}{\underline{Discrete}}  
+    \end{center}
+    %
+    \begin{align*}
+    p(x = x_k) &= p_k \equiv p(x_k)\\
+    k &= 1, \dots, N \\
+    & \\
+    p_k & \geq 0 \\
+    \sum_{k=1}^N p_k &= 1
+    \end{align*}
+  \end{column}
+\end{columns}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Cumulative Distribution Functions}
+
+All PDFs, $p(x)$, have an associated \underline{Cumulative Distribution Function (CDF)}, $P(x)$, with the following properties:
+
+\begin{columns}
+  \begin{column}{0.5\textwidth}
+    \begin{center}
+    \textcolor{berkeleygold}{\underline{Continuous}} 
+    \end{center}
+    %
+    \begin{align*}
+    P\left\lbrace x' \leq x \right\rbrace &= P(x) = \int_{-\infty}^x p(x')dx'\\
+    & \\
+    P(-\infty) &= 0 \:,\quad P(\infty) = 1 \\
+    0 &\leq P(x) \leq 1 \\
+    &\frac{dP(x)}{dx} \geq 0
+    \end{align*}
+  \end{column}
+  \begin{column}{0.5\textwidth}
+    \begin{center}
+    \textcolor{berkeleyblue}{\underline{Discrete}}  
+    \end{center}
+    %
+    \begin{align*}
+    P\left\lbrace x' \leq x \right\rbrace &= P_k \equiv P(x_k) = \sum_{j=1}^k p_j\\
+    k &= 1, \dots, N \\
+    P_0 &= 0 \:,\quad P_N = 1 \\
+    0 &\leq P_k \leq 1 \\
+    P_k & \geq P_{k-1} \\
+    \end{align*}
+  \end{column}
+\end{columns}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Random Sampling Basics}
+
+  	\begin{figure}
+  	\begin{center}
+  		\includegraphics[height=2.75in,clip]{fig/cont-pdf-cdf}
+	\end{center}
+  	\end{figure}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Random Sampling Basics}
+
+  	\begin{figure}
+  	\begin{center}
+  		\includegraphics[height=2.75in,clip]{fig/cont-pdf-cdf-2}
+	\end{center}
+  	\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Random Sampling Basics}
+
+  	\begin{figure}
+  	\begin{center}
+  		\includegraphics[height=2.75in,clip]{fig/cont-pdf-cdf-3}
+	\end{center}
+  	\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Random Sampling Basics}
+
+  	\begin{figure}
+  	\begin{center}
+  		\includegraphics[height=2.75in,clip]{fig/disc-pdf-cdf}
+	\end{center}
+  	\end{figure}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Why Random Sampling}
+
+Various physical phenomena can be
+represented by probabilistic distributions
+
+\begin{itemize}
+    \item The known probability distribution
+represents the \textit{collective} behavior
+\vspace*{1em}
+    \item We need to know the behavior at \textit{each}
+single event
+\vspace*{1em}
+    \item We need to \underline{recreate} the collective behavior after \underline{many} events
+\end{itemize}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Random Sampling Purpose}
+
+Use a random process to select a single
+value with the following requirements
+
+\begin{itemize}
+    \item Each sample should be independent from
+other samples
+\vspace*{1em}
+    \item The PDF formed from a large number of
+samples should converge to the initial PDF
+\vspace*{1em}
+    \item Recover the full resolution of the initial PDF
+\end{itemize}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Sampling Techniques}
+
+Random sampling uses \underline{uniformly distributed
+random variables} to \alert{choose a value for a
+variable} according to its probability density
+function
+
+    \begin{itemize}
+    \item \textit{Basic} sampling techniques
+      \begin{itemize}
+      \item Direct discrete sampling
+      \item Continuous discrete sampling
+      \item Rejection sampling
+      \end{itemize}
+    
+    \vspace*{.5em}
+    \item \textit{Advanced }sampling techniques
+      \begin{itemize}
+      \item Histogram
+      \item Piecewise linear
+      \item Alias sampling
+      \item Advanced continuous PDFs
+      \end{itemize}
+    \end{itemize}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Uniformly-Distributed Random Variable}
+
+    \begin{itemize}
+    \item Standard notation
+      \begin{itemize}
+      \item Single random variable: $\xi$
+      \item Pair of random variables: $(\xi, \eta)$
+      \end{itemize}
+    \vspace*{.5em}
+    \item PDF for random variables:
+    \end{itemize}
+
+\begin{columns}
+  \begin{column}{0.5\textwidth}
+    %
+    \begin{align*}
+    p(\xi) = \begin{cases} 
+     1 & 0 \leq \xi < 1 \\ 
+     0 & \text{ otherwise} 
+     \end{cases}
+    \end{align*}
+  \end{column}
+  \begin{column}{0.5\textwidth}
+  	\begin{figure}
+  	\begin{center}
+  		\includegraphics[height=1.5in,clip]{fig/unif-dist-var}
+	\end{center}
+  	\end{figure}
+  \end{column}
+\end{columns}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Direct Discrete Sampling}
+
+Sampling Procedure
+
+    \begin{itemize}
+    \item Generate $\xi$
+    \item Determine $k$ such that $P_{k-1} \leq \xi \leq P_k$
+    \item Return $x = x_k$
+    \end{itemize}
+
+  	\begin{figure}
+  	\begin{center}
+  		\includegraphics<1>[height=1.5in,clip]{fig/disc-pdf}
+  		\includegraphics<2>[height=1.5in,clip]{fig/disc-pdf-samp}
+	\end{center}
+  	\end{figure}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Direct Discrete Sampling}
+
+\vspace*{1 em}
+Consider the CDF
+
+  	\begin{figure}
+  	\begin{center}
+  		\includegraphics[height=2.5in,clip]{fig/disc-cdf}
+	\end{center}
+  	\end{figure}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Direct Discrete Sampling}
+
+    \begin{itemize}
+    \item Requires a table search on $P_k$
+      \begin{itemize}
+      \item Linear search requires $O(N)$ time
+      \item Binary search requires $O(\log_2 N)$ time
+      \end{itemize}
+    \vspace*{.5em}
+    
+    \item Special case: Uniform discrete PDF
+      \begin{itemize}
+      \item $p_k = 1/N$
+      \item $P_k = k/N$
+      \item $k = \left\lfloor{1 + N\xi}\right\rfloor$ (floor function)
+      \end{itemize}
+    \end{itemize}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Direct Continuous Sampling}
+
+    \begin{itemize}
+    \item Can only be used if CDF can be inverted
+    \item Direct solution of $P(x)= \xi$
+    \item Sampling Procedure:
+    \end{itemize}
+    \hspace*{3 em} Generate $\xi$ , \hspace*{1 em} Determine $x = P^{-1}(\xi)$
+  	\begin{figure}
+  	\begin{center}
+  		\includegraphics<1>[height=1.5in,clip]{fig/cont-pdf}
+  		\includegraphics<2>[height=1.5in,clip]{fig/cont-cdf-on-pdf}
+  		\includegraphics<3>[height=1.5in,clip]{fig/cont-cdf-on-pdf-grey}
+	\end{center}
+  	\end{figure}    
+    
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Direct Continuous Sampling}
+
+    \begin{itemize}
+    \item Advantages: 
+      \begin{itemize}
+      \item Straightforward math \& coding
+      \end{itemize}
+    \vspace*{1 em}
+    \item Disadvantages:
+      \begin{itemize}
+      \item Can involve computationally slow functions
+      \item Not always possible to invert $P(x)$
+      \end{itemize}
+    \end{itemize}
+    
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Normalization}
+
+    \begin{itemize}
+    \item Random sampling depends on \textbf{shape} and not on \sout{magnitude}
+    \item Normalization for formal definition of PDF/CDF
+required
+    \end{itemize}
+%
+\[
+  \begin{aligned}
+g(t)dt &= e^{-\lambda t} dt \:, \quad t > 0 \\
+  %
+G(t) &= \int_{-\infty}^t g(t')dt' = \int_0^t g(t') dt' = \biggl[- \frac{e^{-\lambda t'}}{\lambda} \biggr]_0^t = \frac{1}{\lambda} \bigl(1 - e^{-\lambda t}\bigr)\\
+    G(\infty) &= \frac{1}{\lambda}\\
+    %
+\\p(t) &= \lambda g(t) = \lambda e^{-\lambda t} dt \:, \quad t > 0 \\
+    %
+    P(t) &= \int_{-\infty}^t p(t')dt' = \int_0^t \lambda f(t') dt' = \bigl[e^{-\lambda t'} \bigr]_0^t = 1 - e^{-\lambda t}\\
+    %
+    P(\infty) &= 1
+  \end{aligned}
+\]    
+    
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Shifted Uniform}
+
+\[
+  \begin{aligned}
+g(x) dx &= C \quad a \leq x < b\\
+  %
+G(x) &= \int_{-\infty}^x g(x')dx' = C \int_a^x dx' = C\bigl[x' \bigr]_a^x = C \bigl(x - a)\\
+    G(\infty) &= G(b) = C(b-a)\\
+    %
+\\p(x) &= \frac{g(x)}{G(\infty)} = \frac{C}{C(b-a)} = \frac{1}{b-a} \quad a \leq x < b\\
+    %
+P(x) &= \int_{-\infty}^x p(x')dx' = \frac{1}{b-a}\int_a^x dx' = \frac{x-a}{b-a}\\
+    %
+    &\\
+    x &= P^{-1}(\xi) = \xi\bigl(b-a\bigr) + a
+  \end{aligned}
+\]    
+    
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Simple Line, Slope = $m$}
+
+\[
+  \begin{aligned}
+g(x) dx &= mx \qquad 0 \leq x < 1\\
+  %
+G(x) &= \int_{-\infty}^x g(x')dx' = \int_0^x mx' dx' = \frac{m}{2}\bigl[x'^2 \bigr]_0^x = \frac{m}{2} x^2\\
+    G(\infty) &= G(1) = \frac{m}{2}\\
+    %
+\\p(x) &= \frac{mx}{\frac{m}{2}} = 2x \qquad 0 \leq x < 1\\
+    %
+P(x) &= \int_{-\infty}^x p(x')dx' = \int_0^x 2x' dx' = \bigl[x'^2 \bigr]_0^x = x^2\\
+    %
+    &\\
+    x &= P^{-1}(\xi) = \sqrt{\xi} \qquad\text{Independent of }m
+  \end{aligned}
+\]    
+    
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Shifted Line}
+
+\[
+  \begin{aligned}
+  g(x) dx &= m(x - a) \qquad a \leq x < b\\
+  %
+  G(x) &= \int_{-\infty}^x g(x')dx' = \int_a^x m(x'-a) dx' = \frac{m}{2}\bigl[(x'-a)^2 \bigr]_0^x = \frac{m}{2} (x-a)^2\\
+    G(\infty) &= G(1) = \frac{m}{2}(b-a)^2\\
+    %
+    \\p(x) &= \frac{m(x-a)}{\frac{m}{2}(b-a)^2} = 2 \frac{x-a}{(b-a)^2}\qquad a \leq x < b\\
+    %
+    P(x) &= \int_{-\infty}^x p(x')dx' = \frac{1}{(b-a)^2}\int_a^x 2(x'-a) dx' = \frac{(x-a)^2}{(b-a)^2}\\
+    %
+    &\\
+    x &= P^{-1}(\xi) = \sqrt{\xi}(b-a) + a \qquad\text{Independent of }m
+  \end{aligned}
+\]    
+    
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Rejection Sampling}
+
+    \begin{itemize}
+    \item Many CDFs cannot be inverted
+      \begin{itemize}
+      \item e.g.\ Klien-Nishina cross-section
+      \end{itemize}
+    \vspace*{1 em}
+    
+    \item Use an approach that is more graphical
+      \begin{itemize}
+      \item Select a point in a 2-D domain
+      \item Determine whether that point is above or below the PDF
+      \item Keep those that are below
+      \item Start over if above
+      \end{itemize}
+    \end{itemize}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Rejection Sampling}
+
+    \begin{itemize}
+    \item Select a bounding function, g(x), such that
+      \begin{itemize}
+      \item $g(x)\geq p(x)$ for all $x$
+      \item $g(x)$ is easy to sample
+      \end{itemize}
+    \item Simplest choice is $g(x) = C$
+    \item May not be best choice
+    \vspace*{1 em}
+    
+    \item Generate pair of random variables, $(\xi, \eta)$
+      \begin{itemize}
+      \item $x' = G^{-1} (\xi)$
+      \item If $\eta < p(x')/g(x')$, accept $x'$
+      \item Else, reject $x'$
+      \end{itemize}
+    \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Rejection Sampling}
+
+  	\begin{figure}
+  	\begin{center}
+  		\includegraphics<1>[height=2.5in,clip]{fig/rej-samp1}
+  		\includegraphics<2>[height=2.5in,clip]{fig/rej-samp2}
+  		\includegraphics<3>[height=2.5in,clip]{fig/rej-samp3}
+  		\includegraphics<4>[height=2.5in,clip]{fig/rej-samp4}
+	\end{center}
+  	\end{figure} 
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Rejection Sampling}
+
+    \begin{itemize}
+    \item Advantages
+      \begin{itemize}
+      \item Computationally simple
+      \item Always works
+      \end{itemize}
+    \vspace*{1 em}
+    
+    \item Disadvantages
+      \begin{itemize}
+      \item Will be inefficient if shapes of $g(x)$ and $p(x)$ are not similar
+      \end{itemize}
+    \end{itemize}
+    
+    \begin{equation}
+    \text{Efficiency }= \frac{\int p(x)dx}{\int g(x) dx} \nonumber
+    \end{equation}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Random Sampling Summary}
+
+    \begin{itemize}
+    \item Physics can be represented \textit{probabilistically}
+
+\vspace*{.5em}
+    \item We can create PDFs and from those generate CDFs
+
+\vspace*{.5em}
+    \item These can be either continuous or discrete
+
+\vspace*{.5em}
+    \item We learned some basic ways to use random numbers to \textit{sample} from these distributions to \alert{simulate physics}
+    \end{itemize}
+    
+\end{frame}
+
+\end{document}
