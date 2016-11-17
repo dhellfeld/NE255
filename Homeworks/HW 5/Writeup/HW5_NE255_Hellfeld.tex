@@ -16,7 +16,7 @@
 \usepackage{enumerate}
 \usepackage{wrapfig}
 \usepackage{listings}
-
+\usepackage{diagbox}
 
 % Listings settings
 \lstset{frame=tb,
@@ -95,7 +95,7 @@ and given the following discretizations:
 \begin{itemize}
 \setlength\itemsep{-3pt}
     \item 3 groups
-    \item $P_2$ (number of moments is $(N + 2)^2$)
+    \item $P_2$ (number of moments is $(N + 1)^2$)
     \item $S_2$ (number of angles is $N(N + 2)$, with the $N$ being from $S_N$ rather than $P_N$ above)
     \item $4\times4\times4$ mesh
     \item Diamond Difference
@@ -176,7 +176,7 @@ Implement a Jacobi multigroup solver for the 1D, steady state transport equation
     \item $\alpha=0.5$
     \item $\mu_a = \pm[0.2,0.5,0.7]$
     \item $\Sigma_{t,1}=0.5,\,\, \Sigma_{t,2}=0.8,\,\, \Sigma_{t,3}=1.0$
-    \item $\Sigma_s^{g \rightarrow g'}$ values are given by Table 1.
+    \item $\Sigma_s^{g' \rightarrow g}$ values are given by Table 1.
     \item $q_{e,1}=1.5,\,\, q_{e,2}=0.0,\,\, q_{e,1}=0.2$
     \item left boundary condition is 0.5 incoming in group 1, zero otherwise
 \end{itemize}
@@ -184,16 +184,18 @@ Implement a Jacobi multigroup solver for the 1D, steady state transport equation
 \begin{table}[htb!]
 	\centering
 	\setlength{\tabcolsep}{10pt}
-	\begin{tabular}{c|c|c|c}
-		$g\,/ \,g'$ & 1 & 2 & 3 \\ \hline \hline
+	\begin{tabular}{|c|c|c|c|}
+		\hline
+		\diagbox[width=40pt, height=20pt]{$g'$}{$g$} & 1 & 2 & 3 \\ \hline
 		1 & 0.1 & 0.0 & 0.0 \\ 
 		2 & 0.3 & 0.1 & 0.1 \\ 
-		3 & 0.1 & 0.3 & 0.3 \\ 
+		3 & 0.1 & 0.3 & 0.3 \\ \hline
 	\end{tabular}
-	\caption{Scattering cross-section values. \textcolor{red}{Fix the g/g' cell division}}
+	\caption{Scattering (from group $g'$ to group $g$) cross-section values.}
 \end{table}
 
-Plot the resulting scalar flux in each energy group as a function of $x$. Use a convergence tolerance for the multigroup iteration and the scattering iteration of at least $1 \times 10^{-4}$.\\\\
+
+Plot the resulting scalar flux in each energy group as a function of $x$. Use a convergence tolerance for the multigroup iteration and the scattering iteration of at least $1 \times 10^{-4}$.\\\\
 
 
 ...
