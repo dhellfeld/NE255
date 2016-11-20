@@ -125,12 +125,12 @@ Now, we first adopt the following terminology
 	N &= \text{\# of moments} = (2+1)^2 = 9 \\
 	n &= \text{\# of angular unknowns} = 2(2+2) = 8 \\
 	c &= \text{\# of spatial cells} = 4\times4\times4 = 64 \\
-	u &= \text{\# of unknown per cell} = 4 \,\,(\text{Unknowns in 3D Diamond Difference} \rightarrow \psi_{ijk}, \psi_{i\pm1/2}, \psi_{j\pm1/2}, \psi_{k\pm1/2}) \\
-	\alpha &= G \times n \times c \times u = 3\times8\times64\times4 = 6144 \\
-	f &= G \times N \times c \times u = 3\times9\times64\times4 = 6912
+	u &= \text{\# of unknown per cell} = 1 \,\,(\text{Unknown in 3D Diamond Difference} \rightarrow \text{center flux}, \psi_{ijk}) \\
+	\alpha &= G \times n \times c \times u = 3\times8\times64\times1 = 1536 \\
+	f &= G \times N \times c \times u = 3\times9\times64\times1 = 1728
 \end{align*}
 
-We begin by noting that $\psi$ is a column vector containing the angular flux values for all groups ($G$), at all angles ($n$), in all spatial cells ($c$), and all the solutions we wish to solve for ($u$). Therefore its size is $\alpha \times 1$. The transport operator, $\textbf{L}$ gets applied to the angular flux column vector and we want the operation to return a vector of the same size as $\psi$, therefore it will have a size of $\alpha \times \alpha$. The flux moments will be similar to the angular flux, but instead of angular moments, we have expansion moments. Thus $\phi$ will be a column vector containing the flux values for all groups ($G$), for all expansion moments ($N$), in all spatial cells ($c$) and all solutions points ($u$). Therefore its size is $f \times 1$. Like the transport operator on $\psi$, the scattering matrix $\textbf{S}$ is applied to the flux moments and should return a vector of the same size as $\phi$. Therefore the size of $\textbf{S}$ is $f \times f$. Now the left hand side of the Eq.~(1) has a size of $\alpha \times 1$, and thus the right side should as well. So to get the $\textbf{MS}\phi$ term to have a size of $\alpha \times 1$, the size of $\textbf{M}$ must be $\alpha \times f$. With the same idea, if $\textbf{M}$ has a size of $\alpha \times f$, then the size of $q_e$ must be $f \times 1$ to get a column vector of size $\alpha \times 1$. Finally, for Eq.~(2), if we know that $\phi$ has size $f \times 1$ and $\psi$ has size $\alpha \times 1$, thus in order for the left and right sides to equal, $\textbf{D}$ must have a size of $ f \times \alpha$. Putting this all together, we can write (where again $\alpha = 6144$ and $f = 6912$)
+We begin by noting that $\psi$ is a column vector containing the angular flux values for all groups ($G$), at all angles ($n$), in all spatial cells ($c$), and all the solutions we wish to solve for ($u$). Therefore its size is $\alpha \times 1$. The transport operator, $\textbf{L}$ gets applied to the angular flux column vector and we want the operation to return a vector of the same size as $\psi$, therefore it will have a size of $\alpha \times \alpha$. The flux moments will be similar to the angular flux, but instead of angular moments, we have expansion moments. Thus $\phi$ will be a column vector containing the flux values for all groups ($G$), for all expansion moments ($N$), in all spatial cells ($c$) and all solutions points ($u$). Therefore its size is $f \times 1$. Like the transport operator on $\psi$, the scattering matrix $\textbf{S}$ is applied to the flux moments and should return a vector of the same size as $\phi$. Therefore the size of $\textbf{S}$ is $f \times f$. Now the left hand side of the Eq.~(1) has a size of $\alpha \times 1$, and thus the right side should as well. So to get the $\textbf{MS}\phi$ term to have a size of $\alpha \times 1$, the size of $\textbf{M}$ must be $\alpha \times f$. With the same idea, if $\textbf{M}$ has a size of $\alpha \times f$, then the size of $q_e$ must be $f \times 1$ to get a column vector of size $\alpha \times 1$. Finally, for Eq.~(2), if we know that $\phi$ has size $f \times 1$ and $\psi$ has size $\alpha \times 1$, thus in order for the left and right sides to equal, $\textbf{D}$ must have a size of $ f \times \alpha$. Putting this all together, we can write (where again $\alpha = 1536$ and $f = 1728$)
 %
 \begin{align*}
 	   \overbrace{ \underbrace{\textbf{L}}_{(\alpha \times \alpha)} \underbrace{\psi}_{(\alpha \times 1)} }^{(\alpha \times 1)} = \overbrace{  \underbrace{\textbf{M}}_{(\alpha \times f)}  \underbrace{\textbf{S}}_{(f \times f)} \underbrace{\phi}_{(f \times 1)} }^{(\alpha \times 1)} + \overbrace{ \underbrace{\textbf{M}}_{(\alpha \times f)} \underbrace{q_e}_{(f \times 1)} }^{(\alpha \times 1)}
@@ -167,7 +167,7 @@ where $[\psi]_g$ represents the column vector for all angles, cells, and unknown
 \end{bmatrix} ^ T\,,
 \end{align*}
 
-where $\psi_a^g$ is again another column vector containing all the values in all cells and unknowns (length = $c \times u = 64 \times 4 = 256$). We can write $\psi$ and $[\psi]_1$ as an example using the values at hand (remembering that each $\psi_a^g$ term includes values for all cells and unknowns)
+where $\psi_a^g$ is again another column vector containing all the values in all cells and unknowns (length = $c \times u = 64 \times 1 = 64$). We can write $\psi$ and $[\psi]_1$ as an example using the values at hand (remembering that each $\psi_a^g$ term includes values for all cells and unknowns)
 %
 \begin{align*}
 \psi =
@@ -189,7 +189,7 @@ We see that the size of $\psi$ will indeed be $Gncu \times 1$ or $\alpha \times 
 \phi =
 \begin{bmatrix}
     [\phi]_1 & [\phi]_2 & \dots & [\phi]_g & \dots & [\phi]_G 
-\end{bmatrix} ^ ,,
+\end{bmatrix} ^ T\,,
 \end{align*}
 
 where $[\phi]_g$ represents the column vector for all $P_{N'}$ expansions, cells, and unknowns within group $g$
@@ -198,10 +198,10 @@ where $[\phi]_g$ represents the column vector for all $P_{N'}$ expansions, cells
 [\phi]_g =
 \begin{bmatrix}
     \phi_{00}^g & \phi_{10}^g & \vartheta_{11}^g & \phi_{11}^g & \phi_{20}^g & \vartheta_{21}^g & \phi_{21}^g &  \dots & \vartheta_{N'N'}^g & \phi_{N'N'}^g
-\end{bmatrix} ^ ,,
+\end{bmatrix} ^ T\,,
 \end{align*}
 
-where $(\phi/\vartheta)_{lm}^g$ are again column vectors containing all the values in all cells and unknowns (length = $c \times u = 64 \times 4 = 256$). As an example, using the values at hand, we can write
+where $(\phi/\vartheta)_{lm}^g$ are again column vectors containing all the values in all cells and unknowns (length = $c \times u = 64 \times 1 = 64$). As an example, using the values at hand, we can write
 %
 \begin{align*}
 [\phi]_1 =
@@ -558,13 +558,67 @@ Implement a Jacobi multigroup solver for the 1D, steady state transport equation
 \end{table}
 
 
-Plot the resulting scalar flux in each energy group as a function of $x$. Use a convergence tolerance for the multigroup iteration and the scattering iteration of at least $1 \times 10^{-4}$.\\\\
+Plot the resulting scalar flux in each energy group as a function of $x$. Use a convergence tolerance for the multigroup iteration and the scattering iteration of at least $1 \times 10^{-4}$.\\
 
 
-...
+$\Rightarrow$ The code from the previous homework was used to perform the inner (within group) iterations for all angles, but now the scattering source includes the scattering from all groups into the current group
+%
+\begin{align*}
+	s_a^{g,(k)} = \sum_{g'=1}^G \sum_{l=0}^N w_a \Sigma_{sl}^{g'\rightarrow g}(x) \psi_l^{g'}(x) + q_a^g(x)\,.
+\end{align*}
 
+Looking at Table 1, we see there is only in-group scattering in group 1 ($1\rightarrow1$). In group 2, we have downscattering from group 1 ($1\rightarrow2$), in-group scattering ($2\rightarrow2$), and upscattering from group 3 ($3\rightarrow2$). In group 3, we have downscattering from group 1 ($1\rightarrow3$), downscattering from group 2 ($2\rightarrow3$), and in-group scattering ($3\rightarrow3$). We begin in group 1, and iterate on the scattering source until convergence ($l_2$ norm of the difference of the current scalar flux and previous scalar flux). This is the same procedure as the previous homework. Once group 1 has converged, we then store the group 1 flux and use it in the calculation of the source in the group 2 calculation (with an initial guess for the group 3 flux). Once group 2 has converged, we store the values and use them in the source for group 3. It is clear that we will need to perform multiple iterations over the groups (outer iterations) in order to update the group fluxes after the inner iterations. To define outer iteration convergence, we sum the group scattering source for each group, in each cell, 
+%
+\begin{align*}
+	\sum_{g=1}^G \left[ \sum_{g'=1}^G \sum_{l=0}^N w_a \Sigma_{sl}^{g'\rightarrow g}(x) \psi_l^{g'}(x) + q_a^g(x) \right] \,.
+\end{align*}
 
+and then compute the $l_2$ norm of the difference between the current iteration and the previous iteration. Since group 2 and 3 have no influence on group 1, it will not need more than one outer iteration. Since both group 2 and 3 have influence from other groups, we will need to perform multiple outer iterations until convergence. \\
 
+The code is below and the results (center group scalar fluxes) are plotted in Fig.~1. We see that group 1 has the largest amplitude, followed by group 2 and then group 3. This agrees with intuition because there is a large source into group 1 and the total cross-section is small compared to the other cells. The particles in group 1 can scatter down in energy to groups 2 and 3. In group 2, there is no external source and a larger total cross-section. There is a small source of particles into group 3 and particles from group 1 and 2 can scatter down into group 3, but we see that the large total cross section and ability to upscatter into 2 significantly limits the flux in group 3.
+
+\lstinputlisting[language=Python]{../p2/p2.py}
+
+\vspace{10pt}
+Output:
+\begin{lstlisting}
+(Group = 1) Number of iterations = 7
+(Group = 2) Number of iterations = 6
+(Group = 3) Number of iterations = 8
+Outer group interation = 1
+(Group = 1) Number of iterations = 1
+(Group = 2) Number of iterations = 5
+(Group = 3) Number of iterations = 5
+Outer group interation = 2
+(Group = 1) Number of iterations = 1
+(Group = 2) Number of iterations = 3
+(Group = 3) Number of iterations = 3
+Outer group interation = 3
+(Group = 1) Number of iterations = 1
+(Group = 2) Number of iterations = 2
+(Group = 3) Number of iterations = 1
+Outer group interation = 4
+(Group = 1) Number of iterations = 1
+(Group = 2) Number of iterations = 1
+(Group = 3) Number of iterations = 1
+Outer group interation = 5
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\textwidth]{Figures/groupcenterfluxes.png}
+\vspace{-7pt}
+\caption{Cell centered scalar flux values for groups 1, 2, and 3.}
+\end{figure}
+
+If we reduce the total cross-sections in group 2 and 3 (to 0.5 in each group), we see that the group 3 flux surpasses the group 2 flux (Fig.~2). This agrees with intuition, as now particles in group 2 will have a higher likelihood to scatter into group 3 and once in group 3, have a smaller likelihood to get absorbed. We also see an increase in amplitude for both group 2 and group 3, because the absorption cross-section is now lower. And again, since groups 2 and 3 have no influence on group 1, the group 1 flux is unchanged.
+
+\begin{figure}[htb!]
+\centering
+\includegraphics[width=0.6\textwidth]{Figures/groupcenterfluxes_lowertotxsection.png}
+\vspace{-7pt}
+\caption{Cell centered scalar flux values for groups 1, 2, and 3 using $\Sigma_t = 0.5$ in all groups.}
+\end{figure}
 
 
 
