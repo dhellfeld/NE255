@@ -7,107 +7,120 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Define variables
-a = 0.5    # -0.5, 0.0, 0.5
-mu = np.asarray([0.2,0.7,-0.2,-0.7])
-sig_t = 1.0
-sig_s = 0.5
-q = 1.0
-d_array = np.asarray([0.4,0.2,0.125,0.1,0.08])
-weight = np.asarray([0.5,0.5,0.5,0.5])   # (made up quaderature set, equiprobable, normalized to 2)
+a     = 0.5
+mu    = np.array([0.2,0.5,0.7,-0.2,-0.5,-0.7])
+sig_t = np.array([0.5,0.8,1.0])
+sig_s = np.array([[0.1,0.0,0.0],[0.3,0.1,0.1],[0.1,0.3,0.3]])
+q_e   = np.array([1.5,0.0,0.2])
+d     = 0.1
+x0    = 0.0
+x1    = 2.0
 
-# Loop through mesh spacings
-loopnum = 1   # for subplots
-for d in d_array:
+# Define more variables
+N = (x1 - x0) / d
+x = np.linspace((d/2.), 2.-(d/2.),N)   # get center points for plotting
 
-    # Define more variables
-    N = 2. / d
-    x = np.linspace((d/2.), 2.-(d/2.),N)   # get center points for plotting
+# Group fluxes
+psi_group1 = np.zeros((N,6))
+psi_group2 = np.zeros((N,6))
+psi_group3 = np.zeros((N,6))
+phi_group1 = np.zeros(N)
+phi_group2 = np.zeros(N)
+phi_group3 = np.zeros(N)
 
-    # Initialize center fluxes arrays (2D now b/c two angles)
-    psi_cent_right = np.ones((N,2))
-    psi_cent_left  = np.ones((N,2))
-    phi = np.zeros(N)
-    psi_cent_right_new = np.zeros((N,2))
-    psi_cent_left_new  = np.zeros((N,2))
-    phi_new = np.zeros(N)
+outerconverge = False
+outeritr = 0
+while (outerconverge == False):
 
-    # Iterate
-    converge = False
-    itr = 0
-    while (converge == False):
+    groupsource = np.zeros(N)
+    for group in range(3):
+        groupsource += q_e[group] + (2./6.) * (sig_s[group,0]*psi_group1.sum(axis=1)) + (sig_s[group,1]*psi_group2.sum(axis=1)) + (sig_s[group,2]*psi_group3.sum(axis=1))
 
-        # Boundary condition
-        psi_in  = np.asarray([2.,2.])
-        psi_out = np.asarray([1.,1.])
+    for group in range(3):
 
-        # Sweep in mu > 0 (right)
-        for i in range(int(N)):
-            s = q + sig_s * (weight[0]*psi_cent_right[i,0] + weight[1]*psi_cent_right[i,1] + weight[2]*psi_cent_left[i,0] +  weight[3]*psi_cent_left[i,1])
+        # Initialize center fluxes arrays
+        psi_new = np.zeros((N,6))
+        phi_new = np.zeros(N)
 
-            psi_cent_right_new[i,0] = (s + (2. * np.fabs(mu[0]) / (d * (1.+a))) * psi_in[0]) / (sig_t + (2. * np.fabs(mu[0]) / (d*(1.+a))))
-            psi_cent_right_new[i,1] = (s + (2. * np.fabs(mu[1]) / (d * (1.+a))) * psi_in[1]) / (sig_t + (2. * np.fabs(mu[1]) / (d*(1.+a))))
+        # Iterate
+        innerconverge = False
+        inneritr = 0
+        while (innerconverge == False):
 
-            psi_out[0] = ((2. / (1.+a)) * psi_cent_right[i,0]) - ((1.-a)/(1.+a))*psi_in[0]
-            psi_out[1] = ((2. / (1.+a)) * psi_cent_right[i,1]) - ((1.-a)/(1.+a))*psi_in[1]
+            # Boundary condition
+            if (group == 0):
+                psi_in  = np.array([0.5,0.5,0.5])
+            else:
+                psi_in  = np.array([0.0,0.0,0.0])
 
-            psi_in = psi_out
+            # Sweep in mu > 0 (right)
+            for i in range(int(N)):
+                s = q_e[group] + (2./6.) * ((sig_s[group,0]*psi_group1[i,:].sum()) + (sig_s[group,1]*psi_group2[i,:].sum()) + (sig_s[group,2]*psi_group3[i,:].sum()))
 
-        # Sweep in mu < 0 (left)
-        for i in range(int(N)):
-            s = q + sig_s * (weight[0]*psi_cent_right[N-i-1,0] + weight[1]*psi_cent_right[N-i-1,1] + weight[2]*psi_cent_left[N-i-1,0] +  weight[3]*psi_cent_left[N-i-1,1])
+                psi_new[i,0:3] = (s + (2. * np.fabs(mu[0:3]) / (d * (1.+a))) * psi_in) / (sig_t[group] + (2. * np.fabs(mu[0:3]) / (d*(1.+a))))
 
-            psi_cent_left_new[N-i-1,0] = (s + (2. * np.fabs(mu[2]) / (d*(1.-a))) * psi_in[0]) / (sig_t + (2. * np.fabs(mu[2]) / (d*(1.-a))))
-            psi_cent_left_new[N-i-1,1] = (s + (2. * np.fabs(mu[3]) / (d*(1.-a))) * psi_in[1]) / (sig_t + (2. * np.fabs(mu[3]) / (d*(1.-a))))
+                psi_in = ((2. / (1.+a)) * psi_new[i,0:3]) - ((1.-a)/(1.+a))*psi_in
 
-            psi_out[0] = ((2./(1.-a)) * psi_cent_left[N-i-1,0]) - ((1.+a)/(1.-a))*psi_in[0]
-            psi_out[1] = ((2./(1.-a)) * psi_cent_left[N-i-1,1]) - ((1.+a)/(1.-a))*psi_in[1]
 
-            psi_in = psi_out
+            # Sweep in mu < 0 (left)
+            for i in range(int(N)):
+                s = q_e[group] + (2./6.) * ((sig_s[group,0]*psi_group1[N-i-1,:].sum()) + (sig_s[group,1]*psi_group2[N-i-1,:].sum()) + (sig_s[group,2]*psi_group3[N-i-1,:].sum()))
 
-        # Calculate scalar flux from angular flux (quaderature)
-        phi_new = weight[0]*psi_cent_right_new[:,0] + weight[1]*psi_cent_right_new[:,1] + weight[2]*psi_cent_left_new[:,0] + weight[3]*psi_cent_left_new[:,1]
+                psi_new[N-i-1,3:6] = (s + (2. * np.fabs(mu[3:6]) / (d * (1.+a))) * psi_in) / (sig_t[group] + (2. * np.fabs(mu[3:6]) / (d*(1.+a))))
 
-        # Calculate convergence criterion (l2 norm of differences)
-        crit = np.sqrt(np.sum((phi_new - phi)**2))
+                psi_in = ((2. / (1.+a)) * psi_new[N-i-1,3:6]) - ((1.-a)/(1.+a))*psi_in
 
-        # Check convergence
-        if (crit < 0.0001):
-            converge = True
 
-        # Update fluxes
-        psi_cent_right = psi_cent_right_new
-        psi_cent_left = psi_cent_left_new
-        phi = phi_new
+            # Calculate scalar flux from angular flux (quaderature)
+            phi_new = (2./6.) * psi_new.sum(axis=1)
 
-        # Increment iteration number
-        itr += 1
+            # Calculate convergence criterion (l2 norm of differences)
+            if (group == 0):
+                innercrit = np.sqrt(np.sum((phi_new - phi_group1)**2))
+                psi_group1 = np.copy(psi_new)
+                phi_group1 = np.copy(phi_new)
+            elif (group == 1):
+                innercrit = np.sqrt(np.sum((phi_new - phi_group2)**2))
+                psi_group2 = np.copy(psi_new)
+                phi_group2 = np.copy(phi_new)
+            elif (group == 2):
+                innercrit = np.sqrt(np.sum((phi_new - phi_group3)**2))
+                psi_group3 = np.copy(psi_new)
+                phi_group3 = np.copy(phi_new)
 
-    # How many iterations did we do?
-    print '(mesh spacing = %.3f) Number of iterations = %i' % (d,itr)
+            # Check convergence
+            if (innercrit < 0.0001):
+                innerconverge = True
 
-    # Plot angular flux
-    plt.subplot(5,2,2*loopnum-1)
-    plt.subplots_adjust(hspace = 0.0, wspace=0.2)
-    plt.plot(x,psi_cent_right[:,0], marker="o", linestyle='none',label='$\mu=0.2$')
-    plt.plot(x,psi_cent_right[:,1], marker="o", linestyle='none', label='$\mu=0.7$')
-    plt.plot(x,psi_cent_left[:,0], marker="o", linestyle='none',label='$\mu=-0.2$')
-    plt.plot(x,psi_cent_left[:,1], marker="o", linestyle='none', label='$\mu=-0.7$')
-    plt.xlim(-0.1,2.4)
-    plt.ylim(np.min(psi_cent_left)-0.5*np.max(psi_cent_left),np.max(psi_cent_right)+0.3*np.max(psi_cent_right))
-    plt.xlabel('x'), plt.ylabel('Center $\psi$, ($\Delta_i$=%.2f)\n(Iterations = %i)' % (d,itr))
-    if (loopnum == 1): plt.title('Cell Center Angular Flux Profile, $\\alpha$=%0.2f' % a)
-    plt.legend(numpoints=1,fontsize=10)
+            # Increment iteration number
+            inneritr += 1
 
-    # Plot scalar flux
-    plt.subplot(5,2,2*loopnum)
-    plt.plot(x,phi, marker='s', color='c',linestyle='none')
-    plt.xlim(-0.1,2.1)
-    plt.ylim(np.min(phi)-0.3*np.max(phi),np.max(phi)+0.3*np.max(phi))
-    plt.xlabel('x'), plt.ylabel('Center $\phi$, ($\Delta_i$=%.2f)\n(Iterations = %i)' % (d,itr))
-    if (loopnum == 1): plt.title('Cell Center Scalar Flux Profile, $\\alpha$=%.2f' % a)
+        # How many iterations did we do?
+        print '(Group = %i) Number of iterations = %i' % (group+1,inneritr)
 
-    # Increment loopnum
-    loopnum += 1
+    groupsource_new = np.zeros(N)
+    for group in range(3):
+        groupsource_new += q_e[group] + (2./6.) * (sig_s[group,0]*psi_group1.sum(axis=1)) + (sig_s[group,1]*psi_group2.sum(axis=1)) + (sig_s[group,2]*psi_group3.sum(axis=1))
+
+    outercrit = np.sqrt(np.sum((groupsource_new - groupsource)**2))
+
+    if (outercrit < 1.0e-4):
+         outerconverge = True
+
+    outeritr += 1
+
+    print 'Outer group interation = %i' % outeritr
+
+# Plot scalar flux
+plt.figure()
+plt.plot(x,phi_group1, marker='s', color='c',linestyle='none', label='Group 1')
+plt.plot(x,phi_group2, marker='s', color='b',linestyle='none', label='Group 2')
+plt.plot(x,phi_group3, marker='s', color='r',linestyle='none', label='Group 3')
+plt.xlim(-0.1,2.1)
+plt.ylim(0,25)
+plt.xlabel('x'), plt.ylabel('Center $\phi$')
+plt.title('Cell Center Scalar Flux Profile, $\\alpha$=%.2f' % a)
+plt.legend(numpoints=1,fontsize=10)
 
 # Render plots
 plt.show()
