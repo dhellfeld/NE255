@@ -121,7 +121,7 @@ while (outerconverge == False):
     # Increment outer iteration number
     outeritr += 1
 
-    print 'Outer group interation = %i' % outeritr
+    print 'Outer group iteration = %i' % outeritr
 
 # Plot scalar fluxes
 plt.figure()
