@@ -107,7 +107,7 @@ and given the following discretizations:
 \end{enumerate}
 
 \vspace{5pt}
-The fully discretized transport equation (with implicit spatial discretization in $\vec{r}$) is given by
+$\Rightarrow$ The fully discretized transport equation (with implicit spatial discretization in $\vec{r}$) is given by
 %
 \begin{align*}
 	\hat{\Omega}_a \cdot \nabla \psi_a^g(\vec{r}) + \Sigma_t^g(\vec{r}) \psi_a^g(\vec{r}) &=  \sum_{g'=1}^G \sum_{l=0}^N \Sigma_{sl}^{g' \rightarrow g}(\vec{r}) \Big[ Y_{l0}^e(\hat{\Omega}_a) \phi_{l0}^{g'}(\vec{r}) + \sum_{m=1}^l ( Y_{lm}^e ( \hat{\Omega}_a ) \phi_{lm}^{g'} (\vec{r}) + Y_{lm}^o (\hat{\Omega}_a) \vartheta_{lm}^{g'} (\vec{r}) ) \Big] + q_{a,e}^g (\vec{r})\,, \\
@@ -149,7 +149,7 @@ We begin by noting that $\psi$ is a column vector containing the angular flux va
 \item Write out the matrices $[\textbf{M}]_{gg}$, $\textbf{S}$, and $[\textbf{S}]_{21}$ as well as the vectors $\psi$, $[\psi]_1$, and $[\phi]_1$ to make sure you know what values match with what.
 \end{enumerate}
 
-Let's begin with the flux vectors. The angular flux will again be a set of values for all groups, angles, cells, and unknowns. We can first write 
+$\Rightarrow$ Let's begin with the flux vectors. The angular flux will again be a set of values for all groups, angles, cells, and unknowns. We can first write 
 %
 \begin{align*}
 \psi =
@@ -362,7 +362,7 @@ Each element is this matrix has size $cu \times cu$ so the size of $[\textbf{S}]
 \item Write what the $\textbf{D}$ matrix would be.
 \end{enumerate}
 
-As stated above, the $\textbf{D}$ matrix is the discrete-to-moment operator and is given by $\textbf{M}^\textbf{T}\textbf{W}$ where $\textbf{W}$ is a diagonal matrix of diagonal matrices of quadrature weights ($\textbf{D}=\textbf{M}^\textbf{T}\textbf{W}=\sum_{a=1}^n Y_{lm}^{e/o} w_a$). In general we can write
+$\Rightarrow$ As stated above, the $\textbf{D}$ matrix is the discrete-to-moment operator and is given by $\textbf{M}^\textbf{T}\textbf{W}$ where $\textbf{W}$ is a diagonal matrix of diagonal matrices of quadrature weights ($\textbf{D}=\textbf{M}^\textbf{T}\textbf{W}=\sum_{a=1}^n Y_{lm}^{e/o} w_a$). In general we can write
 %
 \begin{align*}
 \textbf{D} = \textbf{M}^T\textbf{W} &=
@@ -478,7 +478,7 @@ Accounting for each element in $\Box$ being a matrix of size $cu \times cu$, the
 \item Why don't we form an $\textbf{L}$ matrix?
 \end{enumerate}
 
-In the nuclear field, the $\textbf{L}$ matrix is typically not formed because it will govern how we can implement our solvers (except with $SP_N$, which does/can form $\textbf{L}$). Instead, we essentially find $\textbf{L}^{-1}$ and use it implicitly to solve for $\psi$.
+$\Rightarrow$ In the nuclear field, the $\textbf{L}$ matrix is typically not formed because it will govern how we can implement our solvers (except with $SP_N$, which does/can form $\textbf{L}$). Instead, we essentially find $\textbf{L}^{-1}$ and use it implicitly to solve for $\psi$. Furthermore, by not directly forming the $\textbf{L}$ matrix, we save memory during the computation. 
 
 %
 %
@@ -489,7 +489,7 @@ In the nuclear field, the $\textbf{L}$ matrix is typically not formed because it
 \item Combine Eqs.~(1) and (2) to get a system that looks like $\textbf{A}x = b$, writing out the steps.
 \end{enumerate}
 
-Starting with
+$\Rightarrow$ Starting with
 %
 \begin{align*}
     \textbf{L} \psi = \textbf{MS} \phi + \textbf{M} q_e\,,
