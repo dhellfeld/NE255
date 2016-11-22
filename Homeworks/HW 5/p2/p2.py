@@ -3,19 +3,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Within group iteration procedure (weighted diamond difference)
-def InnerIteration(a, mu, sig_t, sig_s, q_e, N, psi_group1, psi_group2, psi_group3, group):
+def InnerIteration(a, mu, sig_t, sig_s, q_e, N, psi_group1, psi_group2, psi_group3, group, converge):
 
     # Initialize new center fluxes arrays for the curret group
     psi_new = np.zeros((N,6))
     phi_new = np.zeros(N)
 
     # Calculate starting scalar flux (Sum 6 directions with equal weight)
-    if (group == 0):
-        phi = (2./np.size(mu)) * psi_group1.sum(axis=1)
-    elif (group == 1):
-        phi = (2./np.size(mu)) * psi_group2.sum(axis=1)
-    elif (group == 2):
-        phi = (2./np.size(mu)) * psi_group3.sum(axis=1)
+    if   (group == 1): phi = (2./np.size(mu)) * psi_group1.sum(axis=1)
+    elif (group == 2): phi = (2./np.size(mu)) * psi_group2.sum(axis=1)
+    elif (group == 3): phi = (2./np.size(mu)) * psi_group3.sum(axis=1)
 
     # Start iterating
     innerconverge = False
@@ -23,33 +20,30 @@ def InnerIteration(a, mu, sig_t, sig_s, q_e, N, psi_group1, psi_group2, psi_grou
     while (innerconverge == False):
 
         # Boundary condition
-        if (group == 0):
-            psi_in  = np.array([0.5,0.5,0.5])
-        else:
-            psi_in  = np.array([0.0,0.0,0.0])
+        if (group == 0): psi_in  = np.array([0.5,0.5,0.5])
+        else           : psi_in  = np.array([0.0,0.0,0.0])
 
         # Sweep in mu > 0 (right)
         for i in range(int(N)):
-
             # Calculate source
             # Weight is normalized to two, and there are 18 terms (6 directions in 3 groups)
-            s = q_e[group] + (2./(np.size(mu)*np.size(q_e)))  * ((sig_s[group,0]*psi_group1[i,:].sum()) + (sig_s[group,1]*psi_group2[i,:].sum()) + (sig_s[group,2]*psi_group3[i,:].sum()))
+            s = q_e[group-1] + (2./(np.size(mu)*np.size(q_e))) * ((sig_s[group-1,0]*psi_group1[i,:].sum()) + (sig_s[group-1,1]*psi_group2[i,:].sum()) + (sig_s[group-1,2]*psi_group3[i,:].sum()))
 
-            # Calculate cetner flux
-            psi_new[i,0:3] = (s + (2. * np.fabs(mu[0:3]) / (d * (1.+a))) * psi_in) / (sig_t[group] + (2. * np.fabs(mu[0:3]) / (d*(1.+a))))
+            # Calculate center flux
+            psi_new[i,0:3] = (s + (2. * np.fabs(mu[0:3]) / (d * (1.+a))) * psi_in) / (sig_t[group-1] + (2. * np.fabs(mu[0:3]) / (d*(1.+a))))
 
             # Calcualte outgoing flux (set it equal to incoming flux for next cell)
             psi_in = ((2. / (1.+a)) * psi_new[i,0:3]) - ((1.-a)/(1.+a))*psi_in
 
         # Sweep in mu < 0 (left)
         for i in range(int(N)):
-            s = q_e[group] + (2./(np.size(mu)*np.size(q_e)))  * ((sig_s[group,0]*psi_group1[N-i-1,:].sum()) + (sig_s[group,1]*psi_group2[N-i-1,:].sum()) + (sig_s[group,2]*psi_group3[N-i-1,:].sum()))
+            s = q_e[group-1] + (2./(np.size(mu)*np.size(q_e)))  * ((sig_s[group-1,0]*psi_group1[N-i-1,:].sum()) + (sig_s[group-1,1]*psi_group2[N-i-1,:].sum()) + (sig_s[group-1,2]*psi_group3[N-i-1,:].sum()))
 
-            psi_new[N-i-1,3:6] = (s + (2. * np.fabs(mu[3:6]) / (d * (1.+a))) * psi_in) / (sig_t[group] + (2. * np.fabs(mu[3:6]) / (d*(1.+a))))
+            psi_new[N-i-1,3:6] = (s + (2. * np.fabs(mu[3:6]) / (d * (1.+a))) * psi_in) / (sig_t[group-1] + (2. * np.fabs(mu[3:6]) / (d*(1.+a))))
 
             psi_in = ((2. / (1.+a)) * psi_new[N-i-1,3:6]) - ((1.-a)/(1.+a))*psi_in
 
-        # Calculate scalar flux from angular flux
+        # Calculate scalar flux from angular flux ((1/2)*SUM(w*psi))
         # Sum 6 directions with equal weight
         phi_new = (2./np.size(mu))  * psi_new.sum(axis=1)
 
@@ -57,27 +51,22 @@ def InnerIteration(a, mu, sig_t, sig_s, q_e, N, psi_group1, psi_group2, psi_grou
         innercrit = np.sqrt(np.sum((phi_new - phi)**2))
 
         # Check convergence
-        if (innercrit < 1.0e-4):
-            innerconverge = True
+        if (innercrit < converge): innerconverge = True
 
         # Update anglular fluxes
         phi= np.copy(phi_new)
-        if (group == 0):
-            psi_group1 = np.copy(psi_new)
-        elif (group == 1):
-            psi_group2 = np.copy(psi_new)
-        elif (group == 2):
-            psi_group3 = np.copy(psi_new)
+        if   (group == 1): psi_group1 = np.copy(psi_new)
+        elif (group == 2): psi_group2 = np.copy(psi_new)
+        elif (group == 3): psi_group3 = np.copy(psi_new)
 
         # Increment inner iteration number
         inneritr += 1
 
     # How many inner iterations did we do?
-    print '(Group = %i) Number of iterations = %i' % (group+1,inneritr)
+    print '(Group = %i) Number of iterations = %i' % (group,inneritr)
 
     # Return angular and scalar flux for group
     return psi_new, phi
-
 
 # -----------------------------------------------
 
@@ -91,20 +80,19 @@ q_e   = np.array([1.5,0.0,0.2])
 d     = 0.1
 x0    = 0.0
 x1    = 2.0
-N = (x1 - x0) / d
-x = np.linspace((d/2.), 2.-(d/2.),N)   # center points for plotting
+N     = (x1 - x0) / d
+x     = np.linspace((d/2.), 2.-(d/2.),N)   # center points for plotting
 
-# Group fluxes (inital guess)
-psi_group1 = np.zeros((N,6))
-psi_group2 = np.zeros((N,6))
-psi_group3 = np.zeros((N,6))
-phi_group1 = np.zeros(N)
-phi_group2 = np.zeros(N)
-phi_group3 = np.zeros(N)
+# Group fluxes (inital guesses)
+psi_group1 = psi_group2 = psi_group3 = np.zeros((N,6))
+phi_group1 = phi_group2 = phi_group3 = np.zeros(N)
 
 # Choose solver method
 #method = 'GaussSeidel'
 method = 'Jacobi'
+
+# Convergence value
+converge = 1.0e-4
 
 # Perform outer iteration over energy groups
 outerconverge = False
@@ -119,9 +107,9 @@ while (outerconverge == False):
     if (method == 'Jacobi'):
         # Do within group iterations (all with inital guesses)
         # Store in intermediate variable (as to not update between groups, which is Gauss-Seidel)
-        psi_group1_, phi_group1_ = InnerIteration(a, mu, sig_t, sig_s, q_e, N, psi_group1, psi_group2, psi_group3, 0)
-        psi_group2_, phi_group2_ = InnerIteration(a, mu, sig_t, sig_s, q_e, N, psi_group1, psi_group2, psi_group3, 1)
-        psi_group3_, phi_group3_ = InnerIteration(a, mu, sig_t, sig_s, q_e, N, psi_group1, psi_group2, psi_group3, 2)
+        psi_group1_, phi_group1_ = InnerIteration(a, mu, sig_t, sig_s, q_e, N, psi_group1, psi_group2, psi_group3, 1, converge)
+        psi_group2_, phi_group2_ = InnerIteration(a, mu, sig_t, sig_s, q_e, N, psi_group1, psi_group2, psi_group3, 2, converge)
+        psi_group3_, phi_group3_ = InnerIteration(a, mu, sig_t, sig_s, q_e, N, psi_group1, psi_group2, psi_group3, 3, converge)
 
         # Update fluxes
         psi_group1 = np.copy(psi_group1_); phi_group1 = np.copy(phi_group1_)
@@ -130,11 +118,11 @@ while (outerconverge == False):
 
     elif (method == 'GaussSeidel'):
         # Do within group iterations, updating after each group
-        psi_group1, phi_group1 = InnerIteration(a, mu, sig_t, sig_s, q_e, N, psi_group1, psi_group2, psi_group3, 0)
-        psi_group2, phi_group2 = InnerIteration(a, mu, sig_t, sig_s, q_e, N, psi_group1, psi_group2, psi_group3, 1)
-        psi_group3, phi_group3 = InnerIteration(a, mu, sig_t, sig_s, q_e, N, psi_group1, psi_group2, psi_group3, 2)
+        psi_group1, phi_group1 = InnerIteration(a, mu, sig_t, sig_s, q_e, N, psi_group1, psi_group2, psi_group3, 1, converge)
+        psi_group2, phi_group2 = InnerIteration(a, mu, sig_t, sig_s, q_e, N, psi_group1, psi_group2, psi_group3, 2, converge)
+        psi_group3, phi_group3 = InnerIteration(a, mu, sig_t, sig_s, q_e, N, psi_group1, psi_group2, psi_group3, 3, converge)
 
-    # Calculate new groups ource values
+    # Calculate new group source values
     groupsource_new = np.zeros(N)
     for group in range(3):
         groupsource_new += q_e[group] + (2./(np.size(mu)*np.size(q_e))) * (sig_s[group,0]*psi_group1.sum(axis=1)) + (sig_s[group,1]*psi_group2.sum(axis=1)) + (sig_s[group,2]*psi_group3.sum(axis=1))
@@ -143,8 +131,7 @@ while (outerconverge == False):
     outercrit = np.sqrt(np.sum((groupsource_new - groupsource)**2))
 
     # Check convergence
-    if (outercrit < 1.0e-4):
-         outerconverge = True
+    if (outercrit < converge): outerconverge = True
 
     # Increment outer iteration number
     outeritr += 1

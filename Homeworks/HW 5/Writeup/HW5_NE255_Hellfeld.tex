@@ -478,7 +478,7 @@ Accounting for each element in $\Box$ being a matrix of size $cu \times cu$, the
 \item Why don't we form an $\textbf{L}$ matrix?
 \end{enumerate}
 
-$\Rightarrow$ In the nuclear field, the $\textbf{L}$ matrix is typically not formed because it will govern how we can implement our solvers (except with $SP_N$, which does/can form $\textbf{L}$). Instead, we essentially find $\textbf{L}^{-1}$ and use it implicitly to solve for $\psi$. Furthermore, by not directly forming the $\textbf{L}$ matrix, we save memory during the computation. 
+$\Rightarrow$ In the nuclear field, the $\textbf{L}$ matrix is typically not formed because it will govern how we can implement our solvers (except with $SP_N$, which does/can form $\textbf{L}$). Instead, we essentially find $\textbf{L}^{-1}$ and use it implicitly to solve for $\psi$ (this is what we are doing in our sweep). The $\textbf{L}$ matrix is also very large in most cases (using fine discretizations and high order expansions) and will be nonuniformly sparse (as opposed to other large, but only diagonal, matrices). Therefore we significantly reduce the amount of unnecessary memory used in the calculation by not forming $\textbf{L}$.
 
 %
 %
@@ -564,23 +564,79 @@ Plot the resulting scalar flux in each energy group as a function of $x$. Use a 
 $\Rightarrow$ The code from the previous homework was used to perform the inner (within group) iterations for all angles, but now the scattering source includes the scattering from all groups into the current group
 %
 \begin{align*}
-	s_a^{g,(k)} = \sum_{g'=1}^G \sum_{l=0}^N w_a \Sigma_{sl}^{g'\rightarrow g}(x) \psi_l^{g'}(x) + q_a^g(x)\,.
+	s_a^{g,(k)} = \sum_{g'=1}^G \sum_{\mu} w_a \Sigma_{sl}^{g'\rightarrow g}(x) \psi_\mu^{g'}(x) + q_a^g(x)\,.
 \end{align*}
 
-Looking at Table 1, we see there is only in-group scattering in group 1 ($1\rightarrow1$). In group 2, we have downscattering from group 1 ($1\rightarrow2$), in-group scattering ($2\rightarrow2$), and upscattering from group 3 ($3\rightarrow2$). In group 3, we have downscattering from group 1 ($1\rightarrow3$), downscattering from group 2 ($2\rightarrow3$), and in-group scattering ($3\rightarrow3$). We begin in group 1, and iterate on the scattering source until convergence ($l_2$ norm of the difference of the current scalar flux and previous scalar flux). This is the same procedure as the previous homework. Once group 1 has converged, we then store the group 1 flux and use it in the calculation of the source in the group 2 calculation (with an initial guess for the group 3 flux). Once group 2 has converged, we store the values and use them in the source for group 3. It is clear that we will need to perform multiple iterations over the groups (outer iterations) in order to update the group fluxes after the inner iterations. To define outer iteration convergence, we sum the group scattering source for each group, in each cell, 
+Looking at Table 1, we see there is only in-group scattering in group 1 ($1\rightarrow1$). In group 2, we have downscattering from group 1 ($1\rightarrow2$), in-group scattering ($2\rightarrow2$), and upscattering from group 3 ($3\rightarrow2$). In group 3, we have downscattering from group 1 ($1\rightarrow3$), downscattering from group 2 ($2\rightarrow3$), and in-group scattering ($3\rightarrow3$). We begin in group 1, and iterate on the scattering source until convergence ($l_2$ norm of the difference of the current scalar flux and previous scalar flux). This is the same procedure as the previous homework. The Jacobi method is order independent, which means that the results of one within group iteration does not affect any other within group iteration (for a given outer iteration level). This means that we begin was some initial guesses for the fluxes in group 1, 2, and 3 and then perform within group iterations for all three groups with these initial guesses. Once we have done all three groups, we then update the group fluxes and redo the inner iterations. This is in contrast to Gauss-Seidel, where we do the inner iterations sequentially and update the group fluxes after each within group iteration. \\
+
+To define outer iteration convergence, we sum the group scattering source for each group, in each cell, 
 %
 \begin{align*}
-	\sum_{g=1}^G \left[ \sum_{g'=1}^G \sum_{l=0}^N w_a \Sigma_{sl}^{g'\rightarrow g}(x) \psi_l^{g'}(x) + q_a^g(x) \right] \,.
+	\sum_{g=1}^G \left[ \sum_{g'=1}^G \sum_{\mu} w_a \Sigma_{sl}^{g'\rightarrow g}(x) \psi_\mu^{g'}(x) + q_a^g(x) \right] \,.
 \end{align*}
 
 and then compute the $l_2$ norm of the difference between the current iteration and the previous iteration. Since group 2 and 3 have no influence on group 1, it will not need more than one outer iteration. Since both group 2 and 3 have influence from other groups, we will need to perform multiple outer iterations until convergence. \\
 
-The code is below and the results (center group scalar fluxes) are plotted in Fig.~1. We see that group 1 has the largest amplitude, followed by group 2 and then group 3. This agrees with intuition because there is a large source into group 1 and the total cross-section is small compared to the other cells. The particles in group 1 can scatter down in energy to groups 2 and 3. In group 2, there is no external source and a larger total cross-section. There is a small source of particles into group 3 and particles from group 1 and 2 can scatter down into group 3, but we see that the large total cross section and ability to upscatter into 2 significantly limits the flux in group 3.
+The code is below and the results (center group scalar fluxes) are plotted in Fig.~1. We see that group 1 has the largest amplitude, followed by group 2 and then group 3. This agrees with intuition because there is a large source into group 1 and the total cross-section is small compared to the other cells. In group 2, there is no external source and a larger total cross-section. There is a small source of particles into group 3 and particles from group 1 and 2 can scatter down into group 3, but we see that the large total cross section and ability to upscatter into 2 significantly limits the flux in group 3. The absolute amplitudes of the fluxes are somewhat questionable because the problem statement was unclear on how the boundary condition flux and the external source are distributed among angle and whether or not we include a factor of $1/2$ in the calculation of the scalar flux. Also, note that group 1 indeed only needs 1 inner iteration following the first outer group iteration.\\
 
 \lstinputlisting[language=Python]{../p2/p2.py}
 
 \vspace{10pt}
-Output:
+\textbf{Output:}
+\begin{lstlisting}
+(Group = 1) Number of iterations = 7
+(Group = 2) Number of iterations = 1
+(Group = 3) Number of iterations = 7
+Outer group iteration = 1
+(Group = 1) Number of iterations = 1
+(Group = 2) Number of iterations = 6
+(Group = 3) Number of iterations = 7
+Outer group iteration = 2
+(Group = 1) Number of iterations = 1
+(Group = 2) Number of iterations = 4
+(Group = 3) Number of iterations = 7
+Outer group iteration = 3
+(Group = 1) Number of iterations = 1
+(Group = 2) Number of iterations = 4
+(Group = 3) Number of iterations = 5
+Outer group iteration = 4
+(Group = 1) Number of iterations = 1
+(Group = 2) Number of iterations = 3
+(Group = 3) Number of iterations = 5
+Outer group iteration = 5
+(Group = 1) Number of iterations = 1
+(Group = 2) Number of iterations = 3
+(Group = 3) Number of iterations = 2
+Outer group iteration = 6
+(Group = 1) Number of iterations = 1
+(Group = 2) Number of iterations = 1
+(Group = 3) Number of iterations = 2
+Outer group iteration = 7
+(Group = 1) Number of iterations = 1
+(Group = 2) Number of iterations = 1
+(Group = 3) Number of iterations = 1
+Outer group iteration = 8
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\textwidth]{Figures/groupcenterfluxes.png}
+\vspace{-7pt}
+\caption{Cell centered scalar flux values for groups 1, 2, and 3.}
+\end{figure}
+
+\textbf{Aside}: If we reduce the total cross-sections in group 2 and 3 (to 0.5 in each group), we see that the group 3 flux surpasses the group 2 flux (Fig.~2). This agrees with intuition, as now particles in group 2 will have a higher likelihood to scatter into group 3 and once in group 3, have a smaller likelihood to get absorbed. We also see an increase in amplitude for both group 2 and group 3, because the absorption cross-section is now lower. And again, since groups 2 and 3 have no influence on group 1, the group 1 flux is unchanged.
+
+\begin{figure}[htb!]
+\centering
+\includegraphics[width=0.6\textwidth]{Figures/groupcenterfluxes_lowertotxsection.png}
+\vspace{-7pt}
+\caption{Cell centered scalar flux values for groups 1, 2, and 3 using $\Sigma_t = 0.5$ in all groups.}
+\end{figure}
+
+\textbf{Another aside}: The code also implements the Gauss-Seidel method, which computes the within group iterations sequentially (group 1 then group 2 then group 3) and updates the fluxes between each group. This means the resultant flux we get from the inner iterations in group 1 will be used in the calculation of the source in group 2. And similarly for group 3. This means the outer iterations should converge faster. Rerunning the code but using the Gauss-Seidel method (line 91), we get the same results but only needed 5 outer group iterations (see below). We also notice it took 6 inner iterations for group 2 in the first outer iteration (as opposed to 1 in the Jacobi method) - this is because in the Jacobi method, group 2 has no information in the first outer iteration (no source, all other fluxes are zero) so the flux converges to 0. However in the Gauss-Seidel method, after we perform the inner iteration in group 1, we have a new group 1 flux that is used in the group 2 inner iteration and thus it has to iterate a few times before convergence.  \\
+
+\textbf{Output:}
 \begin{lstlisting}
 (Group = 1) Number of iterations = 7
 (Group = 2) Number of iterations = 6
@@ -603,23 +659,6 @@ Outer group iteration = 4
 (Group = 3) Number of iterations = 1
 Outer group iteration = 5
 \end{lstlisting}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.6\textwidth]{Figures/groupcenterfluxes.png}
-\vspace{-7pt}
-\caption{Cell centered scalar flux values for groups 1, 2, and 3.}
-\end{figure}
-
-\textbf{Aside}: If we reduce the total cross-sections in group 2 and 3 (to 0.5 in each group), we see that the group 3 flux surpasses the group 2 flux (Fig.~2). This agrees with intuition, as now particles in group 2 will have a higher likelihood to scatter into group 3 and once in group 3, have a smaller likelihood to get absorbed. We also see an increase in amplitude for both group 2 and group 3, because the absorption cross-section is now lower. And again, since groups 2 and 3 have no influence on group 1, the group 1 flux is unchanged.
-
-\begin{figure}[htb!]
-\centering
-\includegraphics[width=0.6\textwidth]{Figures/groupcenterfluxes_lowertotxsection.png}
-\vspace{-7pt}
-\caption{Cell centered scalar flux values for groups 1, 2, and 3 using $\Sigma_t = 0.5$ in all groups.}
-\end{figure}
-
 
 
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
