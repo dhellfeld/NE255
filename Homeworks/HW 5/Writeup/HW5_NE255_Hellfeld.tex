@@ -561,7 +561,7 @@ Implement a Jacobi multigroup solver for the 1D, steady state transport equation
 Plot the resulting scalar flux in each energy group as a function of $x$. Use a convergence tolerance for the multigroup iteration and the scattering iteration of at least $1 \times 10^{-4}$.\\
 
 
-$\Rightarrow$ The code from the previous homework was used to perform the inner (within group) iterations for all angles, but now the scattering source includes the scattering from all groups into the current group
+$\Rightarrow$ The code from the previous homework was used to perform the inner (within group) iterations for all angles, but now the scattering source includes the scattering from all groups and angles into the current group and angle
 %
 \begin{align*}
 	s_a^{g,(k)} = \sum_{g'=1}^G \sum_{\mu} w_a \Sigma_{sl}^{g'\rightarrow g}(x) \psi_\mu^{g'}(x) + q_a^g(x)\,.
