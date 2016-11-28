@@ -1,0 +1,163 @@
+\documentclass[10pt]{article}
+\usepackage[left=0.9in,top=0.9in,bottom=0.9in,right=0.9in]{geometry}
+\usepackage[english]{babel}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{caption}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+\usepackage{soul}
+\usepackage{enumerate}
+\usepackage{wrapfig}
+\usepackage{listings}
+\usepackage{diagbox}
+
+% Listings settings
+\lstset{frame=tb,
+  language=Python,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\scriptsize\ttfamily},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3,
+  numbers=left,
+  xleftmargin=4em,
+  framexleftmargin=3.5em
+}
+
+% Remove bibliography title
+\usepackage{etoolbox}
+\patchcmd{\thebibliography}{\section*{\refname}}{}{}{}
+
+% Set up header/footers
+\pagestyle{fancy}
+\fancyhead[LE,RO]{\today}
+\fancyhead[C]{NE 255 - HW 6}
+\fancyhead[LO,RE]{D. Hellfeld}
+\fancyfoot[C]{\thepage\ of \pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% Set up figure/table captions \textbf{}
+\addto\captionsenglish{\renewcommand{\figurename}{Fig.}}
+\addto\captionsenglish{\renewcommand{\tablename}{\small Table}}
+%\renewcommand{\thetable}{\Roman{table}}
+\captionsetup[table]{labelfont = normal, labelsep=period, singlelinecheck=true}
+\captionsetup[figure]{labelfont=normal, labelsep=period, singlelinecheck=true}
+
+% Remove paragraph indent
+\setlength\parindent{0pt}
+
+
+\begin{document}
+
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\begin{centering}
+\textbf{\large NE 255 - Homework 6}\\
+\vspace{10pt}
+University of California, Berkeley\\
+Department of Nuclear Engineering\\
+\vspace{10pt}
+Daniel Hellfeld\\
+\href{mailto:dhellfeld@berkeley.edu}{dhellfeld@berkeley.edu}\\
+\end{centering}
+
+
+
+
+
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\vspace{20pt}
+\noindent \textbf{Problem 1}\\
+Using the direct inversion of CDF sampling method, derive sampling algorithms for
+
+\begin{enumerate}[(a)]
+	\item The neutron direction in 3D if the neutron source is isotropic.
+\end{enumerate}
+
+...
+
+%
+%
+%
+
+\begin{enumerate}[(b)]
+	\item The distance to the next collision in the direction of neutron motion if the neutron is in the center of the spherical volume that consists of three concentric layers with radii $R_1$, $R_2$, and $R_3$, each made of different materials with total cross sections $\Sigma_{t1}$, $\Sigma_{t2}$, and $\Sigma_{t3}$, respectively.
+\end{enumerate}
+
+...
+
+%
+%
+%
+
+\begin{enumerate}[(c)]
+	\item The type of collision if it is assumed that the neutron can have both elastic and in- elastic scattering, and can be absorbed in fission or (n,$\gamma$) capture interactions. Assume monoenergetic neutron transport.
+\end{enumerate}
+
+...
+
+%
+%
+%
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\newpage
+\noindent \textbf{Problem 2}\\
+Use a rejection Monte Carlo method to evaluate $\pi = 3.14159$:
+
+\begin{enumerate}[(a)]
+	\item From $\pi = 4 \int_0^1 \sqrt{1-x^2} dx$
+\end{enumerate}
+
+...
+
+%
+%
+%
+
+\begin{enumerate}[(b)]
+	\item From $\pi = 4 \int_0^1 \frac{1}{1+x^2} dx$
+\end{enumerate}
+
+...
+
+%
+%
+%
+
+\begin{enumerate}[(c)]
+	\item Assuming the $\pi = 3.14159$ is exact, calculate the relative error for 10, 100, 1,000, and 10,000 samples.
+\end{enumerate}
+
+...
+
+%
+%
+%
+
+\begin{enumerate}[(d)]
+	\item What do you notice about the behavior of error as a function of the number of trials?
+\end{enumerate}
+
+...
+
+%
+%
+%
+
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+\end{document}
