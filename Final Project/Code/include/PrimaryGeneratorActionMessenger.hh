@@ -8,7 +8,7 @@
 
 class PrimaryGeneratorAction;
 class G4UIdirectory;
-class G4UIcmdWithADouble;
+class G4UIcmdWithADoubleAndUnit;
 class G4UIcmdWithAnInteger;
 class G4UIcmdWithAString;
 class G4UIcmdWithoutParameter;
@@ -28,13 +28,15 @@ private:
     G4UIdirectory* fDirDirectory;
     G4UIdirectory* fOutDirectory;
 
-    G4UIcmdWithAnInteger*    fHPCmd;
-    G4UIcmdWithAnInteger*    fHPNsideCmd;
-    G4UIcmdWithAString*      fHPindexingCmd;
-    G4UIcmdWithoutParameter* fSetUpHEALPixCmd;
-    G4UIcmdWithAString*      fOutputFileNameCmd;
-    G4UIcmdWithAString*      fPrintTextCmd;
-    G4UIcmdWithAString*      fPrintBinaryCmd;
+    G4UIcmdWithAnInteger*      fHPCmd;
+    G4UIcmdWithAnInteger*      fHPNsideCmd;
+    G4UIcmdWithAString*        fHPindexingCmd;
+    G4UIcmdWithoutParameter*   fSetUpHEALPixCmd;
+    G4UIcmdWithAString*        fOutputFileNameCmd;
+    G4UIcmdWithAString*        fPrintTextCmd;
+    G4UIcmdWithAString*        fPrintBinaryCmd;
+    G4UIcmdWithoutParameter*   fFarFieldSourceCmd;
+    G4UIcmdWithADoubleAndUnit* fNearFieldSourceCmd;
 
 
 };

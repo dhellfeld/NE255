@@ -5,7 +5,7 @@
 #include "DetectorConstruction.hh"
 
 #include "G4UIdirectory.hh"
-#include "G4UIcmdWithADouble.hh"
+#include "G4UIcmdWithADoubleAndUnit.hh"
 #include "G4UIcmdWithAnInteger.hh"
 #include "G4UIcmdWithAString.hh"
 #include "G4UIcmdWithoutParameter.hh"
@@ -41,7 +41,6 @@ PrimaryGeneratorActionMessenger::PrimaryGeneratorActionMessenger(PrimaryGenerato
 
     fHPindexingCmd = new G4UIcmdWithAString("/PRISM/direction/setHPindexscheme",this);
     fHPindexingCmd->SetGuidance("Set indexing scheme for HEALPix (nested or ring)");
-    fHPindexingCmd->SetParameterName("HPNside",false);
     fHPindexingCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
     fSetUpHEALPixCmd = new G4UIcmdWithoutParameter("/PRISM/direction/SetUpHEALPix",this);
@@ -49,7 +48,7 @@ PrimaryGeneratorActionMessenger::PrimaryGeneratorActionMessenger(PrimaryGenerato
     fSetUpHEALPixCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
     fOutputFileNameCmd = new G4UIcmdWithAString("/PRISM/output/filename",this);
-    fOutputFileNameCmd->SetGuidance("name the output file");
+    fOutputFileNameCmd->SetGuidance("Name the output file");
     fOutputFileNameCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
     fPrintTextCmd = new G4UIcmdWithAString("/PRISM/output/printText",this);
@@ -59,6 +58,20 @@ PrimaryGeneratorActionMessenger::PrimaryGeneratorActionMessenger(PrimaryGenerato
     fPrintBinaryCmd = new G4UIcmdWithAString("/PRISM/output/printBinary",this);
     fPrintBinaryCmd->SetGuidance("Print to binary (on/off)");
     fPrintBinaryCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+
+    fFarFieldSourceCmd = new G4UIcmdWithoutParameter("/PRISM/direction/farfieldsource", this);
+    fFarFieldSourceCmd->SetGuidance("Source is at infinity, parallel rays");
+    fFarFieldSourceCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+
+    fNearFieldSourceCmd = new G4UIcmdWithADoubleAndUnit("/PRISM/direction/nearfieldsource",this);
+    fNearFieldSourceCmd->SetGuidance("Near field point source, provide distance in cm");
+    fNearFieldSourceCmd->SetParameterName("NearFieldDist",false);
+    fNearFieldSourceCmd->SetDefaultUnit("cm");
+    fNearFieldSourceCmd->SetUnitCandidates("micron mm cm m km");
+    fNearFieldSourceCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+
+
+
 
 }
 
@@ -75,6 +88,9 @@ PrimaryGeneratorActionMessenger::~PrimaryGeneratorActionMessenger()
     delete fOutputFileNameCmd;
     delete fPrintTextCmd;
     delete fPrintBinaryCmd;
+    delete fFarFieldSourceCmd;
+    delete fNearFieldSourceCmd;
+
 }
 
 //==================================================================================================
@@ -177,6 +193,21 @@ void PrimaryGeneratorActionMessenger::SetNewValue(G4UIcommand* command,G4String 
         else if (newValue == "Off" || newValue == "OFF" || newValue == "off"){
             RunAction::Instance()->SetPrintBinary(false);
         }
+
+    }
+
+    else if (command == fFarFieldSourceCmd){
+
+        fPrimaryGeneratorAction->SetFarFieldSource(true);
+        fPrimaryGeneratorAction->SetNearFieldSource(false);
+
+    }
+
+    else if (command == fNearFieldSourceCmd){
+
+        fPrimaryGeneratorAction->SetFarFieldSource(false);
+        fPrimaryGeneratorAction->SetNearFieldSource(true);
+        fPrimaryGeneratorAction->SetNearFieldSourceDist(fNearFieldSourceCmd->GetNewDoubleValue(newValue));
 
     }
 

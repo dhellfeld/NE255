@@ -44,6 +44,10 @@ PrimaryGeneratorAction::PrimaryGeneratorAction() : G4VUserPrimaryGeneratorAction
     theta = 0.;
     phi = 0.;
 
+	farfieldsource = true;
+	nearfieldsource = false;
+	nearfieldsourcedist = 50*cm;
+
     // Create a new messenger class
     primarygeneratoractionmessenger = new PrimaryGeneratorActionMessenger(this);
 
@@ -71,36 +75,19 @@ PrimaryGeneratorAction::~PrimaryGeneratorAction() {
 
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent) {
 
-
     if(!detector) detector = DetectorConstruction::Instance();
 
-
-    // - -
-    // Far field source at angle to origin
-    // - -
-
-    // Set the direction of the rays, given theta and phi (calculate position, take all negative values)
-    G4double r = 15.*cm;
-    G4ThreeVector dir;
-    dir.setX(-r*cos(theta*(pi/180))*sin(phi*(pi/180)));
-    dir.setY(-r*sin(theta*(pi/180))*sin(phi*(pi/180)));
-    dir.setZ(-r*cos(phi  *(pi/180)));
-
-    // Uniformly sample a disk that just covers the entire detector (start at z-axis (0,0,1) and then rotate)
-    G4double rand_r = G4UniformRand();
-    G4double rand_theta = 2. * pi * G4UniformRand();
-    G4double sphererad = 8.*cm;
-    G4ThreeVector disk_pos(0);
-    disk_pos.setX(sphererad * sqrt(rand_r) * cos(rand_theta));
-    disk_pos.setY(sphererad * sqrt(rand_r) * sin(rand_theta));
-    disk_pos.setZ(r);
-
-    // Get position by rotating the z-oriented disk
-    G4ThreeVector pos = disk_pos.rotateY(phi*deg).rotateZ(theta*deg);
+	SourceInfo sourceinfo;
+	if (farfieldsource){
+		sourceinfo = FarFieldSource(theta, phi);
+	}
+	else if (nearfieldsource){
+		sourceinfo = NearFieldSource(theta, phi, nearfieldsourcedist);
+	}
 
     // Set results to the gun
-    gun->SetParticlePosition(pos);
-    gun->SetParticleMomentumDirection(dir);
+    gun->SetParticlePosition(sourceinfo.GetPos());
+    gun->SetParticleMomentumDirection(sourceinfo.GetDir());
 
     // Use the particle gun to define a primary particle for the event
     gun->GeneratePrimaryVertex(anEvent);
@@ -108,6 +95,56 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent) {
 
 //==================================================================================================
 
+SourceInfo PrimaryGeneratorAction::FarFieldSource(G4double theta_, G4double phi_){
+
+	// Set the direction of the rays, given theta and phi (calculate position, take all negative values)
+	G4double r = 15.*cm;
+	G4ThreeVector dir;
+	dir.setX(-r*cos(theta_*(pi/180))*sin(phi_*(pi/180)));
+	dir.setY(-r*sin(theta_*(pi/180))*sin(phi_*(pi/180)));
+	dir.setZ(-r*cos(phi_  *(pi/180)));
+
+	// Uniformly sample a disk that just covers the entire detector (start at z-axis (0,0,1) and then rotate)
+	G4double rand_r = G4UniformRand();
+	G4double rand_theta = 2. * pi * G4UniformRand();
+	G4double sphererad = 8.*cm;
+	G4ThreeVector disk_pos(0);
+	disk_pos.setX(sphererad * sqrt(rand_r) * cos(rand_theta));
+	disk_pos.setY(sphererad * sqrt(rand_r) * sin(rand_theta));
+	disk_pos.setZ(r);
+
+	// Get position by rotating the z-oriented disk
+	G4ThreeVector pos = disk_pos.rotateY(phi_*deg).rotateZ(theta_*deg);
+
+	SourceInfo sourceinfo_;
+	sourceinfo_.SetDir(dir);
+	sourceinfo_.SetPos(pos);
+
+	return sourceinfo_;
+
+}
+
+//==================================================================================================
+
+SourceInfo PrimaryGeneratorAction::NearFieldSource(G4double theta_, G4double phi_, G4double dist_){
+
+	// Isotropic rays
+	//G4ThreeVector dir = GetIsotropicMomentumDirection();
+	G4double ang = atan(9.*cm / dist_) * 180. / CLHEP::pi;
+	G4ThreeVector dir = (GetConeMomentumDirection(ang)).rotateY(phi_*deg).rotateZ(theta_*deg);
+
+	// Get position using theta, phi, and distance
+	G4ThreeVector pos(dist_*cos(theta_*(pi/180))*sin(phi_*(pi/180)),
+					  dist_*sin(theta_*(pi/180))*sin(phi_*(pi/180)),
+					  dist_*cos(phi_  *(pi/180)));
+
+	SourceInfo sourceinfo_;
+	sourceinfo_.SetDir(dir);
+	sourceinfo_.SetPos(pos);
+
+	return sourceinfo_;
+
+}
 
 //==================================================================================================
 

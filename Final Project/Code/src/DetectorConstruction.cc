@@ -40,7 +40,7 @@ DetectorConstruction::DetectorConstruction()
   worldPhys(0),
   mworld(0),
   mdetector(0),
-  world_dim(30*cm),                                                     // default world is a 50 cm radius sphere
+  world_dim(100*cm),                                                    // default world is a 50 cm radius sphere
   detector_dim(G4ThreeVector(0.5*cm, 0.5*cm, 0.5*cm)),                  // default detector is 1 cc cube (use half sizes)
   detector_pos(G4ThreeVector(0.)),                                      // default position at 0, 0, 0
   _checkoverlaps(false)                                                 // by default, dont check overlaps while constructing

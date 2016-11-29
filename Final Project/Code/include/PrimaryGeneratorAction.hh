@@ -22,6 +22,16 @@ struct Angles{
     G4double phi;
 };
 
+class SourceInfo {
+    G4ThreeVector dir;
+	G4ThreeVector pos;
+  public:
+	void SetDir(G4ThreeVector dir_){ dir = dir_;}
+	void SetPos(G4ThreeVector pos_){ pos = pos_;}
+    G4ThreeVector GetDir() {return dir;}
+	G4ThreeVector GetPos() {return pos;}
+};
+
 
 class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 {
@@ -39,6 +49,19 @@ public:
 
     void SetTheta(G4double);
     void SetPhi(G4double);
+
+    SourceInfo FarFieldSource(G4double, G4double);
+    SourceInfo NearFieldSource(G4double, G4double, G4double);
+    G4bool farfieldsource;
+    G4bool nearfieldsource;
+    G4double nearfieldsourcedist;
+    inline void SetFarFieldSource(G4bool a){farfieldsource = a;}
+    inline G4bool GetFarFieldSource(){return farfieldsource;}
+    inline void SetNearFieldSource(G4bool a ){nearfieldsource = a;}
+    inline G4bool GetNearFieldSource(){return nearfieldsource;}
+    inline void SetNearFieldSourceDist(G4double a ){nearfieldsourcedist = a;}
+    inline G4double GetNearFieldSourceDist(){return nearfieldsourcedist;}
+
 
     inline G4double GetTheta(){return theta;}
     inline G4double GetPhi(){return phi;}
@@ -66,7 +89,7 @@ public:
 protected:
     inline G4ThreeVector GetIsotropicMomentumDirection() const;
     inline G4ThreeVector GetHalfIsotropicMomentumDirection() const;
-    inline G4ThreeVector GetConeMomentumDirection() const;
+    inline G4ThreeVector GetConeMomentumDirection(G4double) const;
 
     inline G4double GetRandTheta();
     inline G4double GetRandPhi();
@@ -107,10 +130,10 @@ inline G4ThreeVector PrimaryGeneratorAction::GetHalfIsotropicMomentumDirection()
 
 
 //----------------------------------------------------------------------------//
-inline G4ThreeVector PrimaryGeneratorAction::GetConeMomentumDirection() const {
+inline G4ThreeVector PrimaryGeneratorAction::GetConeMomentumDirection(G4double ang) const {
 
     // open a cone of degree theta
-    G4double _theta = 10.;
+    G4double _theta = ang;
 
     G4double u = (-cos(_theta*pi/180)+1)*G4UniformRand()-1;
     G4double v = 2.*pi*G4UniformRand();
