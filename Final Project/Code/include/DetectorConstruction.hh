@@ -40,6 +40,7 @@ public:
     virtual void ConstructSDandField();
 
     vector<G4int> GetRandomMask();
+	vector<G4int> GetFullMask();
     void SetMask(vector<G4int>);
     G4String BinToHex(vector<G4int>);
     vector<G4int> HexToBin(G4String);

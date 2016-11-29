@@ -67,7 +67,7 @@ PrimaryGeneratorActionMessenger::PrimaryGeneratorActionMessenger(PrimaryGenerato
     fNearFieldSourceCmd->SetGuidance("Near field point source, provide distance in cm");
     fNearFieldSourceCmd->SetParameterName("NearFieldDist",false);
     fNearFieldSourceCmd->SetDefaultUnit("cm");
-    fNearFieldSourceCmd->SetUnitCandidates("micron mm cm m km");
+    fNearFieldSourceCmd->SetUnitCandidates("cm m");
     fNearFieldSourceCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
 

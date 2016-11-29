@@ -40,14 +40,15 @@ DetectorConstruction::DetectorConstruction()
   worldPhys(0),
   mworld(0),
   mdetector(0),
-  world_dim(100*cm),                                                    // default world is a 50 cm radius sphere
+  world_dim(10*m),                                                      // default world is a 10 m radius sphere
   detector_dim(G4ThreeVector(0.5*cm, 0.5*cm, 0.5*cm)),                  // default detector is 1 cc cube (use half sizes)
   detector_pos(G4ThreeVector(0.)),                                      // default position at 0, 0, 0
   _checkoverlaps(false)                                                 // by default, dont check overlaps while constructing
 {
 
-    // Get a random mask
-    _mask = GetRandomMask();
+    // Default mask
+    //_mask = GetRandomMask();
+	_mask = GetFullMask();
 
     // Put it into hex form for storage later...
     G4String mask_hex = BinToHex(_mask);
@@ -154,6 +155,7 @@ G4VPhysicalVolume* DetectorConstruction::ConstructWorld() {
                                               ));
     }
 
+	detradius = 7.206 * cm;
 
     // Pull in detector center verticies from file
     G4String centfilename = "geo/centervertices_";
@@ -227,7 +229,7 @@ G4VPhysicalVolume* DetectorConstruction::ConstructWorld() {
     // ---------------------------------------
 
     for (int i = 0; i < 192; i++){
-        G4VisAttributes* detector_vis_att = new G4VisAttributes(G4Color(1.,1.,(i+1)/192.,1.0));
+        G4VisAttributes* detector_vis_att = new G4VisAttributes(G4Color(0.,1.,(i+1)/192.,1.));
         detector_vis_att->SetForceSolid(true);
         detector_vis_att->SetVisibility(true);
         logvols[i]->SetVisAttributes(detector_vis_att);
@@ -258,7 +260,6 @@ void DetectorConstruction::ConstructSDandField(){
 
 //==================================================================================================
 
-
 vector<G4int> DetectorConstruction::GetRandomMask(){
 
     vector<G4int> mask;
@@ -269,6 +270,21 @@ vector<G4int> DetectorConstruction::GetRandomMask(){
         rand = G4UniformRand();
         if (rand > 0.5){mask.push_back(1);}
         else {mask.push_back(0);}
+    }
+
+    return mask;
+}
+
+//==================================================================================================
+
+
+vector<G4int> DetectorConstruction::GetFullMask(){
+
+    vector<G4int> mask;
+
+    // Fill mask array with ones
+    for (int q = 0; q < 192; q++){
+        mask.push_back(1);
     }
 
     return mask;
