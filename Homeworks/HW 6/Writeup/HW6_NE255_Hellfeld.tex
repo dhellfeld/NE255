@@ -18,6 +18,7 @@
 \usepackage{listings}
 \usepackage{diagbox}
 \usepackage{multirow}
+\usepackage{multicol}
 
 % Listings settings
 \lstset{frame=tb,
@@ -87,7 +88,38 @@ Using the direct inversion of CDF sampling method, derive sampling algorithms fo
 	\item The neutron direction in 3D if the neutron source is isotropic.
 \end{enumerate}
 
-...
+$\Rightarrow$ First, we note that the neutron direction is determined using the azimuthal ($\phi \in[0,2\pi)$) and polar angles ($\theta \in[0,\pi]$). If the neutron source is isotropic, one might think to just simple randomly sample $\theta$ on the interval $[0,\pi]$ and $\phi$ on the interval $[0,2\pi)$. However this will lead to clustering near the poles (small $\theta$). This is because of the $\sin\theta$ term in the the differential solid angle element $d\Omega = \sin\theta d\theta d\phi$.\\
+
+Isotropic means there is an equal probability to be emitted in any direction in $4\pi$. The total probability should of course be 1 (the neutron is emitted in some direction) and we assume directions are continuous, therefore the probability density function (PDF) can be determined by
+
+\begin{align*}
+1 = \int_{4\pi} d\Omega C &= C  \int_0^{2\pi} \int_0^\pi \sin\theta d\theta d\phi = C (4\pi)\,, \\
+\Rightarrow C &= \frac{1}{4\pi} = \left(\frac{1}{2}\right)\left(\frac{1}{2\pi}\right)\,.
+\end{align*}
+
+Now the direction inversion sampling method is to set a random number equal to the cumulative density function (CDF) and invert. We can do this for $\theta$ and $\phi$ separately, using random numbers $\xi \in (0,1)$ and $\eta \in (0,1)$
+
+\begin{minipage}{.5\linewidth}
+\begin{align*}
+\xi &= \int_0^\theta \frac{1}{2} \sin\theta ' d\theta ' \\
+\xi & = -\frac{1}{2} \cos\theta ' \Big|_0^\theta \\
+\xi & = \frac{1}{2} (1-\cos\theta ) \\
+\cos\theta &= -(2\xi - 1)  \\
+\theta &= \cos^{-1}(-(2\xi -1)) \\
+\Rightarrow \theta &= \cos^{-1}(2\xi -1)
+\end{align*}
+\end{minipage}%
+\begin{minipage}{.5\linewidth}
+\begin{align*}
+\eta &= \int_0^\phi \frac{1}{2\pi} d\phi ' \\
+\eta &= \frac{1}{2\pi} \phi ' \Big|_0^{\phi} \\
+\eta &= \frac{1}{2\pi} \phi \\
+\Rightarrow \phi &= 2\pi \eta
+\end{align*}
+\end{minipage}
+\vspace{10pt}
+
+These two randomly sampled angles will produce a neutron direction that is isotropic.
 
 %
 %
@@ -131,7 +163,7 @@ $\Rightarrow$ A code was written in Python to perform the rejection sampling and
 	f(x) = \frac{a}{\sqrt{N}}
 \end{equation*}
 
-and plotted together. This is because we expect the relative error to decrease with the number of samples as $1/\sqrt{N}$. The code is shown below and the relative error results (for both functions) are tabulated in Table 1 and plotted in Fig.~1 with the fitted function.\\
+and plotted together. This is because we expect the relative error to decrease with the number of samples as $1/\sqrt{N}$. The code is shown below and the relative error results for a single execution (for both functions) are tabulated in Table 1 and plotted in Fig.~1 with the fitted function. The results will change with each execution, when using a different random seed each time.\\
 
 \lstinputlisting[language=Python]{../p2/p2.py}
 
