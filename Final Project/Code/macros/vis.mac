@@ -62,12 +62,17 @@
 /gun/energy 60 keV
 
 # Configure HEALPix
-/PRISM/direction/setHPNside 16
-/PRISM/direction/setHPindexscheme Ring
-/PRISM/direction/SetUpHEALPix
+/PRISM/healpix/setHPNside 16
+/PRISM/healpix/setHPindexscheme Ring
+/PRISM/healpix/SetUpHEALPix
 
-# Choose a HealPix angle (start at 1)
-/PRISM/direction/setHPindex 45
+## Set up source
+# Pick position (in HP index)
+/PRISM/source/setHPindex 45
+# Use far field source
+/PRISM/source/farfieldsource
+# Use near field source
+#/PRISM/source/nearfieldsource 1 m
 
 # Change output file name
 /PRISM/output/filename output
@@ -78,3 +83,11 @@
 
 # Beam on
 #/run/beamOn 1
+
+### Set up specific scenario
+## Pick acquistion time (in sec)
+#/PRISM/source/acqtime 300
+## Pick source strength (in mCi)
+#/PRISM/source/sourcestrength 0.01
+## Run (will calculate and do beamOn)
+#/PRISM/source/run

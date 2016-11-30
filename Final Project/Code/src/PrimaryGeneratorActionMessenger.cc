@@ -6,9 +6,12 @@
 
 #include "G4UIdirectory.hh"
 #include "G4UIcmdWithADoubleAndUnit.hh"
+#include "G4UIcmdWithADouble.hh"
 #include "G4UIcmdWithAnInteger.hh"
 #include "G4UIcmdWithAString.hh"
 #include "G4UIcmdWithoutParameter.hh"
+
+#include "G4UImanager.hh"
 
 #include <istream>
 #include <sstream>
@@ -23,27 +26,32 @@ PrimaryGeneratorActionMessenger::PrimaryGeneratorActionMessenger(PrimaryGenerato
 : G4UImessenger(), fPrimaryGeneratorAction(generator)
 {
 
-    fDirDirectory = new G4UIdirectory("/PRISM/direction/");
-    fDirDirectory->SetGuidance("Direction of incoming rays");
+    UI = G4UImanager::GetUIpointer();
+
+    fHPDirectory = new G4UIdirectory("/PRISM/healpix/");
+    fHPDirectory->SetGuidance("Setting up Healpix");
+
+    fSrcDirectory = new G4UIdirectory("/PRISM/source/");
+    fSrcDirectory->SetGuidance("Distribution/direction/position of incoming rays");
 
     fOutDirectory = new G4UIdirectory("/PRISM/output/");
     fOutDirectory->SetGuidance("Output file");
 
-    fHPCmd = new G4UIcmdWithAnInteger("/PRISM/direction/setHPindex",this);
+    fHPCmd = new G4UIcmdWithAnInteger("/PRISM/source/setHPindex",this);
     fHPCmd->SetGuidance("Set the HEALPix index far field souce");
     fHPCmd->SetParameterName("HPindex",false);
     fHPCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
-    fHPNsideCmd = new G4UIcmdWithAnInteger("/PRISM/direction/setHPNside",this);
+    fHPNsideCmd = new G4UIcmdWithAnInteger("/PRISM/healpix/setHPNside",this);
     fHPNsideCmd->SetGuidance("Set nside for HEALPix (8 or 16)");
     fHPNsideCmd->SetParameterName("HPNside",false);
     fHPNsideCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
-    fHPindexingCmd = new G4UIcmdWithAString("/PRISM/direction/setHPindexscheme",this);
+    fHPindexingCmd = new G4UIcmdWithAString("/PRISM/healpix/setHPindexscheme",this);
     fHPindexingCmd->SetGuidance("Set indexing scheme for HEALPix (nested or ring)");
     fHPindexingCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
-    fSetUpHEALPixCmd = new G4UIcmdWithoutParameter("/PRISM/direction/SetUpHEALPix",this);
+    fSetUpHEALPixCmd = new G4UIcmdWithoutParameter("/PRISM/healpix/SetUpHEALPix",this);
     fSetUpHEALPixCmd->SetGuidance("Set up HEALPix (command to follow the Nside and IndexingScheme commands)");
     fSetUpHEALPixCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
@@ -59,19 +67,33 @@ PrimaryGeneratorActionMessenger::PrimaryGeneratorActionMessenger(PrimaryGenerato
     fPrintBinaryCmd->SetGuidance("Print to binary (on/off)");
     fPrintBinaryCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
-    fFarFieldSourceCmd = new G4UIcmdWithoutParameter("/PRISM/direction/farfieldsource", this);
+    fFarFieldSourceCmd = new G4UIcmdWithoutParameter("/PRISM/source/farfieldsource", this);
     fFarFieldSourceCmd->SetGuidance("Source is at infinity, parallel rays");
     fFarFieldSourceCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
-    fNearFieldSourceCmd = new G4UIcmdWithADoubleAndUnit("/PRISM/direction/nearfieldsource",this);
+    fNearFieldSourceCmd = new G4UIcmdWithADoubleAndUnit("/PRISM/source/nearfieldsource",this);
     fNearFieldSourceCmd->SetGuidance("Near field point source, provide distance in cm");
     fNearFieldSourceCmd->SetParameterName("NearFieldDist",false);
     fNearFieldSourceCmd->SetDefaultUnit("cm");
     fNearFieldSourceCmd->SetUnitCandidates("cm m");
     fNearFieldSourceCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
+    //fSourceStrengthCmd = new G4UIcmdWithADoubleAndUnit("/PRISM/source/sourcestrength",this);
+    fSourceStrengthCmd = new G4UIcmdWithADouble("/PRISM/source/sourcestrength",this);
+    fSourceStrengthCmd->SetGuidance("Source strength (in mCi)");
+    fSourceStrengthCmd->SetParameterName("SrcStrength",false);
+    //fSourceStrengthCmd->SetDefaultUnit("Ci");
+    //fSourceStrengthCmd->SetUnitCandidates("Ci");
+    fSourceStrengthCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
+    fAcqTimeCmd = new G4UIcmdWithAnInteger("/PRISM/source/acqtime",this);
+    fAcqTimeCmd->SetGuidance("Acquisition time (in seconds)");
+    fAcqTimeCmd->SetParameterName("Acqtime",false);
+    fAcqTimeCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
+    fRunCmd = new G4UIcmdWithoutParameter("/PRISM/source/run",this);
+    fRunCmd->SetGuidance("Calculate beamOn for specified scenario");
+    fRunCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
 }
 
@@ -83,13 +105,17 @@ PrimaryGeneratorActionMessenger::~PrimaryGeneratorActionMessenger()
     delete fHPNsideCmd;
     delete fHPindexingCmd;
     delete fSetUpHEALPixCmd;
-    delete fDirDirectory;
+    delete fHPDirectory;
+    delete fSrcDirectory;
     delete fOutDirectory;
     delete fOutputFileNameCmd;
     delete fPrintTextCmd;
     delete fPrintBinaryCmd;
     delete fFarFieldSourceCmd;
     delete fNearFieldSourceCmd;
+    delete fSourceStrengthCmd;
+    delete fAcqTimeCmd;
+    delete fRunCmd;
 
 }
 
@@ -211,7 +237,41 @@ void PrimaryGeneratorActionMessenger::SetNewValue(G4UIcommand* command,G4String 
 
     }
 
+    else if (command == fSourceStrengthCmd){
 
+        fPrimaryGeneratorAction->SetSourceStrength(fSourceStrengthCmd->GetNewDoubleValue(newValue));
+
+    }
+
+    else if (command == fAcqTimeCmd){
+
+        fPrimaryGeneratorAction->SetAcquisitionTime(fAcqTimeCmd->GetNewIntValue(newValue));
+
+    }
+
+    else if (command == fRunCmd){
+
+        G4double strength = fPrimaryGeneratorAction->GetSourceStrength();
+        G4int acqtime     = fPrimaryGeneratorAction->GetAcquisitionTime();
+
+        G4double relsolidang = 1.;
+        if (fPrimaryGeneratorAction->GetNearFieldSource()){
+            G4double srcdist  = fPrimaryGeneratorAction->GetNearFieldSourceDist();
+            relsolidang = pow((10.*cm / (2. * srcdist)), 2);
+        }
+        else if (fPrimaryGeneratorAction->GetFarFieldSource()){
+            relsolidang = 1. / (4.* CLHEP::pi);
+        }
+
+        G4double numparticles = floor((strength * 3.7*pow(10,7)) * acqtime * relsolidang);
+
+        // beam on command
+        cout << "Beam On! (" << numparticles << " particles!)\n";
+        stringstream cmd_;
+        cmd_ << "/run/beamOn " << numparticles;
+        UI->ApplyCommand( cmd_.str() );
+
+    }
 }
 
 //==================================================================================================

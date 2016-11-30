@@ -43,7 +43,6 @@ public:
 
     PrimaryGeneratorActionMessenger * primarygeneratoractionmessenger;
 
-
 public:
 	void GeneratePrimaries(G4Event*);
 
@@ -61,6 +60,14 @@ public:
     inline G4bool GetNearFieldSource(){return nearfieldsource;}
     inline void SetNearFieldSourceDist(G4double a ){nearfieldsourcedist = a;}
     inline G4double GetNearFieldSourceDist(){return nearfieldsourcedist;}
+
+    G4int acqtime;
+    G4int GetAcquisitionTime(){return acqtime;}
+    void SetAcquisitionTime(G4int a){acqtime = a;}
+
+    G4double srcstrength;
+    G4double GetSourceStrength(){return srcstrength;}
+    void SetSourceStrength(G4double a){srcstrength = a;}
 
 
     inline G4double GetTheta(){return theta;}

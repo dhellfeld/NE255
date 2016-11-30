@@ -155,7 +155,7 @@ G4VPhysicalVolume* DetectorConstruction::ConstructWorld() {
                                               ));
     }
 
-	detradius = 7.206 * cm;
+	//G4double detradius = 7.206 * cm;
 
     // Pull in detector center verticies from file
     G4String centfilename = "geo/centervertices_";

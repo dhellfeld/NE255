@@ -19,12 +19,12 @@
 /gun/energy 60 keV
 
 # Configure HEALPix
-/PRISM/direction/setHPNside 16
-/PRISM/direction/setHPindexscheme Ring
-/PRISM/direction/SetUpHEALPix
+/PRISM/healpix/setHPNside 16
+/PRISM/healpix/setHPindexscheme Ring
+/PRISM/healpix/SetUpHEALPix
 
 # Choose a HealPix angle (start at 1)
-/PRISM/direction/setHPindex 45
+/PRISM/source/setHPindex 45
 
 # Change output file name
 /PRISM/output/filename output

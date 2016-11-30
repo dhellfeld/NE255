@@ -33,8 +33,7 @@ PrimaryGeneratorAction::PrimaryGeneratorAction() : G4VUserPrimaryGeneratorAction
 
     G4ParticleTable* ptable = G4ParticleTable::GetParticleTable();
     G4ParticleDefinition* particle = ptable->FindParticle("gamma");
-    if(!particle) G4Exception("PrimaryGeneratorAction", "null pointer to particle",
-                              FatalException, "Find particle did not return a particle");
+    if(!particle) G4Exception("PrimaryGeneratorAction", "null pointer to particle", FatalException, "Find particle did not return a particle");
 
     gun->SetParticleDefinition(particle);
     gun->SetParticlePosition(G4ThreeVector(0.*cm, 0.*cm, 0.5*m));
@@ -130,6 +129,8 @@ SourceInfo PrimaryGeneratorAction::NearFieldSource(G4double theta_, G4double phi
 
 	// Isotropic rays
 	//G4ThreeVector dir = GetIsotropicMomentumDirection();
+
+	// Cone beam
 	G4double ang = atan(10.*cm / dist_) * (180. / CLHEP::pi);
 	G4ThreeVector dir = (GetConeMomentumDirection(ang)).rotateY(phi_*deg).rotateZ(theta_*deg);
 

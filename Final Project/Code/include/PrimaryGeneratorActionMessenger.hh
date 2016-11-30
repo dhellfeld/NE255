@@ -6,9 +6,12 @@
 #include "G4UIcommand.hh"
 #include "G4UImessenger.hh"
 
+#include "G4UImanager.hh"
+
 class PrimaryGeneratorAction;
 class G4UIdirectory;
 class G4UIcmdWithADoubleAndUnit;
+class G4UIcmdWithADouble;
 class G4UIcmdWithAnInteger;
 class G4UIcmdWithAString;
 class G4UIcmdWithoutParameter;
@@ -21,11 +24,13 @@ public:
 
     void SetNewValue(G4UIcommand * command,G4String newValue);
 
+    G4UImanager* UI;
 
 private:
     PrimaryGeneratorAction* fPrimaryGeneratorAction;
 
-    G4UIdirectory* fDirDirectory;
+    G4UIdirectory* fHPDirectory;
+    G4UIdirectory* fSrcDirectory;
     G4UIdirectory* fOutDirectory;
 
     G4UIcmdWithAnInteger*      fHPCmd;
@@ -37,7 +42,9 @@ private:
     G4UIcmdWithAString*        fPrintBinaryCmd;
     G4UIcmdWithoutParameter*   fFarFieldSourceCmd;
     G4UIcmdWithADoubleAndUnit* fNearFieldSourceCmd;
-
+    G4UIcmdWithADouble*        fSourceStrengthCmd;
+    G4UIcmdWithAnInteger*      fAcqTimeCmd;
+    G4UIcmdWithoutParameter*   fRunCmd;
 
 };
 
