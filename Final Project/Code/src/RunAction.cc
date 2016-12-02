@@ -67,6 +67,7 @@ void RunAction::FillTrackIDtuple    (G4int trackid)     {TrackIDtuple.push_back(
 void RunAction::FillEnergytuple     (G4float energy)    {Energytuple.push_back(energy); }
 void RunAction::FillProcesstuple    (G4int proc)        {Processtuple.push_back(proc); }
 void RunAction::FillHPindextuple    (G4int hpindex)     {HPindextuple.push_back(hpindex); }
+void RunAction::FillTimetuple       (G4float time_)     {Timetuple.push_back(time_); }
 
 //==================================================================================================
 // Clear functions
@@ -79,18 +80,20 @@ void RunAction::ClearTrackIDtuple()     {TrackIDtuple.clear(); }
 void RunAction::ClearEnergytuple()      {Energytuple.clear(); }
 void RunAction::ClearProcesstuple()     {Processtuple.clear(); }
 void RunAction::ClearHPindextuple()     {HPindextuple.clear(); }
+void RunAction::ClearTimetuple()        {Timetuple.clear(); }
 
 //==================================================================================================
 // Get functions
 
-vector<G4int>         RunAction::GetDOIbintuple()      {return DOIbintuple; }
-vector<G4int>         RunAction::GetDetIDtuple()       {return DetIDtuple; }
-vector<G4int>         RunAction::GetEvtNtuple()        {return EvtNtuple; }
-vector<G4int>         RunAction::GetHitNumtuple()      {return HitNumtuple; }
-vector<G4int>         RunAction::GetTrackIDtuple()     {return TrackIDtuple; }
-vector<G4float>       RunAction::GetEnergytuple()      {return Energytuple; }
-vector<G4int>         RunAction::GetProcesstuple()     {return Processtuple; }
-vector<G4int>         RunAction::GetHPindextuple()     {return HPindextuple; }
+vector<G4int>    RunAction::GetDOIbintuple()  {return DOIbintuple; }
+vector<G4int>    RunAction::GetDetIDtuple()   {return DetIDtuple; }
+vector<G4int>    RunAction::GetEvtNtuple()    {return EvtNtuple; }
+vector<G4int>    RunAction::GetHitNumtuple()  {return HitNumtuple; }
+vector<G4int>    RunAction::GetTrackIDtuple() {return TrackIDtuple; }
+vector<G4float>  RunAction::GetEnergytuple()  {return Energytuple; }
+vector<G4int>    RunAction::GetProcesstuple() {return Processtuple; }
+vector<G4int>    RunAction::GetHPindextuple() {return HPindextuple; }
+vector<G4float>  RunAction::GetTimetuple()    {return Timetuple; }
 
 //==================================================================================================
 
@@ -103,6 +106,8 @@ void RunAction::PrintToTextFile(){
     ofstream myfile;
     myfile.open (filename, ios::out | ios::app);    // use append so we can write from mulitple runs
 
+	myfile << "EvtN\tHitN\tTrackID\tEnergy\tDetID\tProcess\tDOI\tHP\tTime\n";
+	
     for (int i = 0; i < int(EvtNtuple.size()); i++){
         myfile
         << EvtNtuple[i] << "\t"
@@ -113,7 +118,9 @@ void RunAction::PrintToTextFile(){
         << Processtuple[i] << "\t"
         << DOIbintuple[i] << "\t"
         << HPindextuple[i] << "\t"
+        << Timetuple[i] << "\t"
         << "\n";
+
     }
     myfile.close();
 }
@@ -139,6 +146,7 @@ void RunAction::PrintToBinaryFile(){
         myfile.write(reinterpret_cast<char*>(&Processtuple[i]), 1);  // 1 Byte  (1 to 4)
         myfile.write(reinterpret_cast<char*>(&DOIbintuple[i]),  1);  // 1 Byte  (1 to 20)
         myfile.write(reinterpret_cast<char*>(&HPindextuple[i]), 2);  // 2 Bytes (1 to 768 or 3072)
+		myfile.write(reinterpret_cast<char*>(&Timetuple[i]),    4);  // 4 Bytes
 
     }
     myfile.close();
@@ -155,7 +163,8 @@ void RunAction::ClearTuples(){
     ClearTrackIDtuple();
     ClearEnergytuple();
     ClearProcesstuple();
-    ClearHPindextuple();
+	ClearHPindextuple();
+	ClearTimetuple();
 
 }
 

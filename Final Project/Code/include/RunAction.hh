@@ -80,6 +80,12 @@ public:
     void ClearHPindextuple();
     vector<G4int> GetHPindextuple();
 
+	// Time
+    vector<G4float> Timetuple;
+    void FillTimetuple(G4float);
+    void ClearTimetuple();
+    vector<G4float> GetTimetuple();
+
     // Clear all tuples
     void ClearTuples();
 

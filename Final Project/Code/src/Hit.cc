@@ -20,7 +20,8 @@ Hit::Hit()
   fProc(G4int()),
   fVol(G4int()),
   fEnergy(0.),
-  fDOI(0.)
+  fDOI(0.),
+  fTime(0.)
 {}
 
 //==================================================================================================
@@ -37,6 +38,7 @@ Hit::Hit(const Hit& right): G4VHit(){
     fProc      = right.fProc;
     fDOI       = right.fDOI;
     fHP        = right.fHP;
+    fTime      = right.fTime;
 }
 
 //==================================================================================================
@@ -49,6 +51,7 @@ const Hit& Hit::operator=(const Hit& right){
     fProc      = right.fProc;
     fDOI       = right.fDOI;
     fHP        = right.fHP;
+    fTime      = right.fTime;
 
     return *this;
 }

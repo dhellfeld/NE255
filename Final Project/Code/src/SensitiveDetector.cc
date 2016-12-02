@@ -69,10 +69,11 @@ G4bool SensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*){
         newHit->SetProcess(4);
     }
 
-
     // HEALPix index
     newHit->SetHPindex(PrimaryGeneratorAction::Instance()->GetHP_index());
 
+    // Global time
+    newHit->SetTime(aStep->GetPreStepPoint()->GetGlobalTime());
 
     // Depth of interaction
     G4ThreeVector detcent = DetectorConstruction::Instance()->GetDetCenters()[atoi(aStep->GetPreStepPoint()->GetPhysicalVolume()->GetName()) - 1];

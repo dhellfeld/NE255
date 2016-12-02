@@ -83,7 +83,7 @@ void EventAction::FillTuples(const G4Event* evt_){
             runaction->FillDetIDtuple      ((*HC)[i]->GetVol());
             runaction->FillProcesstuple    ((*HC)[i]->GetProcess());
             runaction->FillHPindextuple    ((*HC)[i]->GetHPindex());
-
+            runaction->FillTimetuple       ((*HC)[i]->GetTime());
 
 
             // Bin the DOI values into 1mm wide bins

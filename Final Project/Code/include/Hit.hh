@@ -30,20 +30,23 @@ public:
     void SetProcess     (G4int procname)       {fProc = procname;}
     void SetDOI         (G4double doi)         {fDOI = doi;}
     void SetHPindex     (G4int hpindex)        {fHP = hpindex;}
+    void SetTime        (G4float time_)        {fTime = time_;}
 
     // Get methods
-    G4int GetTrackID() const               {return fTrackID;}
-    G4float GetEnergy() const              {return fEnergy;}
-    G4int GetVol() const                   {return fVol;}
-    G4int GetProcess() const               {return fProc;}
-    G4double GetDOI() const                {return fDOI;}
-    G4int GetHPindex() const               {return fHP;}
+    G4int GetTrackID() const   {return fTrackID;}
+    G4float GetEnergy() const  {return fEnergy;}
+    G4int GetVol() const       {return fVol;}
+    G4int GetProcess() const   {return fProc;}
+    G4double GetDOI() const    {return fDOI;}
+    G4int GetHPindex() const   {return fHP;}
+    G4float GetTime() const    {return fTime;}
 
 private:
 
     G4int         fTrackID, fHP, fProc, fVol;
     G4float       fEnergy;
     G4double      fDOI;
+    G4float       fTime;
 
 };
 
