@@ -5,7 +5,7 @@ import healpy as hp
 
 def GetBinaryOutputData(filename):
 
-    dt = np.dtype([('EvtN', np.uint32), ('HitN', np.uint8), ('TrackID', np.uint8), ('Energy', np.float32), ('DetID', np.uint8), ('Proc', np.uint8), ('DOI', np.uint8), ('HPidx', np.uint16),])
+    dt = np.dtype([('EvtN', np.uint32), ('HitN', np.uint8), ('TrackID', np.uint8), ('Energy', np.float32), ('DetID', np.uint8), ('Proc', np.uint8), ('DOI', np.uint8), ('HPidx', np.uint16), ('Time', np.float32)])
     return np.fromfile(filename, dtype=dt)
 
 def FullEnergyAbsorptions(data, fullenergy):
@@ -13,24 +13,24 @@ def FullEnergyAbsorptions(data, fullenergy):
     return data[:][data['Energy'] == fullenergy]
 
 def MLEM(response, signal,itr = 25):
-    
-    # Get number of image bins in response    
-    imbins = np.shape(response)[1] 
-    
-    # Remove all the empty rows from the response matrix 
+
+    # Get number of image bins in response
+    imbins = np.shape(response)[1]
+
+    # Remove all the empty rows from the response matrix
     response = response[~np.all(response == 0, axis=1)]
-    
+
     # Normalize signal
     signal = signal/signal.sum()
 
     # Initialize the image to ones
     image = np.ones(imbins)
-    
+
     # Perform iterations (see Lange and Carson, 1984)
     S = np.sum(response, axis=0)  # nice to have this separate, could put directly into image line though...
     for iteration in range(1, itr + 1):
         image = (image / S) * np.dot(signal / np.dot(response, image), response)
-    
+
     # Return the normalized image
     return image / np.sum(image)
 
