@@ -16,7 +16,7 @@
 /PRISM/geo/fullMask
 
 # Change the energy
-/gun/energy 60 keV
+/gun/energy 662 keV
 
 # Configure HEALPix
 /PRISM/healpix/setHPNside 16
@@ -27,11 +27,11 @@
 /PRISM/source/setHPindex 45
 
 # Change output file name
-/PRISM/output/filename output
+/PRISM/output/filename output_662kev_HP45
 
 #Print to text or binary format
-/PRISM/output/printText On
-/PRISM/output/printBinary Off
+/PRISM/output/printText Off
+/PRISM/output/printBinary On
 
 # Beam on
-/run/beamOn 1000
+/run/beamOn 10000

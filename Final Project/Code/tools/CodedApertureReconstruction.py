@@ -12,6 +12,10 @@ def FullEnergyAbsorptions(data, fullenergy):
 
     return data[:][data['Energy'] == fullenergy]
 
+def RemoveZeroEnergyInteractions(data):
+
+    return data[:][data['Energy'] != 0]
+
 def MLEM(response, signal,itr = 25):
 
     # Get number of image bins in response
