@@ -18,6 +18,10 @@ def RemoveZeroEnergyInteractions(data):
 
 def MLEM(response, signal,itr = 25):
 
+    # Remove all the empty rows from the response matrix
+    response = response[~np.all(response == 0, axis=1)]
+    signal = signal[~(signal == 0.)]
+
     # Get number of image bins in response
     imbins = np.shape(response)[1]
 
@@ -40,7 +44,7 @@ def MLEM(response, signal,itr = 25):
 
 
 # Get the data
-data = GetBinaryOutputData("../output/output_response.bin")
+data = GetBinaryOutputData("../output/output_60keV_rand_response.bin")
 #data = GetBinaryOutputData(sys.argv[1])
 
 # Pull out only full energy absorptions (60 keV)
@@ -48,6 +52,7 @@ data = FullEnergyAbsorptions(data, 60.0)
 
 # Get non-DOI system response (only full energy deposition interactions for coded aperture)
 response_noDOI = (np.histogram2d(data['DetID'], data['HPidx'], bins=(192,3072)))[0]
+#response_noDOI /= response_noDOI.max(axis=0)
 
 # Plot response
 plt.figure()
@@ -57,9 +62,17 @@ plt.xlabel('HEALPix index (Source Location)'), plt.ylabel('Detector ID')
 plt.title('System Response (no DOI)')
 
 # Pick a signal and get MLEM reconstruction
-signal = response_noDOI[:,1230]
-image = MLEM(response_noDOI, signal)
-hp.mollview(image)
+# Just take column of resposne
+#signal = response_noDOI[:,1230]
+# Or read in input
+data_sig = GetBinaryOutputData("../output/output_60keV_rand_ring.bin")
+data_sig = FullEnergyAbsorptions(data_sig, 60.0)
+signal = np.asarray((np.histogram(data_sig['DetID'], bins=(192)))[0]).astype(float)
+#signal /= signal.max()
+
+image = MLEM(response_noDOI, signal, itr=25)
+#hp.cartview(image)
+hp.cartview(image, rot=(0,90,0))
 
 # Do the same for DOI
 DOI = False
@@ -75,10 +88,10 @@ if (DOI):
     plt.xlabel('HEALPix index (Source Location)'), plt.ylabel('Detector ID')
     plt.title('System Response (DOI - 10 bins)')
 
-    # Pick a signal and get MLEM reconstruction
-    signal = response_DOI10[:,1230]
-    image = MLEM(response_DOI10, signal)
-    hp.mollview(image)
+    # # Pick a signal and get MLEM reconstruction
+    # signal = response_DOI10[:,1230]
+    # image = MLEM(response_DOI10, signal)
+    # hp.mollview(image)
 
 # Render
 plt.show()

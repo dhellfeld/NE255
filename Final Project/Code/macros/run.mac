@@ -11,12 +11,12 @@
 /PRISM/geo/detIndexing Ring
 
 # Configure mask
-#/PRISM/geo/setMask 21524FA478BD521AB44791322B545C979943A029753854BB
+/PRISM/geo/setMask 21524FA478BD521AB44791322B545C979943A029753854BB
 #/PRISM/geo/randomMask
-/PRISM/geo/fullMask
+#/PRISM/geo/fullMask
 
 # Change the energy
-/gun/energy 662 keV
+/gun/energy 60 keV
 
 # Configure HEALPix
 /PRISM/healpix/setHPNside 16
@@ -28,7 +28,7 @@
 /PRISM/source/farfieldringsource
 
 # Change output file name
-/PRISM/output/filename output_662kev_ring
+/PRISM/output/filename output_60kev_ring
 
 #Print to text or binary format
 /PRISM/output/printText Off
