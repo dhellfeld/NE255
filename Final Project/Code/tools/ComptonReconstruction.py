@@ -43,7 +43,7 @@ def Sequence(coinc_dets, coinc_energies):
 
 
 # Get the data
-data = GetBinaryOutputData("../output/output_662keV_HP1200.bin")
+data = GetBinaryOutputData("../output/output_662kev_ring.bin")
 #data = GetBinaryOutputData(sys.argv[1])
 data = RemoveZeroEnergyInteractions(data)
 energy  = 662

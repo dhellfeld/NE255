@@ -41,6 +41,7 @@ private:
     G4UIcmdWithAString*        fPrintTextCmd;
     G4UIcmdWithAString*        fPrintBinaryCmd;
     G4UIcmdWithoutParameter*   fFarFieldSourceCmd;
+    G4UIcmdWithoutParameter*   fFarFieldRingSourceCmd;
     G4UIcmdWithADoubleAndUnit* fNearFieldSourceCmd;
     G4UIcmdWithADouble*        fSourceStrengthCmd;
     G4UIcmdWithAnInteger*      fAcqTimeCmd;

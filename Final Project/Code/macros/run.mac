@@ -25,13 +25,14 @@
 
 # Choose a HealPix angle (start at 1)
 /PRISM/source/setHPindex 1200
+/PRISM/source/farfieldringsource
 
 # Change output file name
-/PRISM/output/filename output_662kev_HP1200
+/PRISM/output/filename output_662kev_ring
 
 #Print to text or binary format
 /PRISM/output/printText Off
 /PRISM/output/printBinary On
 
 # Beam on
-/run/beamOn 100000
+/run/beamOn 500000

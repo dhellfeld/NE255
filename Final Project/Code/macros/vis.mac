@@ -70,9 +70,12 @@
 # Pick position (in HP index)
 /PRISM/source/setHPindex 45
 # Use far field source
-/PRISM/source/farfieldsource
+#/PRISM/source/farfieldsource
 # Use near field source
 #/PRISM/source/nearfieldsource 1 m
+# Use far field ring source
+/PRISM/source/farfieldringsource
+
 
 # Change output file name
 /PRISM/output/filename output

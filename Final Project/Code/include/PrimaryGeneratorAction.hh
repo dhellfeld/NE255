@@ -51,15 +51,19 @@ public:
 
     SourceInfo FarFieldSource(G4double, G4double);
     SourceInfo NearFieldSource(G4double, G4double, G4double);
+    SourceInfo FarFieldRingSource();
     G4bool farfieldsource;
     G4bool nearfieldsource;
     G4double nearfieldsourcedist;
+    G4bool farfieldringsource;
     inline void SetFarFieldSource(G4bool a){farfieldsource = a;}
     inline G4bool GetFarFieldSource(){return farfieldsource;}
     inline void SetNearFieldSource(G4bool a ){nearfieldsource = a;}
     inline G4bool GetNearFieldSource(){return nearfieldsource;}
     inline void SetNearFieldSourceDist(G4double a ){nearfieldsourcedist = a;}
     inline G4double GetNearFieldSourceDist(){return nearfieldsourcedist;}
+    inline void SetFarFieldRingSource(G4bool a){farfieldringsource = a;}
+    inline G4bool GetFarFieldRingSource(){return farfieldringsource;}
 
     G4int acqtime;
     G4int GetAcquisitionTime(){return acqtime;}

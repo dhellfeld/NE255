@@ -83,6 +83,9 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent) {
 	else if (nearfieldsource){
 		sourceinfo = NearFieldSource(theta, phi, nearfieldsourcedist);
 	}
+	else if (farfieldringsource){
+		sourceinfo = FarFieldRingSource();
+	}
 
     // Set results to the gun
     gun->SetParticlePosition(sourceinfo.GetPos());
@@ -145,6 +148,25 @@ SourceInfo PrimaryGeneratorAction::NearFieldSource(G4double theta_, G4double phi
 
 	return sourceinfo_;
 
+}
+
+//==================================================================================================
+
+SourceInfo PrimaryGeneratorAction::FarFieldRingSource(){
+
+	G4double radius_    = 15.*cm;
+	G4double rand_theta = 2. * pi * G4UniformRand();
+
+	G4double z_ = 15.*cm;
+	G4double x_ = radius_*cos(rand_theta);
+	G4double y_ = radius_*sin(rand_theta);
+
+	G4double theta_ = atan2(y_,x_) * 180./pi;
+	G4double phi_   = acos(z_/(sqrt(x_*x_+y_*y_+z_*z_))) * 180./pi;
+
+	SourceInfo sourceinfo_;
+	sourceinfo_ =  FarFieldSource(theta_, phi_);
+	return sourceinfo_;
 }
 
 //==================================================================================================

@@ -71,6 +71,10 @@ PrimaryGeneratorActionMessenger::PrimaryGeneratorActionMessenger(PrimaryGenerato
     fFarFieldSourceCmd->SetGuidance("Source is at infinity, parallel rays");
     fFarFieldSourceCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
+    fFarFieldRingSourceCmd = new G4UIcmdWithoutParameter("/PRISM/source/farfieldringsource", this);
+    fFarFieldRingSourceCmd->SetGuidance("Ring source is at infinity, parallel rays");
+    fFarFieldRingSourceCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+
     fNearFieldSourceCmd = new G4UIcmdWithADoubleAndUnit("/PRISM/source/nearfieldsource",this);
     fNearFieldSourceCmd->SetGuidance("Near field point source, provide distance in cm");
     fNearFieldSourceCmd->SetParameterName("NearFieldDist",false);
@@ -112,6 +116,7 @@ PrimaryGeneratorActionMessenger::~PrimaryGeneratorActionMessenger()
     delete fPrintTextCmd;
     delete fPrintBinaryCmd;
     delete fFarFieldSourceCmd;
+    delete fFarFieldRingSourceCmd;
     delete fNearFieldSourceCmd;
     delete fSourceStrengthCmd;
     delete fAcqTimeCmd;
@@ -226,6 +231,15 @@ void PrimaryGeneratorActionMessenger::SetNewValue(G4UIcommand* command,G4String 
 
         fPrimaryGeneratorAction->SetFarFieldSource(true);
         fPrimaryGeneratorAction->SetNearFieldSource(false);
+        fPrimaryGeneratorAction->SetFarFieldRingSource(false);
+
+    }
+
+    else if (command == fFarFieldRingSourceCmd){
+
+        fPrimaryGeneratorAction->SetFarFieldSource(false);
+        fPrimaryGeneratorAction->SetNearFieldSource(false);
+        fPrimaryGeneratorAction->SetFarFieldRingSource(true);
 
     }
 
@@ -233,6 +247,7 @@ void PrimaryGeneratorActionMessenger::SetNewValue(G4UIcommand* command,G4String 
 
         fPrimaryGeneratorAction->SetFarFieldSource(false);
         fPrimaryGeneratorAction->SetNearFieldSource(true);
+        fPrimaryGeneratorAction->SetFarFieldRingSource(false);
         fPrimaryGeneratorAction->SetNearFieldSourceDist(fNearFieldSourceCmd->GetNewDoubleValue(newValue));
 
     }
