@@ -43,11 +43,11 @@ def Sequence(coinc_dets, coinc_energies):
 
 
 # Get the data
-data = GetBinaryOutputData("../output/output_662keV_HP912.bin")
+data = GetBinaryOutputData("../output/output_662keV_HP1200.bin")
 #data = GetBinaryOutputData(sys.argv[1])
 data = RemoveZeroEnergyInteractions(data)
 energy  = 662
-hpindex = 912
+hpindex = 1200
 phi,theta = np.asarray(hp.pix2ang(16,hpindex)) * (180./np.pi)
 
 # Read in detector centers from file
@@ -70,8 +70,8 @@ k = zip(x_,y_,z_)
 
 im = np.zeros(12*nside*nside)
 
-#cmap_ = plt.cm.YlGnBu_r
-cmap_ = plt.cm.jet
+cmap_ = plt.cm.YlGnBu_r
+#cmap_ = plt.cm.jet
 cmap_.set_under("w")
 
 animate = False
@@ -100,7 +100,7 @@ p = hp.cartview(im,lonra=lonra,latra=latra, return_projected_map=True)
 plt.close("all")
 plt.figure()
 p = plt.imshow(p, cmap=cmap_, origin='lower', interpolation='nearest',extent=(lonra[0],lonra[1],latra[0],latra[1]))
-plt.scatter(theta-180, 90-phi, marker='x'); plt.xlim(lonra[0], lonra[1]); plt.ylim(latra[0], latra[1])
+#plt.scatter(theta-180, 90-phi, marker='x'); plt.xlim(lonra[0], lonra[1]); plt.ylim(latra[0], latra[1])
 plt.colorbar(p, fraction=0.046, pad=0.04)
 plt.title("Far Field Compton Cone Backprojection, %i keV, %i cones" %(energy, i+1))
 plt.xlabel('Phi (deg)'); plt.ylabel('Theta (deg)')
