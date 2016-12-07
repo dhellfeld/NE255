@@ -25,26 +25,6 @@ def GetConeAxis(det1, det2, detcenters):
 
     return [x,y,z]/np.sqrt(x**2 + y**2 + z**2)
 
-# Get the data
-data = GetBinaryOutputData("../output/output_662keV_HP912.bin")
-#data = GetBinaryOutputData(sys.argv[1])
-data = RemoveZeroEnergyInteractions(data)
-
-# Read in detector centers from file
-detcenters = np.loadtxt('../geo/centervertices_Ring.txt')
-
-coinc_dets     = np.array([]).reshape(0,2)
-coinc_energies = np.array([]).reshape(0,2)
-for i in range(len(data['EvtN'])):
-    try:
-         if np.isclose(data['Energy'][i] + data['Energy'][i+1], 662):
-             if (data['DetID'][i] != data['DetID'][i+1]):
-                 coinc_energies = np.vstack([coinc_energies, [data['Energy'][i], data['Energy'][i+1]]])
-                 coinc_dets     = np.vstack([coinc_dets,     [data['DetID'][i],  data['DetID'][i+1]]] )
-    except:
-        pass
-
-
 def Sequence(coinc_dets, coinc_energies):
 
     seqs = []
@@ -53,6 +33,7 @@ def Sequence(coinc_dets, coinc_energies):
         E2 = coinc_energies[i,1]
         D1 = coinc_dets[i,0]
         D2 = coinc_dets[i,1]
+        # Compton edge test
         if E1 <= ComptonEdge(E1+E2):
             seqs.append([E1,E2,D1,D2])
         if E2 <= ComptonEdge(E1+E2):
@@ -60,30 +41,70 @@ def Sequence(coinc_dets, coinc_energies):
 
     return seqs
 
+
+# Get the data
+data = GetBinaryOutputData("../output/output_662keV_HP912.bin")
+#data = GetBinaryOutputData(sys.argv[1])
+data = RemoveZeroEnergyInteractions(data)
+energy  = 662
+hpindex = 912
+phi,theta = np.asarray(hp.pix2ang(16,hpindex)) * (180./np.pi)
+
+# Read in detector centers from file
+detcenters = np.loadtxt('../geo/centervertices_Ring.txt')
+
+coinc_dets     = np.array([]).reshape(0,2)
+coinc_energies = np.array([]).reshape(0,2)
+for i in range(len(data['EvtN']) - 1):
+    if np.isclose(data['Energy'][i] + data['Energy'][i+1], energy):
+        if (data['DetID'][i] != data['DetID'][i+1]):
+            coinc_energies = np.vstack([coinc_energies, [data['Energy'][i], data['Energy'][i+1]]])
+            coinc_dets     = np.vstack([coinc_dets,     [data['DetID'][i],  data['DetID'][i+1]]] )
+
 sequences = Sequence(coinc_dets, coinc_energies)
+#print len(sequences), "sequences"
 
-print len(sequences), "sequences"
-nside = 16
-im = np.zeros(3072)
+nside = 32
+[x_,y_,z_] = hp.pix2vec(nside,range(12*nside*nside))
+k = zip(x_,y_,z_)
+
+im = np.zeros(12*nside*nside)
+
+#cmap_ = plt.cm.YlGnBu_r
+cmap_ = plt.cm.jet
+cmap_.set_under("w")
+
+animate = False
+if animate: plt.ion()
+
+angunc = 3.
 for i in range(len(sequences)):
-
-    angwidth = 3.
 
     mu    = np.cos(GetScatteringAngle(sequences[i][0], sequences[i][1]))
     w     = GetConeAxis(sequences[i][2], sequences[i][3], detcenters)
-    sigma = np.sin(np.arccos(mu)) * (angwidth * np.pi/180.)
+    sigma = np.sin(np.arccos(mu)) * (angunc * np.pi/180.)
 
-    x = hp.pix2vec(nside,range(3072))
-    val = (1. / (sigma * np.sqrt(2.*np.pi))) * np.exp(-(np.dot(x,w) - mu)**2/(2. * sigma**2))
+    val = (1. / (sigma * np.sqrt(2.*np.pi))) * np.exp(-(np.dot(k,w) - mu)**2/(2. * sigma**2))
+    val[val < 1e-5] = 0
+    im += val
 
-    # for pix in range(3072):
-    #     x = hp.pix2vec(nside,pix)
-    #
-    #     val = (1. / (sigma * np.sqrt(2.*np.pi))) * np.exp(-(np.dot(x,w) - mu)**2/(2. * sigma**2))
-    #     if val > 1e-5:
-    #         im[pix] += val
+    if animate:
+        hp.cartview(im, fig=1, title="", cbar=False, cmap=cmap_)
+        plt.pause(0.01)
 
+if animate: plt.ioff()
 
-
-hp.cartview(im)
+latra = [-90,90]
+lonra = [-180,180]
+p = hp.cartview(im,lonra=lonra,latra=latra, return_projected_map=True)
+plt.close("all")
+plt.figure()
+p = plt.imshow(p, cmap=cmap_, origin='lower', interpolation='nearest',extent=(lonra[0],lonra[1],latra[0],latra[1]))
+plt.scatter(theta-180, 90-phi, marker='x'); plt.xlim(lonra[0], lonra[1]); plt.ylim(latra[0], latra[1])
+plt.colorbar(p, fraction=0.046, pad=0.04)
+plt.title("Far Field Compton Cone Backprojection, %i keV, %i cones" %(energy, i+1))
+plt.xlabel('Phi (deg)'); plt.ylabel('Theta (deg)')
+plt.xticks([-180,-135,-90,-45,0,45,90,135,180]); plt.yticks([-90,-45,0,45,90])
+#hp.projplot(hp.pix2ang(16,hpindex), 'k*', markersize = 8)
+#hp.graticule()
 plt.show()
