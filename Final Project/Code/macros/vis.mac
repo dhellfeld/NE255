@@ -74,7 +74,7 @@
 # Use near field source
 #/PRISM/source/nearfieldsource 1 m
 # Use far field ring source
-/PRISM/source/farfieldringsource
+#/PRISM/source/farfieldringsource
 
 
 # Change output file name

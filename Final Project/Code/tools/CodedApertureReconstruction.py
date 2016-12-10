@@ -3,19 +3,6 @@ import matplotlib.pyplot as plt
 import sys
 import healpy as hp
 
-def GetBinaryOutputData(filename):
-
-    dt = np.dtype([('EvtN', np.uint32), ('HitN', np.uint8), ('TrackID', np.uint8), ('Energy', np.float32), ('DetID', np.uint8), ('Proc', np.uint8), ('DOI', np.uint8), ('HPidx', np.uint16), ('Time', np.float32)])
-    return np.fromfile(filename, dtype=dt)
-
-def FullEnergyAbsorptions(data, fullenergy):
-
-    return data[:][data['Energy'] == fullenergy]
-
-def RemoveZeroEnergyInteractions(data):
-
-    return data[:][data['Energy'] != 0]
-
 def MLEM(response, signal,itr = 25):
 
     # Remove all the empty rows from the response matrix
@@ -29,7 +16,7 @@ def MLEM(response, signal,itr = 25):
     response = response[~np.all(response == 0, axis=1)]
 
     # Normalize signal
-    signal = signal/signal.sum()
+    #signal = signal/signal.sum()
 
     # Initialize the image to ones
     image = np.ones(imbins)
@@ -43,16 +30,11 @@ def MLEM(response, signal,itr = 25):
     return image / np.sum(image)
 
 
-# Get the data
-data = GetBinaryOutputData("../output/output_60keV_rand_response.bin")
-#data = GetBinaryOutputData(sys.argv[1])
+# Get the system response
+response_noDOI = np.load(sys.argv[1])
 
-# Pull out only full energy absorptions (60 keV)
-data = FullEnergyAbsorptions(data, 60.0)
-
-# Get non-DOI system response (only full energy deposition interactions for coded aperture)
-response_noDOI = (np.histogram2d(data['DetID'], data['HPidx'], bins=(192,3072)))[0]
-#response_noDOI /= response_noDOI.max(axis=0)
+# Get energy of interest
+energy = float(sys.argv[2])
 
 # Plot response
 plt.figure()
@@ -63,35 +45,29 @@ plt.title('System Response (no DOI)')
 
 # Pick a signal and get MLEM reconstruction
 # Just take column of resposne
-#signal = response_noDOI[:,1230]
+signal = response_noDOI[:,1230]
 # Or read in input
-data_sig = GetBinaryOutputData("../output/output_60keV_rand_ring.bin")
-data_sig = FullEnergyAbsorptions(data_sig, 60.0)
-signal = np.asarray((np.histogram(data_sig['DetID'], bins=(192)))[0]).astype(float)
+#signal = np.load(sys.argv[3])
 #signal /= signal.max()
 
-image = MLEM(response_noDOI, signal, itr=25)
-#hp.cartview(image)
-hp.cartview(image, rot=(0,90,0))
+iterations = 25
+image = MLEM(response_noDOI, signal, itr=iterations)
 
-# Do the same for DOI
-DOI = False
-if (DOI):
+cmap_ = plt.cm.YlGnBu_r
+#cmap_ = plt.cm.jet
+cmap_.set_under("w")
 
-    # Get DOI (10 bins) system response (only full energy deposition interactions for coded aperture)
-    response_DOI10 = (np.histogram2d(data['DetID'] + 192.*data['DOI'], data['HPidx'], bins=(192*10,3072)))[0]
-
-    # Plot response
-    plt.figure()
-    im = plt.imshow(response_DOI10, origin='lower', interpolation='nearest', aspect='auto')
-    plt.colorbar(im)
-    plt.xlabel('HEALPix index (Source Location)'), plt.ylabel('Detector ID')
-    plt.title('System Response (DOI - 10 bins)')
-
-    # # Pick a signal and get MLEM reconstruction
-    # signal = response_DOI10[:,1230]
-    # image = MLEM(response_DOI10, signal)
-    # hp.mollview(image)
+latra = [-90,90]
+lonra = [-180,180]
+#p = hp.cartview(image, rot=(0,90,0), lonra=lonra,latra=latra, return_projected_map=True)
+p = hp.cartview(image, lonra=lonra,latra=latra, return_projected_map=True)
+plt.close("all")
+plt.figure()
+p = plt.imshow(p, cmap=cmap_, origin='lower', interpolation='nearest',extent=(lonra[0],lonra[1],latra[0],latra[1]))
+plt.colorbar(p, fraction=0.046, pad=0.04)
+plt.title("Coded Aperture, %i keV, %i iterations" %(energy, iterations))
+plt.xlabel('Phi (deg)'); plt.ylabel('Theta (deg)')
+plt.xticks([-180,-135,-90,-45,0,45,90,135,180]); plt.yticks([-90,-45,0,45,90])
 
 # Render
 plt.show()

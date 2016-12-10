@@ -11,7 +11,8 @@
 /PRISM/geo/detIndexing Ring
 
 # Configure mask
-/PRISM/geo/setMask 21524FA478BD521AB44791322B545C979943A029753854BB
+#/PRISM/geo/setMask 21524FA478BD521AB44791322B545C979943A029753854BB
+/PRISM/geo/setMask 800000000000000000000000000000000000000000000000
 #/PRISM/geo/randomMask
 #/PRISM/geo/fullMask
 
@@ -24,7 +25,7 @@
 /PRISM/healpix/SetUpHEALPix
 
 # Change output file name
-/PRISM/output/filename output_response_rand
+/PRISM/output/filename output_60keV_1det_response
 
 #Print to text or binary format
 /PRISM/output/printText Off

@@ -12,6 +12,7 @@
 *.DS_Store
 *.fls
 *.fdb_latexmk
+*.npy
 cmake_install.cmake
 CMakeCache.txt
 CMakeFiles/
