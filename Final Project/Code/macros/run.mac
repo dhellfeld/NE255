@@ -14,6 +14,7 @@
 #/PRISM/geo/setMask 21524FA478BD521AB44791322B545C979943A029753854BB
 #/PRISM/geo/randomMask
 /PRISM/geo/fullMask
+/PRISM/geo/cubedim 0.5 0.5 0.5
 
 # Change the energy
 /gun/energy 662 keV
@@ -24,11 +25,11 @@
 /PRISM/healpix/SetUpHEALPix
 
 # Choose a HealPix angle (start at 1)
-/PRISM/source/setHPindex 1575
+/PRISM/source/setHPindex 912
 #/PRISM/source/farfieldringsource
 
 # Change output file name
-/PRISM/output/filename output_662kev_full_HP1575
+/PRISM/output/filename output_662kev_full_HP912_smallerdets
 
 #Print to text or binary format
 /PRISM/output/printText Off
