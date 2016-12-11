@@ -66,11 +66,11 @@ def LeverArm(D1, D2, detcenters):
 
 
 # Get the data
-data = GetBinaryOutputData("../output/output_662kev_full_HP1575.bin")
+data = GetBinaryOutputData("../output/output_662kev_full_HP912.bin")
 #data = GetBinaryOutputData(sys.argv[1])
 data = RemoveZeroEnergyInteractions(data)
 energy  = 662
-hpindex = 1575
+hpindex = 912
 theta,phi = np.asarray(hp.pix2ang(16,hpindex-1)) * (180./np.pi)
 if phi > 180: phi = -(360. - phi)
 
@@ -80,7 +80,7 @@ detcenters = np.loadtxt('../geo/centervertices_Ring.txt')
 # Get sequences
 sequences = GetSequences(data)
 
-nside = 32
+nside = 64
 [x_,y_,z_] = hp.pix2vec(nside,range(12*nside*nside))
 k = zip(x_,y_,z_)
 
@@ -90,12 +90,11 @@ im = np.zeros(12*nside*nside)
 cmap_ = plt.cm.jet
 cmap_.set_under("w")
 
-animate = True
+animate = False
 if animate: plt.ion()
 
 angunc = 3.
-for i in range(50):
-    i += 1000
+for i in range(len(sequences)):
 
     mu     = np.cos(GetScatteringAngle(sequences[i][0], sequences[i][1]))
     w      = GetConeAxis(sequences[i][2], sequences[i][3], detcenters)
