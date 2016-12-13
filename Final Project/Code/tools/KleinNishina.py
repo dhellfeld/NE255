@@ -4,8 +4,6 @@ import matplotlib.pyplot as plt
 def KleinNishina(E,theta):
     a = 1./137.04
     r = 0.38616e-13
-    #a = 1
-    #r = 1
     P = 1. / (1. + (E/511.)*(1-np.cos(theta)))
 
     return ((a**2 * r**2 * P**2) / 2.) * (P + (1./P) - 1. + np.cos(theta)**2)

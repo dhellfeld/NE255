@@ -57,15 +57,15 @@ if doi: response = response[:192]
 
 # Pick a signal and get MLEM reconstruction
 # Just take column of resposne
-#hpindex = 912
-#theta,phi = np.asarray(hp.pix2ang(16,hpindex-1)) * (180./np.pi)
-#if phi > 180: phi = -(360. - phi)
-#signal = response[:, hpindex]
+hpindex = 912
+theta,phi = np.asarray(hp.pix2ang(16,hpindex-1)) * (180./np.pi)
+if phi > 180: phi = -(360. - phi)
+signal = response[:, hpindex]
 # Or read in input
-signal = np.load(sys.argv[3])
+#signal = np.load(sys.argv[3])
 #signal /= signal.max()
 
-iterations = 10
+iterations = 50
 image = MLEM(response, signal, itr=iterations)
 
 #cmap_ = plt.cm.YlGnBu_r
@@ -74,12 +74,12 @@ cmap_.set_under("w")
 
 latra = [-90,90]
 lonra = [-180,180]
-p = hp.cartview(image, rot=(0,90,0), lonra=lonra,latra=latra, return_projected_map=True)
-#p = hp.cartview(image, lonra=lonra,latra=latra, return_projected_map=True)
-#plt.close("all")
+#p = hp.cartview(image, rot=(0,90,0), lonra=lonra,latra=latra, return_projected_map=True)
+p = hp.cartview(image, lonra=lonra,latra=latra, return_projected_map=True)
+plt.close("all")
 plt.figure()
 p = plt.imshow(p, cmap=cmap_, origin='lower', interpolation='nearest',extent=(lonra[1],lonra[0],latra[0],latra[1]))
-#plt.scatter(phi, 90-theta, marker='x'); 
+plt.scatter(phi, 90-theta, marker='x'); 
 plt.colorbar(p, fraction=0.046, pad=0.04)
 plt.xlim(lonra[0], lonra[1]); plt.ylim(latra[0], latra[1])
 plt.title("Coded Aperture, %i keV, %i iterations" %(energy, iterations))

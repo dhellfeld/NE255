@@ -17,7 +17,7 @@
 #/PRISM/geo/fullMask
 
 # Change the energy
-/gun/energy 186 keV
+/gun/energy 356 keV
 
 # Configure HEALPix
 /PRISM/healpix/setHPNside 16
@@ -25,7 +25,7 @@
 /PRISM/healpix/SetUpHEALPix
 
 # Change output file name
-/PRISM/output/filename output_186keV_rand_response
+/PRISM/output/filename output_356keV_rand_response
 
 #Print to text or binary format
 /PRISM/output/printText Off

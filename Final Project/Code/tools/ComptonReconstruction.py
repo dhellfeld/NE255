@@ -66,10 +66,10 @@ def LeverArm(D1, D2, detcenters):
 
 
 # Get the data
-data = GetBinaryOutputData("../output/output_662keV_full_ring_1M.bin")
+data = GetBinaryOutputData("../output/output_200keV_full_HP912.bin")
 #data = GetBinaryOutputData(sys.argv[1])
 data = RemoveZeroEnergyInteractions(data)
-energy  = 662
+energy  = 200
 hpindex = 912
 theta,phi = np.asarray(hp.pix2ang(16,hpindex-1)) * (180./np.pi)
 if phi > 180: phi = -(360. - phi)
@@ -137,6 +137,5 @@ plt.colorbar(p, fraction=0.046, pad=0.04)
 plt.title("Far Field Compton Cone Backprojection, %i keV, %i cones" %(energy, i+1))
 plt.xlabel('Phi (deg)'); plt.ylabel('Theta (deg)')
 plt.xticks([-180,-135,-90,-45,0,45,90,135,180]); plt.yticks([-90,-45,0,45,90])
-
 
 plt.show()
