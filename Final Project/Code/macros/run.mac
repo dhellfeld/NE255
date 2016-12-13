@@ -11,29 +11,35 @@
 /PRISM/geo/detIndexing Ring
 
 # Configure mask
-#/PRISM/geo/setMask 21524FA478BD521AB44791322B545C979943A029753854BB
+/PRISM/geo/setMask 21524FA478BD521AB44791322B545C979943A029753854BB
 #/PRISM/geo/randomMask
-/PRISM/geo/fullMask
-/PRISM/geo/cubedim 0.5 0.5 0.5
+#/PRISM/geo/fullMask
+#/PRISM/geo/cubedim 0.5 0.5 0.5
 
 # Change the energy
-/gun/energy 662 keV
+/gun/energy 60 keV
 
 # Configure HEALPix
 /PRISM/healpix/setHPNside 16
 /PRISM/healpix/setHPindexscheme Ring
 /PRISM/healpix/SetUpHEALPix
 
-# Choose a HealPix angle (start at 1)
+# Set up source
+# Pick position (in HP index)
 /PRISM/source/setHPindex 912
-#/PRISM/source/farfieldringsource
+# Use far field source
+#/PRISM/source/farfieldsource
+# Use near field source
+#/PRISM/source/nearfieldsource 1 m
+# Use far field ring source
+/PRISM/source/farfieldringsource
 
 # Change output file name
-/PRISM/output/filename output_662kev_full_HP912_smallerdets
+/PRISM/output/filename output_60keV_rand_ring_1M
 
 #Print to text or binary format
 /PRISM/output/printText Off
 /PRISM/output/printBinary On
 
 # Beam on
-/run/beamOn 500000
+/run/beamOn 1000000

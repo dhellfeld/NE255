@@ -23,11 +23,18 @@ data = FullEnergyAbsorptions(data, energy)
 
 # Get non-DOI system response (only full energy deposition interactions for coded aperture)
 print 'Histogramming data'
-response_noDOI = (np.histogram2d(data['DetID'], data['HPidx'], bins=(192,3072)))[0]
+
+if sys.argv[3] == "DOI":
+	response = (np.histogram2d(data['DetID'] + 192.*data['DOI'], data['HPidx'], bins=(192*10,3072)))[0]
+else:
+	response = (np.histogram2d(data['DetID'], data['HPidx'], bins=(192,3072)))[0]
 
 # Save response to file to avoid histogramming again
 print 'Saving data'
-np.save(filename[:-4], response_noDOI)
+if sys.argv[3] == "DOI":
+	np.save(filename[:-4]+'_DOI', response)
+else:
+	np.save(filename[:-4], response)
 
 print 'Done!'
 

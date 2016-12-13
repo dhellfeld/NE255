@@ -11,13 +11,13 @@
 /PRISM/geo/detIndexing Ring
 
 # Configure mask
-#/PRISM/geo/setMask 21524FA478BD521AB44791322B545C979943A029753854BB
-/PRISM/geo/setMask 800000000000000000000000000000000000000000000000
+/PRISM/geo/setMask 21524FA478BD521AB44791322B545C979943A029753854BB
+#/PRISM/geo/setMask 800000000000000000000000000000000000000000000000
 #/PRISM/geo/randomMask
 #/PRISM/geo/fullMask
 
 # Change the energy
-/gun/energy 60 keV
+/gun/energy 186 keV
 
 # Configure HEALPix
 /PRISM/healpix/setHPNside 16
@@ -25,7 +25,7 @@
 /PRISM/healpix/SetUpHEALPix
 
 # Change output file name
-/PRISM/output/filename output_60keV_1det_response
+/PRISM/output/filename output_186keV_rand_response
 
 #Print to text or binary format
 /PRISM/output/printText Off

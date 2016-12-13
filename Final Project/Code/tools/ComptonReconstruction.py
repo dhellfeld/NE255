@@ -66,7 +66,7 @@ def LeverArm(D1, D2, detcenters):
 
 
 # Get the data
-data = GetBinaryOutputData("../output/output_662kev_full_HP912.bin")
+data = GetBinaryOutputData("../output/output_662keV_full_ring_1M.bin")
 #data = GetBinaryOutputData(sys.argv[1])
 data = RemoveZeroEnergyInteractions(data)
 energy  = 662
@@ -79,6 +79,8 @@ detcenters = np.loadtxt('../geo/centervertices_Ring.txt')
 
 # Get sequences
 sequences = GetSequences(data)
+print len(sequences), "sequences"
+sequences = np.asarray(sequences)
 
 nside = 64
 [x_,y_,z_] = hp.pix2vec(nside,range(12*nside*nside))
@@ -123,15 +125,18 @@ if animate: plt.ioff()
 
 latra = [-90,90]
 lonra = [-180,180]
-p = hp.cartview(im,lonra=lonra,latra=latra, return_projected_map=True)
+p = hp.cartview(im, rot=(90,0), lonra=lonra,latra=latra, return_projected_map=True)
 hp.projplot(hp.pix2ang(16,hpindex-1), 'k*', markersize = 8)
 #hp.graticule()
 plt.close("all")
 plt.figure()
 p = plt.imshow(p, cmap=cmap_, origin='lower', interpolation='nearest', extent=(lonra[1],lonra[0],latra[0],latra[1]))
-plt.scatter(phi, 90-theta, marker='x'); plt.xlim(lonra[0], lonra[1]); plt.ylim(latra[0], latra[1])
+#plt.scatter(phi, 90-theta, marker='x')
+plt.xlim(lonra[0], lonra[1]); plt.ylim(latra[0], latra[1])
 plt.colorbar(p, fraction=0.046, pad=0.04)
 plt.title("Far Field Compton Cone Backprojection, %i keV, %i cones" %(energy, i+1))
 plt.xlabel('Phi (deg)'); plt.ylabel('Theta (deg)')
 plt.xticks([-180,-135,-90,-45,0,45,90,135,180]); plt.yticks([-90,-45,0,45,90])
+
+
 plt.show()

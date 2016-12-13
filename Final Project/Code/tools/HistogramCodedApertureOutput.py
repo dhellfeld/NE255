@@ -23,7 +23,7 @@ data = FullEnergyAbsorptions(data, energy)
 
 # Get non-DOI system response (only full energy deposition interactions for coded aperture)
 print 'Histogramming data'
-output = np.asarray((np.histogram(data_sig['DetID'], bins=(192)))[0]).astype(float)
+output = np.asarray((np.histogram(data['DetID'], bins=(192)))[0]).astype(float)
 
 # Save response to file to avoid histogramming again
 print 'Saving data'
