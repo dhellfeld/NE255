@@ -4,6 +4,7 @@ Required software:
 Geant4.10.2.p1
 CMake 3.5+
 Python 2.7.12 (Anaconda 4.1.1)
+healpy
 
 #------------------
 
