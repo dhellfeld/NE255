@@ -62,10 +62,11 @@ theta,phi = np.asarray(hp.pix2ang(16,hpindex-1)) * (180./np.pi)
 if phi > 180: phi = -(360. - phi)
 signal = response[:, hpindex]
 # Or read in input
-#signal = np.load(sys.argv[3])
+#signal = np.load(sys.argv[4])
+#if doi: signal = signal[:192]
 #signal /= signal.max()
 
-iterations = 50
+iterations = 30
 image = MLEM(response, signal, itr=iterations)
 
 #cmap_ = plt.cm.YlGnBu_r

@@ -1,45 +1,50 @@
-# Verbosities
+# Geant4 Tracking Verbosities, keep quiet (0)
 /control/verbose 0
 /tracking/verbose 0
 /run/verbose 0
 /event/verbose 0
 
-# Tracking secondary electrons
+# Tracking secondary electrons (On/Off)
 /PRISM/tracking/trackElectrons Off
 
-# Detector indexing
+# Detector indexing (Ring/Nested)
 /PRISM/geo/detIndexing Ring
 
 # Configure mask
+# Provide 48-character hexadecimal string
 /PRISM/geo/setMask 21524FA478BD521AB44791322B545C979943A029753854BB
+# Or use random mask
 #/PRISM/geo/randomMask
+# Or use full mask
 #/PRISM/geo/fullMask
+
+# Change dimension of the detectors (default is 1 1 1)
 #/PRISM/geo/cubedim 0.5 0.5 0.5
 
-# Change the energy
+# Change the particle energy
 /gun/energy 60 keV
 
-# Configure HEALPix
+# Configure HEALPix indexing (better to not mess with)
 /PRISM/healpix/setHPNside 16
 /PRISM/healpix/setHPindexscheme Ring
 /PRISM/healpix/SetUpHEALPix
 
 # Set up source
-# Pick position (in HP index)
+# Pick a position in HEALPix index
 /PRISM/source/setHPindex 912
 # Use far field source
-#/PRISM/source/farfieldsource
-# Use near field source
+/PRISM/source/farfieldsource
+# Use near field source (provide a distance)
 #/PRISM/source/nearfieldsource 1 m
-# Use far field ring source
-/PRISM/source/farfieldringsource
+# Use far field ring source (need to include a diameter input…)
+#/PRISM/source/farfieldringsource
 
 # Change output file name
-/PRISM/output/filename output_60keV_rand_ring_1M
+/PRISM/output/filename output_60keV_rand_HP912
 
 #Print to text or binary format
 /PRISM/output/printText Off
 /PRISM/output/printBinary On
 
-# Beam on
+# Beam on, run this many particles
 /run/beamOn 1000000

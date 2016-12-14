@@ -85,12 +85,4 @@
 /PRISM/output/printBinary Off
 
 # Beam on
-#/run/beamOn 1
-
-### Set up specific scenario
-## Pick acquistion time (in sec)
-#/PRISM/source/acqtime 300
-## Pick source strength (in mCi)
-#/PRISM/source/sourcestrength 0.01
-## Run (will calculate and do beamOn)
-#/PRISM/source/run
+#/run/beamOn 10

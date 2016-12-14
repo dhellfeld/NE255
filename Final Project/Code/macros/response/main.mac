@@ -1,4 +1,5 @@
-# Pick Healpix angle
+# Pick Healpix angle (don’t change)
 /PRISM/source/setHPindex {hpindex}
 
+# Number of particles to run at each source location
 /run/beamOn 100000

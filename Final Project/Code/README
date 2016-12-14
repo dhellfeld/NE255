@@ -1,0 +1,117 @@
+#------------------
+
+Required software:
+Geant4.10.2.p1
+CMake 3.5+
+Python 2.7.12 (Anaconda 4.1.1)
+
+#------------------
+
+To compile:
+- Replace user Geant4 directory and cmake executable in compile.sh
+- run $sh compile
+
+- my output is:
+
+"""
+Removing old build
+
+Building...
+
+-- The C compiler identification is AppleClang 6.0.0.6000056
+-- The CXX compiler identification is AppleClang 6.0.0.6000056
+-- Check for working C compiler: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc
+-- Check for working C compiler: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++
+-- Check for working CXX compiler: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /path/to/Code
+
+Done! Now run $ make to compile.
+"""
+
+- then run $make
+
+- my output is:
+
+"""
+Scanning dependencies of target PRISM
+[  6%] Building CXX object CMakeFiles/PRISM.dir/PRISM.cc.o
+[ 13%] Building CXX object CMakeFiles/PRISM.dir/src/ActionInitialization.cc.o
+[ 20%] Building CXX object CMakeFiles/PRISM.dir/src/DetectorConstruction.cc.o
+[ 26%] Building CXX object CMakeFiles/PRISM.dir/src/DetectorConstructionMessenger.cc.o
+[ 33%] Building CXX object CMakeFiles/PRISM.dir/src/EventAction.cc.o
+[ 40%] Building CXX object CMakeFiles/PRISM.dir/src/Hit.cc.o
+[ 46%] Building CXX object CMakeFiles/PRISM.dir/src/PhysicsList.cc.o
+[ 53%] Building CXX object CMakeFiles/PRISM.dir/src/PrimaryGeneratorAction.cc.o
+[ 60%] Building CXX object CMakeFiles/PRISM.dir/src/PrimaryGeneratorActionMessenger.cc.o
+[ 66%] Building CXX object CMakeFiles/PRISM.dir/src/RunAction.cc.o
+[ 73%] Building CXX object CMakeFiles/PRISM.dir/src/SensitiveDetector.cc.o
+[ 80%] Building CXX object CMakeFiles/PRISM.dir/src/StackingAction.cc.o
+[ 86%] Building CXX object CMakeFiles/PRISM.dir/src/StackingActionMessenger.cc.o
+[ 93%] Building CXX object CMakeFiles/PRISM.dir/src/SteppingAction.cc.o
+[100%] Linking CXX executable PRISM
+[100%] Built target PRISM
+"""
+
+#------------------
+
+- Single simulation can be executed with $./PRISM macros/run.mac
+
+- System response simulation can be executed with $./PRISM macros/response/hp.mac
+
+- See macro files for simulation options
+
+- Outputs will be dumped to the output/ directory
+
+#------------------
+
+Python tools:
+
+- HistogramCodedApertureResponse.py will read into the response output files and histogram the data into the system response matrix.
+It will then save the matrix to a .npy file. The syntax to call the script looks like:
+
+$python HistogramCodedApertureResponse.py <outputfilename.bin> <energy in keV> <DOI setting (noDOI or DOI)>
+
+
+- HistogramCodedApertureOutput.py will perform the same function as the Response histogrammer but for single simulation outputs.
+It will save the generated array toa .npy file. The syntax to call the script looks like:
+
+$python HistogramCodedApertureOutput.py <outputfilename.bin> <energy in keV> <DOI setting (noDOI or DOI)>
+
+
+- CodedApertureReconstruction.py is used to perform the coded aperture reconstruction of either a column of the system response,
+or a user provided data file. The user must provide the system response matrix, the incident energy, the DOI setting, and an optional
+data file. If no data file is provided, the column index used must be specified in the code with the "hpindex" variable. An example call looks like:
+
+$python CodedApertureReconstruction.py <systemresponsefilename.npy> <energy in keV> <DOI setting (noDOI or DOI)> <datafilename.npy>
+
+
+- KleinNishina.py is used to plot the Klien-Nishina differential scattering cross-section. It can be run with
+
+$python KleinNishina.py
+
+
+- ComptonEnergyDepTest.py is used to check the ratio of the first energy deposition to the second for sequences with initial energies
+above and below the cutoff of 256 keV. 1000 sequences for 200 keV and 662 keV initial gamma ray energies are available. To run:
+
+$python ComptonEnergyDepTest.py
+
+
+- ComptonReconstruction.py is used to parse the binary output files, select coincident events, sequence, and perform Compton cone back
+projection including Klein-Nishina and lever arm weighting. To run:
+
+$python ComptonReconstruction.py <outputfilename.bin>
+
+#------------------
+
+

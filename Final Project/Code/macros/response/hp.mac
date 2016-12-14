@@ -12,14 +12,13 @@
 
 # Configure mask
 /PRISM/geo/setMask 21524FA478BD521AB44791322B545C979943A029753854BB
-#/PRISM/geo/setMask 800000000000000000000000000000000000000000000000
 #/PRISM/geo/randomMask
 #/PRISM/geo/fullMask
 
 # Change the energy
 /gun/energy 356 keV
 
-# Configure HEALPix
+# Configure HEALPix (don’t change)
 /PRISM/healpix/setHPNside 16
 /PRISM/healpix/setHPindexscheme Ring
 /PRISM/healpix/SetUpHEALPix
