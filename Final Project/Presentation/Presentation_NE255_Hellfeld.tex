@@ -93,7 +93,7 @@
 
 %------------------------------------------------------------------------------------------------------
 % Title and authors
-\title[NE 255 - Final Project]{Monte Carlo Simulation and Analysis Framework for a CdZnTe-based Spherical Coded Aperture and Compton Gamma-ray Imager}
+\title[NE 255 - Final Project]{Monte Carlo Simulation and Reconstruction Framework for a CdZnTe-based Spherical Coded Aperture and Compton Gamma-ray Imager}
 %\subtitle{Subtitle}
 \author{D. Hellfeld}
 \institute[UC Berkeley]{NE 255 - Numerical Simulation in Radiation Transport \\ University of California, Berkeley \\ Department of Nuclear Engineering}
@@ -125,7 +125,7 @@
 %------------------------------------------------------------------------------------------------------
 \begin{frame}{Introduction}
 
-\textbf{Motivation}\\
+\textcolor{blue}{\textbf{Motivation}}\\
 Efficiently detect, image, identify, and characterize weak radioactive sources in complex environments.
 \begin{itemize}
 \small
@@ -134,11 +134,11 @@ Efficiently detect, image, identify, and characterize weak radioactive sources i
 \end{itemize}
 
 \vspace{15pt}
-\textbf{Need}\\
+\textcolor{blue}{\textbf{Need}}\\
 Hand-held, portable 3D imaging system with high efficiency, wide field-of-view, broad energy sensitivity, and high energy resolution.\\
 
 \vspace{15pt}
-\textbf{Approach}\\
+\textcolor{blue}{\textbf{Approach}}\\
 Multiple room-temperature operated cm$^3$ CdZnTe (CZT) coplanar gird (CPG) \cite{Luke} detectors arranged to facilitate coded aperture and Compton imaging modalities.  
 
 
@@ -247,7 +247,7 @@ b(\hat{\vec{x}}) = \sum_{i=1}^n \frac{w_i}{\sigma_i \sqrt{2\pi}} \exp\left( -\fr
 \begin{frame}{PRISM}
 
 \begin{itemize}
-\item Multimodal active planar imaging systems exist \cite{Galloway} $\rightarrow$ suffer from \textbf{limited field-of-view}, especially in coded aperture mode. 
+\item Multimodal active planar imagers exist (HEMI \cite{Galloway}) $\rightarrow$ suffer from \textbf{limited field-of-view}, especially in coded aperture mode. 
 \item Rearrange into a spherical configuration to facilitate 4$\pi$ imaging.
 \end{itemize}
 
@@ -284,30 +284,28 @@ b(\hat{\vec{x}}) = \sum_{i=1}^n \frac{w_i}{\sigma_i \sqrt{2\pi}} \exp\left( -\fr
 Geant4 \cite{Agostinelli} is a \emph{Monte Carlo toolkit} use to simulate the transport of particles through matter.
 \begin{itemize}
 \small
-\item[-] The user writes and compiles their own simulation using the Geant4 header files and base framework.
+\item[-] The user writes and compiles their own simulation. % using the Geant4 header files and base framework.
 \item[-] \underline{Requires knowledge of C++ and CMake.}
 \end{itemize}
 
 \vspace{3ex}
 
-Simple simulation was developed over the summer to determine coded aperture system response to far-field point sources.
+Simple raytracing simulation was developed over the summer to determine coded aperture system response to far-field point sources.
+%\begin{itemize}
+%\small
+%\item[-] Raytracing with attenuation
+%\end{itemize}
+
+\vspace{2.5ex}
+
+\begin{itemize}
+\item[$\Rightarrow$] Simulation upgraded to include scattering, electron production, multi-interaction tracking, geometry and source modifications. 
 \begin{itemize}
 \small
-\item[-] Raytracing with attenuation
+\item[-] User interaction via macro files passed to executable
 \end{itemize}
-
-\vspace{3ex}
-
-\begin{itemize}
-\item[$\Rightarrow$] Simulation upgraded to include scattering, multi-interaction tracking, geometry modifications, and source modifications. 
-\begin{itemize}
-\small
-\item[-] User interaction via macro files
+\item[$\Rightarrow$] Python tools developed to parse output data and perform coded aperture/Compton image reconstruction.
 \end{itemize}
-\item[$\Rightarrow$] Analysis tools developed to parse output data and perform coded aperture/Compton image reconstruction.
-\end{itemize}
-
-
 
 \end{frame}
 
@@ -319,7 +317,7 @@ Simple simulation was developed over the summer to determine coded aperture syst
 Simulate far-field point sources (parallel rays at infinity) at each image pixel in 4$\pi$.
 \begin{itemize}
 \small
-\item[-] Use the \emph{Hierarchical Equal Area isoLatitude Pixelization} (HEALPix) \cite{Gorski} discretization of a sphere with 3072 pixels.
+\item[-] \emph{Hierarchical Equal Area isoLatitude Pixelization} (HEALPix) \cite{Gorski} discretization of a sphere with 3072 pixels.
 \end{itemize}
 
 \begin{figure}
@@ -361,9 +359,10 @@ Simulate far-field point sources (parallel rays at infinity) at each image pixel
 %------------------------------------------------------------------------------------------------------
 \begin{frame}{MLEM Images}
 
-\textbf{60 keV, random mask}
-\vspace{-2ex}
+\textbf{60 keV, random mask}\\ [1ex]
+\includegraphics[height=35pt, width=35pt]{Figures/RandMask.png}
 
+\vspace{-40pt}
 \begin{figure}
 \begin{tabular}{m{0.12\linewidth} m{0.4\linewidth} m{0.4\linewidth}}
 	& 10 iterations & 30 iterations \\
@@ -409,6 +408,7 @@ Simulate far-field point sources (parallel rays at infinity) at each image pixel
 	60 keV, inner DOI, 50 itr & 662 keV, without DOI \\
 	Random mask & Full mask \\
 	$1.0\times10^5$ total counts & $2.2 \times10^4$ cones \\
+	&\\
 	\includegraphics[height=80pt, width=160pt]{Figures/FarfieldRing_60_DOI.png} & 
 	\includegraphics[height=80pt, width=160pt]{Figures/FarfieldRing_662.png} \\
 	%\includegraphics[height=50pt, width=50pt]{Figures/RandMask.png} & 
@@ -437,11 +437,12 @@ Simulate far-field point sources (parallel rays at infinity) at each image pixel
 \begin{itemize}
 \small
 \item[$\circ$] Multiple point sources, near-field sources, distributed sources.
-\item[$\circ$] List mode MLEM.
+\item[$\circ$] List-mode MLEM.
 \item[$\circ$] $>2$ interaction Compton sequencing.
 \item[$\circ$] Static 3D imaging, 3D tomographic motion imaging.
 \item[$\circ$] Real-time imaging, fused with contextual sensors (RGB, LiDAR) \cite{Barnowski}.
 \item[$\circ$] Detection efficiency, charge collection, coincidence gating.
+\item[$\circ$] ...
 \end{itemize}
 
 \end{frame}
@@ -478,7 +479,7 @@ Simulate far-field point sources (parallel rays at infinity) at each image pixel
   \bibitem{Wahl} C. Wahl, Ph.D. Thesis, University of Michigan (2011).
   \bibitem{Fenimore} E. E. Fenimore and T. M. Cannon, Applied Optics 17, 3 (1978).  \bibitem{Lange} K. Lange and R. Carson, Journal of Computer Assisted Tomography 8(2), 306 (1984).
   \bibitem{Haefner} A. Haefner, D. Gunter, R. Barnowski, and K. Vetter, IEEE Trans. on Nucl. Sci. 62, 1911 (2015).
-   \bibitem{Galloway} M. Galloway and other, Nucl. Instrum. Methods A 652, 641 (2011).
+   \bibitem{Galloway} M. Galloway et al., Nucl. Instrum. Methods A 652, 641 (2011).
   \bibitem{Agostinelli} S. Agostinelli et al., (GEANT4 Collaboration), Nucl. Instrum. Methods A 506, 250 (2003).
   \bibitem{Gorski} K. Gorski et al., The Astrophysical Journal 662, 759 (2005).
   \bibitem{Barnowski} R. Barnowski, A. Haefner, L. Mihailescu, and K. Vetter, Nucl. Instrum. Methods A 800, 65 (2015).
