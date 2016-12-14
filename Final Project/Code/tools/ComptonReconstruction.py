@@ -66,10 +66,10 @@ def LeverArm(D1, D2, detcenters):
 
 
 # Get the data
-data = GetBinaryOutputData("../output/output_200keV_full_HP912.bin")
+data = GetBinaryOutputData("../output/output_662keV_full_HP912.bin")
 #data = GetBinaryOutputData(sys.argv[1])
 data = RemoveZeroEnergyInteractions(data)
-energy  = 200
+energy  = 662
 hpindex = 912
 theta,phi = np.asarray(hp.pix2ang(16,hpindex-1)) * (180./np.pi)
 if phi > 180: phi = -(360. - phi)
@@ -92,7 +92,7 @@ im = np.zeros(12*nside*nside)
 cmap_ = plt.cm.jet
 cmap_.set_under("w")
 
-animate = False
+animate = True
 if animate: plt.ion()
 
 angunc = 3.
